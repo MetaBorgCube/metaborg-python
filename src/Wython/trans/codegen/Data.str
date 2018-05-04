@@ -1,0 +1,36 @@
+module Data
+
+imports
+  src-gen/signatures/WebAssembly/WastData-sig
+  src-gen/signatures/WebAssembly/WastExpr-sig
+  trans/codegen/-
+  ast-syntax/AST-Wython
+  ast-syntax/AST-Statement
+  
+rules
+
+  data:
+    callList -> dataList
+    where 
+    <debug> callList;
+    dataList := <map(calls)> callList
+      
+  calls:
+    ExprStmt(Call(name, params, list)) -> dataList
+    where
+      dataList := <map(dataStmt)> params;
+      <debug> dataList
+
+  dataStmt:
+    (param) -> 
+       WastData(
+          WastExpr(WastInstr(I32Const("0"))), 
+          Some(val)
+        )
+      where
+        val := <evaluate> param;
+        <debug> val
+       
+  evaluate:
+    Int(val) -> val
+    

@@ -1,0 +1,13 @@
+module Compile
+
+menus
+  
+  menu: "Compile" (openeditor)
+    
+    action: "Compile to .wast"      = compile-to-wast  (source)
+    action: "Show WebAssembly AST"      = show-wast-ast (source)
+
+views
+  
+  outline view: editor-outline (source)
+    expand to level: 3

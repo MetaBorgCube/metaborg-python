@@ -1,0 +1,22 @@
+module WebAssembly/WastImport
+
+imports
+  
+  WebAssembly/WastCommon
+  WebAssembly/WastVarType
+
+context-free start-symbols
+  
+  WastImport
+
+context-free syntax
+  
+  WastImport.WastFunc = <
+    (func <WastID?> <WastImportStmt><WastParameterList?>)>
+
+  WastImport.WastMem = <
+    (memory <WastID?> <WastImportStmt> <WastINT>)>
+    
+  WastParameterList.WastParams = < (param <{WastVarType " "}+>)>
+    
+  WastImportStmt.WastImport = <(import <WastSTRING> <WastSTRING>)>
