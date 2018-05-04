@@ -34,7 +34,7 @@ rules
     // Builtin 'print()'
     Var{"print"} <- s,
     new s_builtin_print, s_builtin_print ---> s,
-      Var{"__print__"} ===> s_builtin_print,
+      Var{"print"} ===> s_builtin_print,
       Function{"__call__"} <- s_builtin_print.
 
 

@@ -9,11 +9,11 @@ rules
   callable[[ Name(ID(a), Load()) ^(s) ]] := 
     Var{a} -> s,
     Var{a} |-> d | warning $[Object [a] might not be defined],  // TODO: When this fails do not continue
-    new s_fun, s_fun ---> s,  
-//      d ?===> objScope,
+    
+    new s_fun, s_fun ---> s,
       // Import the object body
       d <=== s_fun,
-      Function{"call"} -> s_fun,
+      Function{"__call__"} -> s_fun,
       Function{"__call__"} |-> d | warning $[Function '__call__' might not be defined for this object].
     
   argument[[(ID(i), expr) ^(s)]] :=
