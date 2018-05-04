@@ -169,7 +169,7 @@ FileInput(
 
 Into the desugared AST:
 
-```
+```js
 Module(
   [ ExprStmt(
       Call(
