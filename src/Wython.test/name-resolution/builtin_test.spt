@@ -29,6 +29,10 @@ test reassign print [[
   print(42)
 ]] >= 1 errors
 
+test print complex arg [[
+  print(12 & 13)
+]] 0 errors 0 warnings
+
 test reassign print to callable [[
   class A(object):
     def __call__(self):
