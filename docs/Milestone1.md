@@ -31,7 +31,7 @@ we only worked towards supporting the aforementioned print statement, again for
 time reasons.
 
 The most complex program we can currently parse and desugar is of the form: 
-```
+```python
 a.b.func(12, 13 & 14)
 ```
 
