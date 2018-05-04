@@ -36,7 +36,7 @@ a.b.func(12, 13 & 14)
 ```
 
 This converts the parsed syntax tree: 
-```
+```js
 FileInput(
   [ Statement(
       SimpleStatement(
