@@ -1,0 +1,18 @@
+module Program
+
+imports
+  WebAssembly/src-gen/signatures/Module-sig
+  ast-syntax/AST-Wython
+  ast-syntax/AST-Statement
+
+strategies
+  codegen-all = desugar
+ 
+rules
+  desugar: Module(stmts) -> Module(imports, data, funcs, exports)
+    where
+       sed-stmts := <mapconcat(desugar)> elems
+       
+  desugar: NewLine(_) -> []
+  desugar: Statement(stmt, _) -> <desugar> stmt
+  desugar: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts

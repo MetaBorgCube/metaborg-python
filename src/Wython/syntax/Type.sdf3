@@ -14,11 +14,11 @@ lexical syntax
   STRING = MSSTRING
   
   SSTRING = "'" SStringChar* "'" 
-  SStringChar     = ~[\'\n] 
+  SStringChar     = ~[\'\n]
   SStringChar     = "\\'" 
   SStringChar     = BackSlashChar
   
-  DSTRING = "\"" DStringChar* "\"" 
+  DSTRING = '"' DStringChar* '"' 
   DStringChar     = ~[\"\n] 
   DStringChar     = "\\\"" 
   DStringChar     = BackSlashChar 
