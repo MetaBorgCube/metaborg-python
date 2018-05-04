@@ -8,10 +8,12 @@ imports
   static-semantics
 
   pp
+  desugar/Program
+  analysis/-
 
 rules // Analysis
 
-  editor-analyze = nabl2-analyze(id)
+  editor-analyze = nabl2-analyze(desugar-all)
 
 rules // Debugging
   
