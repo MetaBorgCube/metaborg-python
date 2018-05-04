@@ -1,7 +1,8 @@
 module Funcs
 
 imports
-  src-gen/signatures/WebAssembly/-
+  src-gen/signatures/WebAssembly/WastFunc-sig
+  src-gen/signatures/WebAssembly/WastExpr-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -9,14 +10,14 @@ imports
 rules
 
   funcs:
-    _ -> [ Func(
+    _ -> [ WastFunc(
           Some("$main")
-        , [ Expr(Instr(I32Const("0")))
-          , Expr(Instr(I32Const("14")))
-          , Expr(Call(Call("$a")))
-          , Expr(Instr(I32Const("15")))
-          , Expr(Instr(I32Const("14")))
-          , Expr(Call(Call("$a")))
+        , [ WastExpr(WastInstr(I32Const("0")))
+          , WastExpr(WastInstr(I32Const("14")))
+          , WastExpr(WastCall(WastCall("$a")))
+          , WastExpr(WastInstr(I32Const("15")))
+          , WastExpr(WastInstr(I32Const("14")))
+          , WastExpr(WastCall(WastCall("$a")))
           ]
         )
       ]

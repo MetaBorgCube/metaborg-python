@@ -22,9 +22,19 @@ rules // Debugging
       filename := <guarantee-extension(|"desugared.aterm")> path ;
       text     := <desugar-all> ast
 
+  show-wast-ast:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wast")> path ;
+      <debug> ast;
+      desugared := <desugar-all> ast;
+      text     := <codegen-all> desugared
+    
   compile-to-wast:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"wast")> path ;
+      <debug> ast;
       desugared := <desugar-all> ast;
-      text     := <codegen-all> desugared
+      <debug> desugared;
+      text := <pp-debug> desugared
+
     

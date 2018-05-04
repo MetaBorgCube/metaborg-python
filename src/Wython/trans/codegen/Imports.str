@@ -1,7 +1,8 @@
 module Imports
 
 imports
-  WebAssembly/signatures/WastFunc-sig
+  src-gen/signatures/WebAssembly/WastFunc-sig
+  src-gen/signatures/WebAssembly/WastImport-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
