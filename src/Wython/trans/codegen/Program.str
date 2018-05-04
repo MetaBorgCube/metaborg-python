@@ -12,6 +12,7 @@ strategies
 rules
   codegen: Module(stmts) -> WastModule(iList, dList, fList, eList)
     where
+       <debug> stmts;
        iList := <imports> stmts;
        dList := <data> stmts;
        fList := <funcs> stmts;

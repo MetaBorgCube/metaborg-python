@@ -13,11 +13,8 @@ rules
     _ -> [ WastFunc(
           Some("$main")
         , [ WastExpr(WastInstr(I32Const("0")))
-          , WastExpr(WastInstr(I32Const("14")))
-          , WastExpr(WastCall(WastCall("$a")))
-          , WastExpr(WastInstr(I32Const("15")))
-          , WastExpr(WastInstr(I32Const("14")))
-          , WastExpr(WastCall(WastCall("$a")))
+          , WastExpr(WastInstr(I32Const("8")))
+          , WastExpr(WastCall(WastCall("$log")))
           ]
         )
       ]

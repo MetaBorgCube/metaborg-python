@@ -12,9 +12,9 @@ rules
   imports:
     _ -> [ 
       WastFunc(
-        Some("$a"),
+        Some("$log"),
         [WastImport("\"lib\"", "\"logString\""),
         Some(WastParams([I32(), I32()]))]
       ),
-      WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
+      WastMem(("$a"), WastImport("\"memory\"", "\"memory\""), "1")
     ]
