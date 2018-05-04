@@ -2,7 +2,7 @@ module Program
 
 imports
   trans/codegen/-
-  Module-sig
+  src-gen/signatures/WebAssembly/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
 
@@ -10,7 +10,7 @@ strategies
   codegen-all = codegen
  
 rules
-  codegen: Module(stmts) -> Module(iList, dList, fList, eList)
+  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList)
     where
        iList := <imports> stmts;
        dList := <data> stmts;

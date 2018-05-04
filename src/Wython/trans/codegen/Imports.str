@@ -1,7 +1,7 @@
 module Imports
 
 imports
-  Module-sig
+  src-gen/signatures/WebAssembly/WastFunc-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -10,10 +10,10 @@ rules
 
   imports:
     _ -> [ 
-      Func(
+      WastFunc(
         Some("$a"),
-        Import("\"lib\"", "\"logString\""),
-        Some(Params(I32(), I32()]))
+        [WastImport("\"lib\"", "\"logString\""),
+        Some(WastParams([I32(), I32()]))]
       ),
-      Mem(Some("$d"), Import("\"memory\"", "\"memory\""), "1")
+      WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
     ]

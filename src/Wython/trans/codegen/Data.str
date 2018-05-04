@@ -1,7 +1,7 @@
 module Data
 
 imports
-  Module-sig
+  src-gen/signatures/WebAssembly/-
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -10,9 +10,9 @@ rules
 
   data:
     _ -> [ 
-      Data(Expr(Instr(I32Const("0")))
+      WastData(WastExpr(WastInstr(I32Const("0")))
       , Some("\"Hello, Rasmus!\\n\"")),
-      Data(Expr(Instr(I32Const("15")))
+      WastData(WastExpr(WastInstr(I32Const("15")))
       , Some("\"Hello, Chiel!\\n\""))
     ]
     

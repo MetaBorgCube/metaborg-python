@@ -1,7 +1,7 @@
 module Exports
 
 imports
-  Module-sig
+  src-gen/signatures/WebAssembly/-
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -9,6 +9,6 @@ imports
 rules
   exports:
     _ -> [
-      Export("\"main\"", 
-      Func("$main"))
+      WastExport("\"main\"", 
+      WastFunc("$main"))
     ]
