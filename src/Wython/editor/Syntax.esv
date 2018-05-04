@@ -18,9 +18,10 @@ menus
   
   menu: "Syntax" (openeditor)
     
-    action: "Format"                = editor-format    (source)
-    action: "Show parsed AST"       = debug-show-aterm (source)
-    action: "Show desugared syntax" = editor-desugar   (source)
+    action: "Format"                         = editor-format            (source)
+    action: "Show parsed AST"                = debug-show-aterm         (source)
+    action: "Show desugared syntax"          = editor-desugar           (source)
+    action: "Show desugared analysis syntax" = editor-analysis-desugar  (source)
 
 views
   
