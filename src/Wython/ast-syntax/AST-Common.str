@@ -13,6 +13,7 @@ signature
     
     Singleton
     Constant
+    ID
     
  
   constructors
@@ -31,3 +32,4 @@ signature
     False: Singleton
     
     None: Constant
+    ID: String -> ID
