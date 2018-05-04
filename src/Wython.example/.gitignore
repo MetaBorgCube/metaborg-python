@@ -11,3 +11,6 @@
 *.name-resolution
 *.unifier
 *.symbolic
+*.gv
+*.dot
+*.pdf

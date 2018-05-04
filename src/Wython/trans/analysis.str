@@ -4,16 +4,16 @@ imports
   
   nabl2shared
   nabl2runtime
-  
-  // static-semantics
 
   pp
+  desugar/Program
+  analysis-desugar/desugar
+  analysis/-
 
 rules // Analysis
+  editor-analyze = nabl2-analyze(desugar-all; analysis-desugar-all)
 
-  editor-analyze = nabl2-analyze(id)
-
-rules // Debugging
+rules // Debuggings
   
   // Prints the abstract syntax ATerm of a selection.
   debug-show-aterm: (selected, _, _, path, project-path) -> (filename, result)

@@ -1,0 +1,46 @@
+module analysis/Program
+
+imports
+  desugar/-
+  analysis/-
+
+
+signature
+  namespaces Var Class Function Module
+
+name resolution
+  labels
+    P I
+
+  order
+    D < P,
+    D < I,
+    I < P
+
+  well-formedness
+    P* I*
+
+sorts Type
+   constructors
+     NumT : Type
+     CallableT : Type
+     Object : Type
+     
+rules
+  
+  init ^ (s) :=
+    new s,
+    
+    // Builtin 'print()'
+    Var{"print"} <- s,
+    new s_builtin_print, s_builtin_print ---> s,
+      Var{"print"} ===> s_builtin_print,
+      Function{"__call__"} <- s_builtin_print.
+
+
+
+  [[Module(stmts) ^ (s)]] :=
+    Module{"__main__"} <- s,
+    new s_module, s_module ---> s,
+      Module{"__main__"} ===> s_module,
+      Map1[[ stmts ^ (s_module) ]].

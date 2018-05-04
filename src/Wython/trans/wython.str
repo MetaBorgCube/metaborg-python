@@ -7,7 +7,11 @@ imports
   outline
   analysis
   desugar/Program
+
   codegen/Program
+
+  analysis-desugar/desugar
+
 
 rules // Debugging
   
@@ -20,7 +24,6 @@ rules // Debugging
   editor-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"desugared.aterm")> path ;
-      text     := <desugar-all> ast
 
   show-wast-ast:
     (_, _, ast, path, project-path) -> (filename, text) where
@@ -38,4 +41,9 @@ rules // Debugging
       <debug> code;
       text := <pp-debug> code
 
-    
+      
+  editor-analysis-desugar:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"a-desugared.aterm")> path ;
+      text     := <analysis-desugar-all> <desugar-all> ast
+

@@ -54,6 +54,8 @@ rules
   desugar-call: [h | t] -> Attribute(<desugar-call> t, h, Load())
   
   desugar-args: Some(list) -> <desugar-args> list
+  desugar-args: None() -> ([], [])
+  
   desugar-args: ArgList(list, _) -> <desugar-args> (list, [], [])
   desugar-args: ([], arg, karg) -> (arg, karg)
   desugar-args: ([h | t], arg, karg) -> <desugar-args> (t, <concat> [arg, n_arg], <concat> [karg, n_karg])
