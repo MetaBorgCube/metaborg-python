@@ -1,0 +1,12 @@
+module WebAssembly/WastVarType
+
+imports
+  WebAssembly/WastCommon
+
+context-free start-symbols
+  
+  WastVarType
+
+context-free syntax
+  
+  WastVarType.I32 = "i32"

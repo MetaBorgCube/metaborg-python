@@ -1,0 +1,20 @@
+module WebAssembly/WastData
+
+imports
+  
+  WebAssembly/WastCommon
+  WebAssembly/WastVarType
+  WebAssembly/WastExpr
+
+context-free start-symbols
+  WastData
+
+context-free syntax
+  
+  WastData.WastDataWithID = 
+    <(data <WastID> <WastExpr> <WastSTRING?>)
+    >
+
+  WastData.WastData = 
+    <(data <WastExpr> <WastSTRING?>)
+    >

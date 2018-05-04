@@ -1,0 +1,18 @@
+module WebAssembly/WastFunc
+
+imports
+  
+  WebAssembly/WastCommon
+  WebAssembly/WastData
+  WebAssembly/WastExpr
+
+context-free start-symbols
+  WastFunc
+
+context-free syntax
+  
+  WastFunc.WastFunc = <
+    (func <WastID?>
+      <{WastExpr "\n"}*> 
+    )
+    >

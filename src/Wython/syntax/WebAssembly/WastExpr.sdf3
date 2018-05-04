@@ -1,0 +1,21 @@
+module WebAssembly/WastExpr
+
+imports
+
+  WebAssembly/WastCommon
+
+context-free start-symbols
+  
+  WastExpr
+
+context-free syntax
+
+  WastExpr.WastExpr = <( <WastInstr> )> 
+  
+  WastInstr.WastInstr = WastConst
+  WastInstr.WastCall = WastCall
+  
+  WastCall.WastCall = <call <WastID>>
+  
+  
+  WastConst.I32Const = <i32.const <WastINT>>
