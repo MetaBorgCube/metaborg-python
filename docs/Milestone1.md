@@ -215,7 +215,7 @@ For this reasons, I/O is not an integrated part of the language, and the
 language is mainly instanciated by the means of a JavaScript API. In order to
 log output to the console, a helper function was written.
 
-```
+```js
 const logStringFactory = memory => (position, length) => {
   const bytes = new Uint8Array(memory.buffer, position, length);
   const s = new TextDecoder('utf8').decode(bytes);
@@ -237,6 +237,48 @@ WebAssembly.instantiateStreaming(fetch('hello.wasm'), {
 
 Build scripts etc. were developed to facilitate the deployment of WebAssembly
 to the browser.
+
+### WebAssembly Syntax Definition
+
+Webassembly is organized into Modules, containing more of the following (in
+that order)
+
+- Types
+- Imports
+- Memory 
+- Data
+- Functions
+- Start (calling functions)
+- Exports
+
+In order to fulfill the goal of printing strings, it was decided to implement
+imports (to import the memory and the log function), data (to store the
+string), functions (to be able to declare a main function) and exports (to be
+able to export the said main function).
+
+Each of these were declared in a consise way (there really wasn't that much
+complexity, as the syntax of wast is quite straightforward), and only so much
+as to be able to recognize and generate the program,
+
+```wast
+(module
+  (func $_log (import "console" "log") )
+  (func $_logString (import "lib" "logString") (param i32 i32))
+  (memory $_memory (import "memory" "memory") 1)
+  (data (i32.const 0) "Hello, Rasmus!\n") ;; str1
+  (data (i32.const 15) "Hello, Chiel!\n") ;; str2
+
+  (func $main 
+    (i32.const 0) ;; str1*
+    (i32.const 14) ;; len(str1)
+    (call $_log)
+    (i32.const 0) ;; str*
+    (i32.const 14) ;; len(str)
+    (call $_log)
+  )
+  (export "main" (func $main))
+)
+```
 
 ### Transformation to Wasm AST
 
