@@ -1,4 +1,4 @@
-module Program
+module Exports
 
 imports
   Module-sig
@@ -6,14 +6,9 @@ imports
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
 
-strategies
-  codegen-all = codegen
- 
 rules
-  codegen: Module(stmts) -> Module(iList, dList, fList, eList)
-    where
-       iList := <imports> stmts;
-       dList := <data> stmts;
-       fList := <funcs> stmts;
-       eList :=  <exports> stmts
-       
+  exports:
+    _ -> [
+      Export("\"main\"", 
+      Func("$main"))
+    ]

@@ -1,8 +1,8 @@
 module Program
 
 imports
-  Module-sig
   trans/codegen/-
+  Module-sig
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
 
