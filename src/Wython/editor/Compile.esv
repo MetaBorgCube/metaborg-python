@@ -1,0 +1,14 @@
+module Compile
+
+menus
+  
+  menu: "Compile" (openeditor)
+    
+    action: "Compile to .wast"      = compile-to-wast  (source)
+    action: "Show parsed AST"       = debug-show-aterm (source)
+    action: "Show desugared syntax" = editor-desugar   (source)
+
+views
+  
+  outline view: editor-outline (source)
+    expand to level: 3

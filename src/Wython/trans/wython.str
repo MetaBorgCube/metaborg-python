@@ -20,3 +20,9 @@ rules // Debugging
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"desugared.aterm")> path ;
       text     := <desugar-all> ast
+
+  compile-to-wast:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"aterm")> path ;
+      text     := <desugar-all> ast
+    
