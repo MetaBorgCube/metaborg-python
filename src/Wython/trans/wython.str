@@ -24,6 +24,7 @@ rules // Debugging
   editor-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"desugared.aterm")> path ;
+      text     := <desugar-all> ast
 
   show-wast-ast:
     (_, _, ast, path, project-path) -> (filename, text) where

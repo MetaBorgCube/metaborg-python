@@ -1,5 +1,5 @@
 ---
-id: org.metaborg.lang:Wython:0.1.0-SNAPSHOT
+id: nl.tudelft:Wython:0.1.0-SNAPSHOT
 name: Wython
 dependencies:
   compile:
