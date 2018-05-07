@@ -12,11 +12,7 @@ context-free start-symbols
   Start
 
 context-free syntax
-  // FIXME: This should work (according to the documentation), but doesn't force the alignment
-  // http://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#layout-sensitive-parsing
-  Start.FileInput = <
-    <body:CodeElement*>
-  > {layout( align 0 body )}
+  Start.FileInput = body:CodeElement* {layout (align body)}
   
 //  Start.SingleInput = SingleInput
 //  Start.EvalInput = TestList NewLine* EOF
