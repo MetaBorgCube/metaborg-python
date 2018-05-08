@@ -13,8 +13,8 @@ rules
     _ -> [ 
       WastFunc(
         Some("$log"),
-        [WastImport("\"lib\"", "\"logString\""),
-        Some(WastParams([I32(), I32()]))]
+        WastImport("\"lib\"", "\"logString\""),
+        Some(WastParams([I32(), I32()]))
       ),
       WastMem(("$a"), WastImport("\"memory\"", "\"memory\""), "1")
     ]

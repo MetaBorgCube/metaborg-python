@@ -3,6 +3,7 @@ module Data
 imports
   signatures/WebAssembly/WastData-sig
   signatures/WebAssembly/WastExpr-sig
+  signatures/WebAssembly/WastCommon-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -14,7 +15,8 @@ rules
     callList -> dataList
     where 
     <debug> callList;
-    dataList := <map(calls)> callList
+    dataList := <concat> <map(calls)> callList;
+   <debug> dataList
       
   calls:
     ExprStmt(Call(name, args, kwargs)) -> dataList
