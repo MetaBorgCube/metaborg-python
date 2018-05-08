@@ -6,6 +6,7 @@ imports
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
+  ast-syntax/AST-Expression
   
 rules
 
@@ -16,9 +17,9 @@ rules
     dataList := <map(calls)> callList
       
   calls:
-    ExprStmt(Call(name, params, list)) -> dataList
+    ExprStmt(Call(name, args, kwargs)) -> dataList
     where
-      dataList := <map(dataStmt)> params;
+      dataList := <map(dataStmt)> args;
       <debug> dataList
 
   dataStmt:
@@ -34,3 +35,5 @@ rules
   evaluate:
     Int(val) -> val
     
+  evaluate:
+    String(val) -> val

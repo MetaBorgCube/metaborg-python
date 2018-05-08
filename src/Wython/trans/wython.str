@@ -4,6 +4,7 @@ imports
   
   completion/completion
   pp
+  WebAssembly/pp
   outline
   analysis
   desugar/Program
