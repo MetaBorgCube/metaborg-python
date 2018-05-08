@@ -1,8 +1,8 @@
 module Funcs
 
 imports
-  src-gen/signatures/WebAssembly/WastFunc-sig
-  src-gen/signatures/WebAssembly/WastExpr-sig
+  signatures/WebAssembly/WastFunc-sig
+  signatures/WebAssembly/WastExpr-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement

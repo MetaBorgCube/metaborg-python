@@ -1,9 +1,9 @@
 ---
-id: nl.tudelft:Wython.example:0.1.0-SNAPSHOT
+id: org.metaborg.lang:Wython.example:0.1.0-SNAPSHOT
 name: Wython
 dependencies:
   compile:
-  - nl.tudelft:Wython:0.1.0-SNAPSHOT
+  - org.metaborg.lang:Wython:0.1.0-SNAPSHOT
 debug:
   typesmart: false
 runtime:
