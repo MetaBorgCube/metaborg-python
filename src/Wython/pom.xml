@@ -63,7 +63,7 @@
   </pluginRepositories>
   <dependencies>
   	<dependency>
-  		<groupId>org.example</groupId>
+  		<groupId>org.metaborg.lang</groupId>
   		<artifactId>WebAssembly</artifactId>
   		<version>0.1.0-SNAPSHOT</version>
   		<scope>runtime</scope>
