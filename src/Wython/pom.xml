@@ -61,4 +61,12 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.example</groupId>
+  		<artifactId>WebAssembly</artifactId>
+  		<version>0.1.0-SNAPSHOT</version>
+  		<scope>runtime</scope>
+  	</dependency>
+  </dependencies>
 </project>
