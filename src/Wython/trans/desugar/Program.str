@@ -1,8 +1,8 @@
 module Program
 
 imports
-  src-gen/signatures/Program-sig
-  src-gen/signatures/Statement-sig
+  signatures/Program-sig
+  signatures/Statement-sig
   
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement

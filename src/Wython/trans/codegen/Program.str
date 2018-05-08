@@ -2,7 +2,7 @@ module Program
 
 imports
   trans/codegen/-
-  src-gen/signatures/WebAssembly/WastModule-sig
+  signatures/WebAssembly/WastModule-sig
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
 

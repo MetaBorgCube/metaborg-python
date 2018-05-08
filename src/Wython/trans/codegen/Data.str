@@ -1,8 +1,8 @@
 module Data
 
 imports
-  src-gen/signatures/WebAssembly/WastData-sig
-  src-gen/signatures/WebAssembly/WastExpr-sig
+  signatures/WebAssembly/WastData-sig
+  signatures/WebAssembly/WastExpr-sig
   trans/codegen/-
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement

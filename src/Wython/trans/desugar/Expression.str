@@ -1,10 +1,10 @@
 module Expression
 
 imports
-  src-gen/signatures/Expression-sig
-  src-gen/signatures/CompoundStatement-sig
-  src-gen/signatures/Test-sig
-  src-gen/signatures/Common-sig
+  signatures/Expression-sig
+  signatures/CompoundStatement-sig
+  signatures/Test-sig
+  signatures/Common-sig
   
   ast-syntax/AST-Expression
   ast-syntax/AST-Common

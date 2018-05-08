@@ -1,7 +1,7 @@
 module Statement
 
 imports
-  src-gen/signatures/Statement-sig
+  signatures/Statement-sig
   
   ast-syntax/AST-Statement
  
