@@ -1,11 +1,19 @@
 module Statement
 
 imports
-  src-gen/signatures/Statement-sig
+  src-gen/signatures/-
   
   ast-syntax/AST-Statement
  
   trans/desugar/Expression
 
 rules
+  desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
+  desugar-suite: e -> <debug> e
+  
+  desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr> exp)
+  
+  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr> cond, <desugar-suite> body, [])]
+  
+  desugar-stmt: e -> <debug> e

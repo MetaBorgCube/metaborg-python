@@ -18,7 +18,7 @@ context-free start-symbols
 
 context-free syntax
 
-    CompoundStatement.If = "if" Test ":" Suite Elif* Else?
+    CompoundStatement.If = "if" Test ":" NewLine? body:Suite Elif* Else?
     CompoundStatement.While = "while" Test ":" Suite Else?
     CompoundStatement.For = For
     CompoundStatement.Try = "try" ":" Suite Except+ Else? Finally?
@@ -87,6 +87,5 @@ context-free syntax
     
     FuncType.FuncType = "->" Test
 
-    Suite.Statement = SimpleStatement
-    Suite.BlockLine = <<NewLine> <{Statement "\n"}+> >
-    // Suite.BlockLine = NewLine Indent Statement+ Dedent
+    Suite.Statement = SimpleStatement   {prefer}
+    Suite.BlockLine = {Statement "\n"}+ {layout (align 1) }
