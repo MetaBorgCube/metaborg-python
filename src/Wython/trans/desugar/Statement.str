@@ -9,11 +9,22 @@ imports
 
 rules
   desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
-  desugar-suite: BlockLine(stmts) -> <mapconcat(desugar-stmt)> stmts
+  desugar-suite: BlockLine(stmts, _) -> <mapconcat(desugar-stmt)> stmts
   
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr> exp)
   
-  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr> cond, <desugar-suite> body, [])]
+  //TODO: elif
+  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr> cond, <desugar-suite> body, <desugar-if>else)]
+    where
+//      a := <foldr(desugar-if)> (elif, <desugar-if> else);
+      des-else := [<debug> else, <map(debug)> elif]
+  desugar-if: None() -> None()
+  desugar-if: Some(item) -> <desugar-if> item
+  desugar-if: Else(_, suite) -> <desugar-suite> suite
+  
+  desugar-if: (a, b) -> <debug> (a, b)
+  
+  desugar-stmt: Pass() -> Pass()
   
   desugar-stmt: e -> <debug> e
