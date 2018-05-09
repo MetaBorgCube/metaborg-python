@@ -9,7 +9,7 @@ imports
 
 rules
   desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
-  desugar-suite: e -> <debug> e
+  desugar-suite: BlockLine(stmts) -> <mapconcat(desugar-stmt)> stmts
   
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr> exp)

@@ -75,6 +75,14 @@ rules
 //  desugar-expr: AndTest(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
   
   desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
-//  desugar-expr: Comparison(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
+  desugar-expr: Comparison(exp, [item]) -> BoolOp(type, <desugar-expr> exp, des-r)
+    where
+      (type, des-r) := <desugar-comp> item
+      
+  desugar-expr: Comparison(exp, [h|t]) -> Comparison(first, t)
+    where
+      first := <desugar-expr> Comparison(exp, [h])
 
+  desugar-comp: Comparison(Eq(), exp) -> (Eq(), <desugar-expr> exp)
+  
   desugar-expr: e -> <debug> e
