@@ -11,22 +11,26 @@ imports
 
 rules  
   desugar-expr: Exp([item]) -> <desugar-expr> item
-  desugar-expr: Exp([l, r]) -> BinOp(BitOr(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: Exp([h | t]) -> <foldl(desugar-binop-or)> (t, <desugar-expr> h)
+  desugar-binop-or: (r, l) -> BinOp(BitOr(), l, <desugar-expr> r)
   
   desugar-expr: XorExp([item]) -> <desugar-expr> item
-  desugar-expr: XorExp([l, r]) -> BinOp(BitXor(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: XorExp([h | t]) -> <foldl(desugar-binop-xor)> (t, <desugar-expr> h)
+  desugar-binop-xor: (r, l) -> BinOp(BitXor(), l, <desugar-expr> r)
   
   desugar-expr: AndExp([item]) -> <desugar-expr> item
-  desugar-expr: AndExp([l, r]) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: AndExp([h | t]) -> <foldl(desugar-binop-and)> (t, <desugar-expr> h)
+  desugar-binop-and: (r, l) -> BinOp(BitAnd(), l, <desugar-expr> r)
   
   desugar-expr: ShiftExp(h, []) -> <desugar-expr> h
-//  desugar-expr: ShiftExp(h, tail) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: ShiftExp(l, r) ->  ShiftExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Shift"
   
   desugar-expr: ArithExp(h, []) -> <desugar-expr> h
-//  desugar-expr: ArithExp(h, tail) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: ArithExp(l, r) -> ArithExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Artihmatic"
+
   
   desugar-expr: Term(h, []) -> <desugar-expr> h
-//  desugar-expr: Term(h, t) -> 
+  desugar-expr: Term(l, r) -> Term(l, r) where e := <debug> "[Desugar] Unsupported operation: Term"
 
   desugar-expr: Power(exp) -> <desugar-expr> exp
   
