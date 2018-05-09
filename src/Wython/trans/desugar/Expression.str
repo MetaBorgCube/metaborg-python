@@ -26,11 +26,19 @@ rules
   desugar-expr: ShiftExp(l, r) ->  ShiftExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Shift"
   
   desugar-expr: ArithExp(h, []) -> <desugar-expr> h
-  desugar-expr: ArithExp(l, r) -> ArithExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Artihmatic"
+  desugar-expr: ArithExp(h, t) -> <foldl(desugar-arith)> (t, <desugar-expr> h)
+  
+  desugar-arith: (Add(r), l) -> BinOp(Add(), l, <desugar-expr> r)
+  desugar-arith: (Sub(r), l) -> BinOp(Sub(), l, <desugar-expr> r)
+  desugar-arith: (Div(r), l) -> BinOp(Div(), l, <desugar-expr> r)
+  desugar-arith: (Mul(r), l) -> BinOp(Mult(), l, <desugar-expr> r)
+  desugar-arith: (IntDiv(r), l) -> BinOp(FloorDiv(), l, <desugar-expr> r)
+  desugar-arith: (PowerNode(r), l) -> BinOp(Pow(), l, <desugar-expr> r)
+  desugar-arith: (op, l) -> <debug> ("[Desugar] Unsupported operation: ", op)
 
   
   desugar-expr: Term(h, []) -> <desugar-expr> h
-  desugar-expr: Term(l, r) -> Term(l, r) where e := <debug> "[Desugar] Unsupported operation: Term"
+  desugar-expr: Term(l, r) -> <foldl(desugar-arith)> (r, <desugar-expr> l)
 
   desugar-expr: Power(exp) -> <desugar-expr> exp
   
