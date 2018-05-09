@@ -75,14 +75,19 @@ rules
 //  desugar-expr: AndTest(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
   
   desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
-  desugar-expr: Comparison(exp, [item]) -> BoolOp(type, <desugar-expr> exp, des-r)
+  desugar-expr: Comparison(lhs, cmps) -> Compare(<desugar-expr>lhs, ops, exprs)
     where
-      (type, des-r) := <desugar-comp> item
+      (ops, exprs) := <unzip><map(desugar-comp)> cmps
       
-  desugar-expr: Comparison(exp, [h|t]) -> Comparison(first, t)
-    where
-      first := <desugar-expr> Comparison(exp, [h])
-
-  desugar-comp: Comparison(Eq(), exp) -> (Eq(), <desugar-expr> exp)
+  desugar-comp: Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr> exp)
+  desugar-comp: Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr> exp)
+  desugar-comp: Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr> exp)
+  desugar-comp: Comparison(In(),    exp) -> (In(),    <desugar-expr> exp)
+  desugar-comp: Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr> exp)
+  desugar-comp: Comparison(Is(),    exp) -> (Is(),    <desugar-expr> exp)
+  desugar-comp: Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr> exp)
   
   desugar-expr: e -> <debug> e
