@@ -80,11 +80,11 @@ rules
   desugar-expr: Test(or, None()) -> <desugar-expr> or
   desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
   
-  desugar-expr: OrTest(and, None()) -> <desugar-expr> and
-  desugar-expr: OrTest(l, Some(r)) -> BoolOp(Or(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: OrTest([and]) -> <desugar-expr> and
+  desugar-expr: OrTest(list) -> BoolOp(Or(), <map(desugar-expr)> list)
   
-  desugar-expr: AndTest(comp, []) -> <desugar-expr> comp
-  desugar-expr: AndTest(l, Some(r)) -> BoolOp(And(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: AndTest([comp]) -> <desugar-expr> comp
+  desugar-expr: AndTest(list) -> BoolOp(And(), <map(desugar-expr)> list)
   
   desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
   desugar-expr: Comparison(lhs, cmps) -> Compare(<desugar-expr>lhs, ops, exprs)

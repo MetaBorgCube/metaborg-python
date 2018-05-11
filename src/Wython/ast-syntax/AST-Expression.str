@@ -16,8 +16,8 @@ signature
     Comprehension
  
   constructors
-  //      operator   left   right
-  BoolOp: Boolop  *  Expr * Expr -> Expr
+  //      operator   exprs
+  BoolOp: Boolop  *  [Expr] -> Expr
   
   //     operator   left   right
   BinOp: Operator * Expr * Expr -> Expr
