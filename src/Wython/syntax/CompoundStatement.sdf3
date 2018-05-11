@@ -33,7 +33,7 @@ context-free syntax
     
     With.With = "with" { WithItem ","}+ ":" Suite
 
-    For.For = "for" ExpList "in" TestList ":" Suite Else?
+    For.For = "for" ExpList "in" TestList ":" NewLine body:Suite Else?   { layout (indent "for" body) }
     
     Finally.Finally = "finally" ":" Suite
 

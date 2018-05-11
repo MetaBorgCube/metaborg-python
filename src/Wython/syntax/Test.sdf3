@@ -12,8 +12,7 @@ context-free start-symbols
 
 context-free syntax
 
-  TestList.TestList = Test TestNode* Comma?
-  TestNode.Node = "," Test
+  TestList.TestList = {Test ","}+ Comma?
 
   Test.Test = OrTest OrTestExtension? 
   Test.LambdaDef = LambdaDef

@@ -12,6 +12,7 @@ imports
 rules  
   desugar-expr: Exp([item]) -> <desugar-expr> item
   desugar-expr: Exp([h | t]) -> <foldl(desugar-binop-or)> (t, <desugar-expr> h)
+  desugar-expr: Exp(exp) -> <desugar-expr> exp
   desugar-binop-or: (r, l) -> BinOp(BitOr(), l, <desugar-expr> r)
   
   desugar-expr: XorExp([item]) -> <desugar-expr> item
@@ -79,6 +80,9 @@ rules
   
   desugar-expr: Test(or, None()) -> <desugar-expr> or
   desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
+  
+  desugar-expr: TestList([elem], _) -> <desugar-expr> elem
+  desugar-expr: TestList(list, _) -> Tuple(<map(desugar-expr)> list, Load())
   
   desugar-expr: OrTest([and]) -> <desugar-expr> and
   desugar-expr: OrTest(list) -> BoolOp(Or(), <map(desugar-expr)> list)
