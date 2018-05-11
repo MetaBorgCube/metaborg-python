@@ -4,6 +4,7 @@ imports
   
   completion/completion
   pp
+  WebAssembly/pp
   outline
   analysis
   desugar/Program
@@ -34,13 +35,11 @@ rules // Debugging
     
   compile-to-wast:
     (_, _, ast, path, project-path) -> (filename, text) where
-      filename := <guarantee-extension(|"wast")> path ;
-      <debug> ast;
+      filename := <guarantee-extension(|".wast")> path ;
       desugared := <desugar-all> ast;
       <debug> desugared;
       code := <codegen-all> desugared;
-      <debug> code;
-      text := <pp-debug> code
+      text := <pp-debug-wast> code
 
       
   editor-analysis-desugar:

@@ -1,10 +1,10 @@
 module Expression
 
 imports
-  src-gen/signatures/Expression-sig
-  src-gen/signatures/CompoundStatement-sig
-  src-gen/signatures/Test-sig
-  src-gen/signatures/Common-sig
+  signatures/Expression-sig
+  signatures/CompoundStatement-sig
+  signatures/Test-sig
+  signatures/Common-sig
   
   ast-syntax/AST-Expression
   ast-syntax/AST-Common
@@ -81,10 +81,10 @@ rules
   desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
   
   desugar-expr: OrTest(and, None()) -> <desugar-expr> and
-  desugar-expr: OrTest(l, r) -> BoolOp(Or(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: OrTest(l, Some(r)) -> BoolOp(Or(), <desugar-expr> l, <desugar-expr> r)
   
   desugar-expr: AndTest(comp, []) -> <desugar-expr> comp
-//  desugar-expr: AndTest(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
+  desugar-expr: AndTest(l, Some(r)) -> BoolOp(And(), <desugar-expr> l, <desugar-expr> r)
   
   desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
   desugar-expr: Comparison(lhs, cmps) -> Compare(<desugar-expr>lhs, ops, exprs)
@@ -102,4 +102,4 @@ rules
   desugar-comp: Comparison(Is(),    exp) -> (Is(),    <desugar-expr> exp)
   desugar-comp: Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr> exp)
   
-  desugar-expr: e -> <debug> e
+  desugar-expr: e -> ("Cannot desugar expression: ", <debug> e)

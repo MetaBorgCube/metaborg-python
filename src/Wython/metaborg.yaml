@@ -1,5 +1,5 @@
 ---
-id: nl.tudelft:Wython:0.1.0-SNAPSHOT
+id: org.metaborg.lang:Wython:0.1.0-SNAPSHOT
 name: Wython
 dependencies:
   compile:
@@ -8,6 +8,7 @@ dependencies:
   - org.metaborg:org.metaborg.meta.nabl2.lang:${metaborgVersion}
   - org.metaborg:dynsem:${metaborgVersion}
   source:
+  - org.metaborg.lang:WebAssembly:0.1.0-SNAPSHOT
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.nabl2.shared:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.nabl2.runtime:${metaborgVersion}

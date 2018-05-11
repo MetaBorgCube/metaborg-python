@@ -2,11 +2,10 @@ module Statement
 
 imports
   src-gen/signatures/-
-  
-  ast-syntax/AST-Statement
- 
-  trans/desugar/Expression
+  ast-syntax/-
 
+  trans/desugar/Expression
+  
 rules
   desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
   desugar-suite: BlockLine(stmts, _) -> <mapconcat(desugar-stmt)> stmts
