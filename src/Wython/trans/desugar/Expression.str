@@ -102,4 +102,4 @@ rules
   desugar-comp: Comparison(Is(),    exp) -> (Is(),    <desugar-expr> exp)
   desugar-comp: Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr> exp)
   
-  desugar-expr: e -> ("Cannot desugar expression: ", <debug> e)
+  desugar-expr: e -> <debug> ("Cannot desugar expression: ", e)
