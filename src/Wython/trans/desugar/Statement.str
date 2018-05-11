@@ -25,4 +25,4 @@ rules
   
   desugar-stmt: Pass() -> Pass()
   
-  desugar-stmt: e -> ("Cannot desugar statement: ", <debug> e)
+  desugar-stmt: e -> [<debug> ("Cannot desugar statement: ", e)]
