@@ -22,8 +22,7 @@ rules
   desugar-if: Else(_, suite) -> <desugar-suite> suite
   
   desugar-if: (Elif(cond, _, body), else) -> If(<desugar-expr> cond, <desugar-suite> body, else)
-  desugar-if: (a, b) -> <debug> (a, b)
   
   desugar-stmt: Pass() -> Pass()
   
-  desugar-stmt: e -> <debug> e
+  desugar-stmt: e -> ("Cannot desugar statement: ", <debug> e)
