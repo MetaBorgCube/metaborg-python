@@ -3,11 +3,15 @@ module Assign
 imports
   signatures/Expression-sig
   signatures/CompoundStatement-sig
+  signatures/SimpleStatement-sig
   signatures/Test-sig
   signatures/Common-sig
   
+  ast-syntax/AST-Statement
   ast-syntax/AST-Expression
   ast-syntax/AST-Common
+  
+  trans/desugar/Expression
 
 rules  
   desugar-stmt: ExpStatement(TestFirst(targets, _), AssignList(value)) -> Assign(<desugar-assign-target><map(desugar-expr)> targets, <desugar-assign> value)
