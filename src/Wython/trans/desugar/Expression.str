@@ -98,7 +98,7 @@ rules
   desugar-expr(ctx): Comparison(exp, []) -> <desugar-expr(ctx)> exp
   desugar-expr(ctx): Comparison(lhs, cmps) -> Compare(<desugar-expr(ctx)>lhs, ops, exprs)
     where
-      (ops, exprs) := <unzip><map(desugar-comp)> cmps
+      (ops, exprs) := <unzip><map(desugar-comp(ctx))> cmps
       
   desugar-comp(ctx): Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr(ctx)> exp)
