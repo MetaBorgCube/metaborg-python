@@ -10,7 +10,6 @@ imports
   SimpleStatement
   Parameters
   Test
-  Class
 
 context-free start-symbols
 
@@ -21,17 +20,17 @@ context-free syntax
     CompoundStatement.If = "if" Test ":" NewLine body:Suite Elif* Else?   { layout (indent "if"    body) }
     CompoundStatement.While = "while" Test ":" NewLine body:Suite Else?   { layout (indent "while" body) }
     CompoundStatement.For = For
-    CompoundStatement.Try = "try" ":" Suite Except+ Else? Finally?
-    CompoundStatement.TryFinally = "try" ":" Suite Finally
+    CompoundStatement.Try = "try" ":" body:Suite Except+ Else? Finally?
+    CompoundStatement.TryFinally = "try" ":" body:Suite Finally
     CompoundStatement.With = With
     CompoundStatement.FuncDef =  FuncDef
-    CompoundStatement.ClassDef = "class" ID ArgList? ":" Suite
+    CompoundStatement.ClassDef = "class" ID ArgList? ":" NewLine body:Suite { layout (indent "class" body) }
     CompoundStatement.Decorated = Decorators Definition
     CompoundStatement.AsyncFunc = Async FuncDef
     CompoundStatement.AsyncWith = Async With
     CompoundStatement.AsyncFor = Async For
     
-    With.With = "with" { WithItem ","}+ ":" Suite
+    With.With = "with" { WithItem ","}+ ":" body:Suite
 
     For.For = "for" ExpList "in" TestList ":" NewLine body:Suite Else?   { layout (indent "for" body) }
     
@@ -50,7 +49,6 @@ context-free syntax
 
     ArgListInBraces.ArgListInBraces = "(" ArgList? ")"
 
-    Definition.ClassDef = ClassDef
     Definition.FuncDef = FuncDef
     Definition.AsyncFuncDef = AsyncFuncDef
     
