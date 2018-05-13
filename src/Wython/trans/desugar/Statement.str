@@ -11,11 +11,11 @@ rules
   desugar-suite: BlockLine(stmts, _) -> <mapconcat(desugar-stmt)> stmts
   
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
-  desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr> exp)
+  desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr(!Load())> exp)
   
-  desugar-stmt: For(For(trgt, iter, _, body, else)) -> [For(<desugar-for> trgt, <desugar-expr> iter, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: While(cond, _, body, else) -> [While(<desugar-expr> cond, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr> cond, <desugar-suite> body, des-else)]
+  desugar-stmt: For(For(trgt, iter, _, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: While(cond, _, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, des-else)]
     where
       des-else := <foldr(!<desugar-if> else, desugar-if)> elif
 
@@ -23,9 +23,9 @@ rules
   desugar-if: Some(item) -> <desugar-if> item
   desugar-if: Else(_, suite) -> <desugar-suite> suite
   
-  desugar-if: (Elif(cond, _, body), else) -> If(<desugar-expr> cond, <desugar-suite> body, else)
-  desugar-for: [elem] -> <desugar-expr> elem
-  desugar-for: List(list, _) -> Tuple(<map(desugar-expr)> list, Store())
+  desugar-if: (Elif(cond, _, body), else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, else)
+  desugar-for: [elem] -> <desugar-expr(!Load())> elem
+  desugar-for: List(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Store())
 
   desugar-stmt: Pass() -> Pass()
   
