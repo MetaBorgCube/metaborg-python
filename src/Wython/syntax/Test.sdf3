@@ -26,8 +26,8 @@ context-free syntax
     
   OrTestExtension.OrTest = "if" OrTest "else" Test
 
-  OrTest.OrTest = {AndTest "or"}*
-  AndTest.AndTest = {NotTest "and"}*
+  OrTest.OrTest = {AndTest "or"}+
+  AndTest.AndTest = {NotTest "and"}+
   
   NotTest.NotTest = "not" NotTest
   

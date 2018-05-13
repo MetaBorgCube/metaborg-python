@@ -47,10 +47,13 @@ rules
   desugar-expr: Power(atom, exponent) -> BinOp(Pow(), <desugar-expr> atom, <desugar-expr> exponent)
   
   desugar-expr: AtomExp(Await(_), a, b) -> Await(<desugar-expr> AtomExp(None(), a, b))
+  desugar-expr: AtomExp(None(), YieldOrTestList(list), a) -> Tuple(<desugar-expr> list, Load())
   desugar-expr: AtomExp(None(), atom, []) -> atom
   desugar-expr: AtomExp(None(), atom, [h | t]) -> <desugar-atom> ([atom], h, t)
   
   desugar-atom: (obj, DotName(name), [h | t]) -> <desugar-atom> (<concat>[obj, [ID(name)]], h, t)
+  desugar-atom: (obj, DotName(name), []) -> <desugar-call> <concat> [obj, [ID(name)]]
+  
   desugar-atom: (obj, ArgList(list), []) -> Call(<desugar-call> obj, args, kargs)
     where
       (args, kargs) := <desugar-args> list
@@ -78,6 +81,8 @@ rules
   
   desugar-args: CompForArgument(t, None()) -> ([<desugar-expr> t], [])
   
+  desugar-expr: TestList(elem) -> <desugar-expr> elem
+  desugar-expr: TestList(list, _) -> <map(desugar-expr)> list
   desugar-expr: Test(or, None()) -> <desugar-expr> or
   desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
   
