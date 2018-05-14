@@ -12,8 +12,8 @@ rules
           Some("$main"), 
 		  body) ]
  	 where 
+ 	 	<debug> exprList;
  	 	body := <concat> <map(exprStmt)> exprList
-          
           
    exprStmt:
    	 ExprStmt(Call(name, params, kwargs)) -> exprList
@@ -26,6 +26,20 @@ rules
 			 parameters,
 			 call
 		  ] 
+		  
+   exprStmt: 
+     If(expr, body, else) -> code
+     where
+     	<debug> expr;
+        code := [
+        	<evaluate> expr
+        ]
+
+	evaluate:
+		False() -> I32Const(0)
+
+	evaluate:
+		True() -> I32Const(1)
    	   
    callExpr: 
 	   Name(identifier, Load()) -> 

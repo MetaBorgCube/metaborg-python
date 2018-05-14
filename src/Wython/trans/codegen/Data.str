@@ -11,19 +11,27 @@ rules
     callList -> dataList
     where 
     dataList := <concat> <map(importCall)> callList
+    
+  importCall:
+  	If(condition, body, else) -> dataList
+  	where
+  	dataList := <concat> [
+  		<concat> <map(importCall)> body,
+  		<concat> <map(importCall)> else
+  	]
       
   importCall:
     ExprStmt(Call(name, args, kwargs)) -> dataList
     where
       <debug> args;
-      dataList := <map(dataStmt)> args
+      dataList := <concat> <map(dataStmt)> args
 
   dataStmt:
-    (param) -> 
+    (param) -> [
        WastData(
           WastExpr(WastInstr(I32Const("0"))), 
           Some(val)
-        )
+        )]
       where
         <debug> param;
         val := <to-string> param;

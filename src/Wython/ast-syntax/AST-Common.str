@@ -11,7 +11,6 @@ signature
     Arguments
     Keyword
     
-    Singleton
     Constant
     ID
     
@@ -27,9 +26,9 @@ signature
     //       arg    value
     Keyword: ID  *  Expr -> Keyword
     
-    None: Singleton
-    True: Singleton
-    False: Singleton
+    None: None
+    True: True
+    False: False
     
     None: Constant
     ID: String -> ID
