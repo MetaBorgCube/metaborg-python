@@ -28,7 +28,7 @@ context-free syntax
   SmallStatement.ImportFrom = "from" ImportFromArgs "import" ImportItems
   SmallStatement.Global = "global" {ID ","}+
   SmallStatement.NonLocal = "nonlocal" {ID ","}+
-  SmallStatement.Assert = "assert" Test TestNode?
+  SmallStatement.Assert = "assert" {Test ","}+
   
   FlowStatement.Break = "break"
   FlowStatement.Continue = "continue"
@@ -49,11 +49,9 @@ context-free syntax
   AssignArguments.Yield = Yield
   AssignArguments.TestListStarExp = TestListStarExp
   
-  TestListStarExp.TestFirst = Test TestListStarExpNode* Comma?
-  TestListStarExp.StarExpFirst = StarExp TestListStarExpNode* Comma?
+  TestListStarExp.TestFirst = {Test ","}+ Comma?
+  TestListStarExp.StarExpFirst = {StarExp ","}+ Comma?
 
-  TestListStarExpNode.TestNode = "," Test
-  TestListStarExpNode.StarExpNode = "," StarExp
 
   AuggAssign.PlusEqual = "+="
   AuggAssign.MinusEqual = "-="
@@ -68,8 +66,6 @@ context-free syntax
   AuggAssign.ShiftRightEqual = ">>="
   AuggAssign.PowEqual = "**="
   AuggAssign.IntegerDivEqual = "//="
-    
-  IDList.Node = "," ID
 
   DottedAsNames.Names = {DottedAsName ","}+
   

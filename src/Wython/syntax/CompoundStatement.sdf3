@@ -18,8 +18,8 @@ context-free start-symbols
 
 context-free syntax
 
-    CompoundStatement.If = "if" Test ":" NewLine body:Suite Elif* Else?   { layout (indent "if" body) }
-    CompoundStatement.While = "while" Test ":" Suite Else?
+    CompoundStatement.If = "if" Test ":" NewLine body:Suite Elif* Else?   { layout (indent "if"    body) }
+    CompoundStatement.While = "while" Test ":" NewLine body:Suite Else?   { layout (indent "while" body) }
     CompoundStatement.For = For
     CompoundStatement.Try = "try" ":" Suite Except+ Else? Finally?
     CompoundStatement.TryFinally = "try" ":" Suite Finally
@@ -33,7 +33,7 @@ context-free syntax
     
     With.With = "with" { WithItem ","}+ ":" Suite
 
-    For.For = "for" ExpList "in" TestList ":" Suite Else?
+    For.For = "for" ExpList "in" TestList ":" NewLine body:Suite Else?   { layout (indent "for" body) }
     
     Finally.Finally = "finally" ":" Suite
 

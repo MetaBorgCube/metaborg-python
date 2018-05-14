@@ -1,0 +1,35 @@
+module Assign
+
+imports
+  signatures/Expression-sig
+  signatures/CompoundStatement-sig
+  signatures/SimpleStatement-sig
+  signatures/Test-sig
+  signatures/Common-sig
+  
+  ast-syntax/AST-Statement
+  ast-syntax/AST-Expression
+  ast-syntax/AST-Common
+  
+  trans/desugar/Expression
+
+rules  
+  desugar-stmt: ExpStatement(TestFirst(targets, _), AssignList(value)) -> Assign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign> value)
+  
+  desugar-assign-target: [elem] -> Name(elem, Store())
+  desugar-assign-target: list -> Tuple(<map(desugar-assign-target)> list, Store())
+  desugar-assign-target: ID(name) -> Name(name, Store())
+  desugar-assign-target: AtomExp(None(), atom, [h | t]) -> <desugar-assign-target> ([atom], h, t)
+  
+  desugar-assign-target: (obj, DotName(name), [h | t]) -> <desugar-atom(!Store())> (<concat>[obj, [ID(name)]], h, t)
+  desugar-assign-target: (obj, DotName(name), []) -> <desugar-assign-target> <concat> [obj, [ID(name)]]
+  desugar-assign-target: [ID(name)] -> Name(ID(name), Store())
+  desugar-assign-target: [e] -> e
+  desugar-assign-target: [h | t] -> Attribute(<desugar-assign-target> t, h, Store())
+
+  desugar-assign-target: e -> <debug> ("Cannot desugar assign target", e)
+  
+  desugar-assign: AssignList(list) -> <desugar-assign> list
+  desugar-assign: TestListStarExp(exp) -> <desugar-assign> exp
+  desugar-assign: TestFirst([elem], _) -> <desugar-expr(!Load())> elem
+  desugar-assign: TestFirst(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Load())

@@ -10,96 +10,106 @@ imports
   ast-syntax/AST-Common
 
 rules  
-  desugar-expr: Exp([item]) -> <desugar-expr> item
-  desugar-expr: Exp([h | t]) -> <foldl(desugar-binop-or)> (t, <desugar-expr> h)
-  desugar-binop-or: (r, l) -> BinOp(BitOr(), l, <desugar-expr> r)
+  desugar-expr(ctx): Exp([item]) -> <desugar-expr(ctx)> item
+  desugar-expr(ctx): Exp([h | t]) -> <foldl(desugar-binop-or(ctx))> (t, <desugar-expr(ctx)> h)
+  desugar-expr(ctx): Exp(exp) -> <desugar-expr(ctx)> exp
+  desugar-binop-or(ctx): (r, l) -> BinOp(BitOr(), l, <desugar-expr(ctx)> r)
   
-  desugar-expr: XorExp([item]) -> <desugar-expr> item
-  desugar-expr: XorExp([h | t]) -> <foldl(desugar-binop-xor)> (t, <desugar-expr> h)
-  desugar-binop-xor: (r, l) -> BinOp(BitXor(), l, <desugar-expr> r)
+  desugar-expr(ctx): XorExp([item]) -> <desugar-expr(ctx)> item
+  desugar-expr(ctx): XorExp([h | t]) -> <foldl(desugar-binop-xor(ctx))> (t, <desugar-expr(ctx)> h)
+  desugar-binop-xor(ctx): (r, l) -> BinOp(BitXor(), l, <desugar-expr(ctx)> r)
   
-  desugar-expr: AndExp([item]) -> <desugar-expr> item
-  desugar-expr: AndExp([h | t]) -> <foldl(desugar-binop-and)> (t, <desugar-expr> h)
-  desugar-binop-and: (r, l) -> BinOp(BitAnd(), l, <desugar-expr> r)
+  desugar-expr(ctx): AndExp([item]) -> <desugar-expr(ctx)> item
+  desugar-expr(ctx): AndExp([h | t]) -> <foldl(desugar-binop-and(ctx))> (t, <desugar-expr(ctx)> h)
+  desugar-binop-and(ctx): (r, l) -> BinOp(BitAnd(), l, <desugar-expr(ctx)> r)
   
-  desugar-expr: ShiftExp(h, []) -> <desugar-expr> h
-  desugar-expr: ShiftExp(l, r) ->  ShiftExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Shift"
+  desugar-expr(ctx): ShiftExp(h, []) -> <desugar-expr(ctx)> h
+  desugar-expr(ctx): ShiftExp(l, r) ->  ShiftExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Shift"
   
-  desugar-expr: ArithExp(h, []) -> <desugar-expr> h
-  desugar-expr: ArithExp(h, t) -> <foldl(desugar-arith)> (t, <desugar-expr> h)
+  desugar-expr(ctx): ArithExp(h, []) -> <desugar-expr(ctx)> h
+  desugar-expr(ctx): ArithExp(h, t) -> <foldl(desugar-arith(ctx))> (t, <desugar-expr(ctx)> h)
   
-  desugar-arith: (Add(r), l) -> BinOp(Add(), l, <desugar-expr> r)
-  desugar-arith: (Sub(r), l) -> BinOp(Sub(), l, <desugar-expr> r)
-  desugar-arith: (Div(r), l) -> BinOp(Div(), l, <desugar-expr> r)
-  desugar-arith: (Mul(r), l) -> BinOp(Mult(), l, <desugar-expr> r)
-  desugar-arith: (IntDiv(r), l) -> BinOp(FloorDiv(), l, <desugar-expr> r)
-  desugar-arith: (PowerNode(r), l) -> BinOp(Pow(), l, <desugar-expr> r)
-  desugar-arith: (op, l) -> <debug> ("[Desugar] Unsupported operation: ", op)
+  desugar-arith(ctx): (Add(r), l) -> BinOp(Add(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (Sub(r), l) -> BinOp(Sub(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (Div(r), l) -> BinOp(Div(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (Mul(r), l) -> BinOp(Mult(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (IntDiv(r), l) -> BinOp(FloorDiv(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (PowerNode(r), l) -> BinOp(Pow(), l, <desugar-expr(ctx)> r)
+  desugar-arith(ctx): (op, l) -> <debug> ("[Desugar] Unsupported operation: ", op)
 
   
-  desugar-expr: Term(h, []) -> <desugar-expr> h
-  desugar-expr: Term(l, r) -> <foldl(desugar-arith)> (r, <desugar-expr> l)
+  desugar-expr(ctx): Term(h, []) -> <desugar-expr(ctx)> h
+  desugar-expr(ctx): Term(l, r) -> <foldl(desugar-arith)> (r, <desugar-expr(ctx)> l)
 
-  desugar-expr: Power(exp) -> <desugar-expr> exp
+  desugar-expr(ctx): Power(exp) -> <desugar-expr(ctx)> exp
   
-  desugar-expr: Power(atom, None()) -> <desugar-expr> atom
-  desugar-expr: Power(atom, exponent) -> BinOp(Pow(), <desugar-expr> atom, <desugar-expr> exponent)
+  desugar-expr(ctx): Power(atom, None()) -> <desugar-expr(ctx)> atom
+  desugar-expr(ctx): Power(atom, exponent) -> BinOp(Pow(), <desugar-expr(ctx)> atom, <desugar-expr(ctx)> exponent)
   
-  desugar-expr: AtomExp(Await(_), a, b) -> Await(<desugar-expr> AtomExp(None(), a, b))
-  desugar-expr: AtomExp(None(), atom, []) -> atom
-  desugar-expr: AtomExp(None(), atom, [h | t]) -> <desugar-atom> ([atom], h, t)
+  desugar-expr(ctx): AtomExp(Await(_), a, b) -> Await(<desugar-expr(ctx)> AtomExp(None(), a, b))
+  desugar-expr(ctx): AtomExp(None(), YieldOrTestList(list), a) -> Tuple(<desugar-expr(ctx)> list, Load())
+  desugar-expr(ctx): AtomExp(None(), atom, []) -> atom
+  desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
-  desugar-atom: (obj, DotName(name), [h | t]) -> <desugar-atom> (<concat>[obj, [ID(name)]], h, t)
-  desugar-atom: (obj, ArgList(list), []) -> Call(<desugar-call> obj, args, kargs)
+  desugar-atom(ctx): (obj, DotName(name), [h | t]) -> <desugar-atom(ctx)> (<concat>[obj, [ID(name)]], h, t)
+  desugar-atom(ctx): (obj, DotName(name), []) -> <desugar-call(ctx)> <concat> [obj, [ID(name)]]
+  
+  desugar-atom(ctx): (obj, ArgList(list), []) -> Call(<desugar-call(ctx)> obj, args, kargs)
     where
-      (args, kargs) := <desugar-args> list
+      (args, kargs) := <desugar-args(ctx)> list
 
-  desugar-atom: (obj, ArgList(list), [h|t]) -> <desugar-atom> ([Call(<desugar-call> obj, args, kargs)], h, t)
+  desugar-atom(ctx): (obj, ArgList(list), [h|t]) -> <desugar-atom(ctx)> ([Call(<desugar-call(ctx)> obj, args, kargs)], h, t)
     where
-      (args, kargs) := <desugar-args> list
+      (args, kargs) := <desugar-args(ctx)> list
 
 //  desugar-atom: (obj, SubscriptList(list), [h | t]) -> a
 
 
   
-  desugar-call: [ID(name)] -> Name(ID(name), Load())
-  desugar-call: [e] -> e
-  desugar-call: [h | t] -> Attribute(<desugar-call> t, h, Load())
+  desugar-call(ctx): [ID(name)] -> Name(ID(name), <ctx>)
+  desugar-call(ctx): [e] -> e
+  desugar-call(ctx): [h | t] -> Attribute(<desugar-call(ctx)> t, h, Load())
   
-  desugar-args: Some(list) -> <desugar-args> list
-  desugar-args: None() -> ([], [])
+  desugar-args(ctx): Some(list) -> <desugar-args(ctx)> list
+  desugar-args(ctx): None() -> ([], [])
   
-  desugar-args: ArgList(list, _) -> <desugar-args> (list, [], [])
-  desugar-args: ([], arg, karg) -> (arg, karg)
-  desugar-args: ([h | t], arg, karg) -> <desugar-args> (t, <concat> [arg, n_arg], <concat> [karg, n_karg])
+  desugar-args(ctx): ArgList(list, _) -> <desugar-args(ctx)> (list, [], [])
+  desugar-args(ctx): ([], arg, karg) -> (arg, karg)
+  desugar-args(ctx): ([h | t], arg, karg) -> <desugar-args(ctx)> (t, <concat> [arg, n_arg], <concat> [karg, n_karg])
     where
-      (n_arg, n_karg) := <desugar-args> h
+      (n_arg, n_karg) := <desugar-args(ctx)> h
   
-  desugar-args: CompForArgument(t, None()) -> ([<desugar-expr> t], [])
+  desugar-args(ctx): CompForArgument(t, None()) -> ([<desugar-expr(ctx)> t], [])
   
-  desugar-expr: Test(or, None()) -> <desugar-expr> or
-  desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr(ctx): TestList(elem) -> <desugar-expr(ctx)> elem
+  desugar-expr(ctx): TestList(list, _) -> <map(desugar-expr(ctx))> list
+  desugar-expr(ctx): Test(or, None()) -> <desugar-expr(ctx)> or
+  desugar-expr(ctx): Test(l, r) -> Compare(Eq(), <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
   
-  desugar-expr: OrTest([and]) -> <desugar-expr> and
-  desugar-expr: OrTest(list) -> BoolOp(Or(), <map(desugar-expr)> list)
+  desugar-expr(ctx): TestList([elem], _) -> <desugar-expr(ctx)> elem
+  desugar-expr(ctx): TestList(list, _) -> Tuple(<map(desugar-expr(ctx))> list, Load())
   
-  desugar-expr: AndTest([comp]) -> <desugar-expr> comp
-  desugar-expr: AndTest(list) -> BoolOp(And(), <map(desugar-expr)> list)
+  desugar-expr(ctx): OrTest([and]) -> <desugar-expr(ctx)> and
+  desugar-expr(ctx): OrTest(list) -> BoolOp(Or(), <map(desugar-expr(ctx))> list)
   
-  desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
-  desugar-expr: Comparison(lhs, cmps) -> Compare(<desugar-expr>lhs, ops, exprs)
+  desugar-expr(ctx): AndTest([comp]) -> <desugar-expr(ctx)> comp
+  desugar-expr(ctx): AndTest(list) -> BoolOp(And(), <map(desugar-expr(ctx))> list)
+  
+  desugar-expr(ctx): Comparison(exp, []) -> <desugar-expr(ctx)> exp
+  desugar-expr(ctx): Comparison(lhs, cmps) -> Compare(<desugar-expr(ctx)>lhs, ops, exprs)
     where
-      (ops, exprs) := <unzip><map(desugar-comp)> cmps
-      
-  desugar-comp: Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr> exp)
-  desugar-comp: Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr> exp)
-  desugar-comp: Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr> exp)
-  desugar-comp: Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr> exp)
-  desugar-comp: Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr> exp)
-  desugar-comp: Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr> exp)
-  desugar-comp: Comparison(In(),    exp) -> (In(),    <desugar-expr> exp)
-  desugar-comp: Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr> exp)
-  desugar-comp: Comparison(Is(),    exp) -> (Is(),    <desugar-expr> exp)
-  desugar-comp: Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr> exp)
+      (ops, exprs) := <unzip><map(desugar-comp(ctx))> cmps
+
+  desugar-comp(ctx): Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(In(),    exp) -> (In(),    <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Is(),    exp) -> (Is(),    <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr(ctx)> exp)
   
-  desugar-expr: e -> <debug> ("Cannot desugar expression: ", e)
+  desugar-expr(ctx): e -> <debug> ("Cannot desugar expression: ", e)
+

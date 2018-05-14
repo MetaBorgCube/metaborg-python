@@ -8,6 +8,7 @@ imports
   
   trans/desugar/Statement
   trans/desugar/Expression
+  trans/desugar/Assign
 
 strategies
   desugar-all = desugar
