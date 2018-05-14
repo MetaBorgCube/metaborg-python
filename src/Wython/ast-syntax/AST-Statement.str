@@ -12,7 +12,7 @@ signature
     Withitem
  
   constructors
-     //           name   args        body     decorators   return
+     //           name   args        body     decorators   returnType
     FunctionDef: ID  *  Arguments * [Stmt] * [Expr]      * [Expr] -> Stmt
     
     //                name   args        body     decorators   return

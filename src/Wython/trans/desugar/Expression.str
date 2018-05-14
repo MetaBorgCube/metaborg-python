@@ -64,8 +64,6 @@ rules
 
 //  desugar-atom: (obj, SubscriptList(list), [h | t]) -> a
 
-
-  
   desugar-call(ctx): [ID(name)] -> Name(ID(name), <ctx>)
   desugar-call(ctx): [e] -> e
   desugar-call(ctx): [h | t] -> Attribute(<desugar-call(ctx)> t, h, Load())
@@ -80,7 +78,8 @@ rules
       (n_arg, n_karg) := <desugar-args(ctx)> h
   
   desugar-args(ctx): CompForArgument(t, None()) -> ([<desugar-expr(ctx)> t], [])
-  
+  desugar-args(ctx): Assignment(name, value) -> ([], [Keyword(<desugar-expr(ctx)> name, <desugar-expr(ctx)> value)])
+
   desugar-expr(ctx): TestList(elem) -> <desugar-expr(ctx)> elem
   desugar-expr(ctx): TestList(list, _) -> <map(desugar-expr(ctx))> list
   desugar-expr(ctx): Test(or, None()) -> <desugar-expr(ctx)> or

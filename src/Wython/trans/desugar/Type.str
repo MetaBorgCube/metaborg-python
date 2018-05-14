@@ -1,0 +1,19 @@
+module desugar/Type
+
+imports
+  src-gen/signatures/-
+  ast-syntax/-
+  
+  trans/desugar/Expression
+  
+rules
+  desugar-type: None() -> None()
+  desugar-type: NoneVal() -> NoneT()
+  desugar-type: Some(TypedArgDefExtension(exp)) -> <desugar-type><desugar-expr(!Load())>exp
+  desugar-type: Some(FuncType(exp)) -> <desugar-type><desugar-expr(!Load())>exp
+  
+  desugar-type: ID("str") -> StringT()
+  desugar-type: ID("int") -> IntT()
+  desugar-type: Tuple(types, _) -> TupleT(<map(desugar-type)>types)
+
+  desugar-type: e -> [<debug> ("Cannot desugar type: ", e)]
