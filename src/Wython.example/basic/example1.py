@@ -1,4 +1,4 @@
 if False:
- 	print("false")
+ 	print("falsehoods")
 else:
 	print("true")

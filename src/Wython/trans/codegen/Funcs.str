@@ -36,10 +36,10 @@ rules
         ]
 
 	evaluate:
-		False() -> I32Const(0)
+		False() -> WastExpr(WastInstr(I32Const("0")))
 
 	evaluate:
-		True() -> I32Const(1)
+		True() -> WastExpr(WastInstr(I32Const("1")))
    	   
    callExpr: 
 	   Name(identifier, Load()) -> 
@@ -53,7 +53,7 @@ rules
    param: 
       String(s) -> [
 	    WastExpr(WastInstr(I32Const("0"))),
-		WastExpr(WastInstr(I32Const(len)))
+      WastExpr(WastInstr(I32Const(len)))
       ]
       where
       len := <int-to-string> <string-length> s

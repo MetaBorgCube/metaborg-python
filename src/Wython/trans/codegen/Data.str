@@ -8,47 +8,161 @@ imports
 rules
 
   data:
-    callList -> dataList
+    stmts -> dataList
     where 
-    dataList := <concat> <map(importCall)> callList
+    lengths := <map(calculate-length)> stmts;
+    <debug> lengths;
+    offsets := <calculate-offset> lengths;
+    <debug> offsets;
+    dataList := <concat> <map(dataStmt)> <zip> (stmts, lengths)
     
-  importCall:
-  	If(condition, body, else) -> dataList
+  calculate-length:
+  	If(condition, body, else) -> lengths
   	where
-  	dataList := <concat> [
-  		<concat> <map(importCall)> body,
-  		<concat> <map(importCall)> else
-  	]
-      
-  importCall:
-    ExprStmt(Call(name, args, kwargs)) -> dataList
-    where
-      <debug> args;
-      dataList := <concat> <map(dataStmt)> args
+  	bodyLengths :=  <map(calculate-length)> body;
+  	elseLengths :=  <map(calculate-length)> else;
+  	lengths :=  [ bodyLengths, elseLengths ]
 
+  calculate-length:
+    ExprStmt(Call(_, args, _)) -> length
+  	where
+  	length := <map(calculate-length)> args
+  	
+  calculate-offset:
+    [a] -> <calculate-offset> a
+  	
+  calculate-offset:
+    [a, b] -> [c,d] 
+      where 
+    <debug> "calculate offset";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    (c,d) := <pack-b><pack-a><unpack> (a, b, 0, 0);
+    <debug> ("c:", c);
+    <debug> ("d:", d)
+
+  unpack: 
+    ([a], [b], x, y) -> <unpack>(a,b,  <inc>x, <inc>y)
+  where
+    <debug> "unpack 1";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("x:", x);
+    <debug> ("y:", y)
+
+  unpack: ([a], b, x, y) -> <unpack>(a,b,  <inc>x, y)
+  where
+    <debug> "unpack 2";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("x:", x);
+    <debug> ("y:", y)
+
+  unpack: (a, [b], x, y) -> <unpack>(a,b,  x, <inc>y)
+  where
+    <debug> "unpack 3";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("x:", x);
+    <debug> ("y:", y)
+
+  unpack: (a, b, x, y) -> (a, <addi> (a,b), x, y)
+  where
+    <debug> "unpack 4";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("x:", x);
+    <debug> ("y:", y)
+
+  pack-a: (a, b, 0, y) -> (a, b, y)
+  where
+    <debug> "pack a 1";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("y:", y)
+
+  pack-a: (a, b, x, y) -><pack-a> ([a], b, <dec> x, y)
+  where
+    <debug> "pack a 2";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("x:", x);
+    <debug> ("y:", y)
+
+  pack-b: (a, b, 0) -> (a, b)
+  where
+    <debug> "pack b 1";
+    <debug> ("a:", a);
+    <debug> ("b:", b)
+  
+  pack-b: (a, b, y) -><pack-b> (a, [b], <dec> y)
+  where
+    <debug> "pack b 2";
+    <debug> ("a:", a);
+    <debug> ("b:", b);
+    <debug> ("y:", y)
+
+  //fold: 
+    //(elem, sum) -> result
+    //where
+    //<debug> "fold";
+    //<debug> elem;
+    //<debug> sum;
+    //result := <unpack>(elem, sum)
+    
+  //unpack: 
+    //([elem], sum) -> ([res], sum) 
+    //where 
+    //<debug> "unpack";
+    //<debug> elem;
+    //<debug> sum;
+    //(res, sum) := <unpack>(elem, sum)
+
+  //unpack: 
+    //(val, sum) -> (<addi> (val, sum), sum)
+    //where
+    //<debug> "unpack";
+    //<debug> val;
+    //<debug> sum
+  	
+  calculate-length:
+  	String(s) -> length
+  	where
+  	length := [ <int-to-string> <string-length> s ]
+    
   dataStmt:
-    (param) -> [
+  	(If(condition, body, else), [ bodyLengths, elseLengths] ) -> dataList
+  	where
+      dataList := <concat> [
+  		<concat> <map(dataStmt)> <zip> (body, bodyLengths),
+  		<concat> <map(dataStmt)> <zip> (else, elseLengths)
+  	]
+
+  dataStmt: 
+    (ExprStmt(Call(name, args, kwargs)), lengths)
+       -> dataList 
+    where
+      dataList := <concat> <map(dataParam)> <zip> (args, lengths)
+
+  dataParam:
+    (param, [length]) -> [
        WastData(
-          WastExpr(WastInstr(I32Const("0"))), 
+          WastExpr(WastInstr(I32Const(length))), 
           Some(val)
         )]
-      where
-        <debug> param;
-        val := <to-string> param;
-        <debug> val
+    where
+      <debug> length;
+      val := <to-string> param
        
   to-string:
     Int(val) -> string
       where
       //string := val
-      <debug> val;
       string := <int-to-string> val
-      //<debug> string
 
   to-string:
     Num(val) -> string
       where
-      <debug> val;
       string := <real-to-string> val
     
   to-string:
