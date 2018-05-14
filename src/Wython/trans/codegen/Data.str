@@ -27,104 +27,24 @@ rules
     ExprStmt(Call(_, args, _)) -> length
   	where
   	length := <map(calculate-length)> args
-  	
+  		
   calculate-offset:
-    [a] -> <calculate-offset> a
-  	
-  calculate-offset:
-    [a, b] -> [c,d] 
-      where 
-    <debug> "calculate offset";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    (c,d) := <pack-b><pack-a><unpack> (a, b, 0, 0);
-    <debug> ("c:", c);
-    <debug> ("d:", d)
-
-  unpack: 
-    ([a], [b], x, y) -> <unpack>(a,b,  <inc>x, <inc>y)
-  where
-    <debug> "unpack 1";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("x:", x);
-    <debug> ("y:", y)
-
-  unpack: ([a], b, x, y) -> <unpack>(a,b,  <inc>x, y)
-  where
-    <debug> "unpack 2";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("x:", x);
-    <debug> ("y:", y)
-
-  unpack: (a, [b], x, y) -> <unpack>(a,b,  x, <inc>y)
-  where
-    <debug> "unpack 3";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("x:", x);
-    <debug> ("y:", y)
-
-  unpack: (a, b, x, y) -> (a, <addi> (a,b), x, y)
-  where
-    <debug> "unpack 4";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("x:", x);
-    <debug> ("y:", y)
-
-  pack-a: (a, b, 0, y) -> (a, b, y)
-  where
-    <debug> "pack a 1";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("y:", y)
-
-  pack-a: (a, b, x, y) -><pack-a> ([a], b, <dec> x, y)
-  where
-    <debug> "pack a 2";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("x:", x);
-    <debug> ("y:", y)
-
-  pack-b: (a, b, 0) -> (a, b)
-  where
-    <debug> "pack b 1";
-    <debug> ("a:", a);
-    <debug> ("b:", b)
+    [list] -> [<calculate-offset> (list, 0)]
   
-  pack-b: (a, b, y) -><pack-b> (a, [b], <dec> y)
-  where
-    <debug> "pack b 2";
-    <debug> ("a:", a);
-    <debug> ("b:", b);
-    <debug> ("y:", y)
-
-  //fold: 
-    //(elem, sum) -> result
-    //where
-    //<debug> "fold";
-    //<debug> elem;
-    //<debug> sum;
-    //result := <unpack>(elem, sum)
+  calculate-offset:
+    ([], _) -> []
     
-  //unpack: 
-    //([elem], sum) -> ([res], sum) 
-    //where 
-    //<debug> "unpack";
-    //<debug> elem;
-    //<debug> sum;
-    //(res, sum) := <unpack>(elem, sum)
+  calculate-offset:
+    ([h|t], s) -> [hh | <calculate-offset> (t, sum)] 
+    where 
+	  (hh, sum) := <offset-unpack> (h, s)
 
-  //unpack: 
-    //(val, sum) -> (<addi> (val, sum), sum)
-    //where
-    //<debug> "unpack";
-    //<debug> val;
-    //<debug> sum
-  	
+  offset-unpack:
+    ([val], sum) -> ([v], s) where (v, s) := <offset-unpack>(val, sum)
+  offset-unpack:
+    (val, sum) -> (<int-to-string> sum, <addi> (sum, <string-to-int> val))
+  
+    	
   calculate-length:
   	String(s) -> length
   	where
