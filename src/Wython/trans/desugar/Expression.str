@@ -11,22 +11,34 @@ imports
 
 rules  
   desugar-expr: Exp([item]) -> <desugar-expr> item
-  desugar-expr: Exp([l, r]) -> BinOp(BitOr(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: Exp([h | t]) -> <foldl(desugar-binop-or)> (t, <desugar-expr> h)
+  desugar-binop-or: (r, l) -> BinOp(BitOr(), l, <desugar-expr> r)
   
   desugar-expr: XorExp([item]) -> <desugar-expr> item
-  desugar-expr: XorExp([l, r]) -> BinOp(BitXor(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: XorExp([h | t]) -> <foldl(desugar-binop-xor)> (t, <desugar-expr> h)
+  desugar-binop-xor: (r, l) -> BinOp(BitXor(), l, <desugar-expr> r)
   
   desugar-expr: AndExp([item]) -> <desugar-expr> item
-  desugar-expr: AndExp([l, r]) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: AndExp([h | t]) -> <foldl(desugar-binop-and)> (t, <desugar-expr> h)
+  desugar-binop-and: (r, l) -> BinOp(BitAnd(), l, <desugar-expr> r)
   
   desugar-expr: ShiftExp(h, []) -> <desugar-expr> h
-//  desugar-expr: ShiftExp(h, tail) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: ShiftExp(l, r) ->  ShiftExp(l, r) where e := <debug> "[Desugar] Unsupported operation: Shift"
   
   desugar-expr: ArithExp(h, []) -> <desugar-expr> h
-//  desugar-expr: ArithExp(h, tail) -> BinOp(BitAnd(), <desugar-expr> l, <desugar-expr> r)
+  desugar-expr: ArithExp(h, t) -> <foldl(desugar-arith)> (t, <desugar-expr> h)
+  
+  desugar-arith: (Add(r), l) -> BinOp(Add(), l, <desugar-expr> r)
+  desugar-arith: (Sub(r), l) -> BinOp(Sub(), l, <desugar-expr> r)
+  desugar-arith: (Div(r), l) -> BinOp(Div(), l, <desugar-expr> r)
+  desugar-arith: (Mul(r), l) -> BinOp(Mult(), l, <desugar-expr> r)
+  desugar-arith: (IntDiv(r), l) -> BinOp(FloorDiv(), l, <desugar-expr> r)
+  desugar-arith: (PowerNode(r), l) -> BinOp(Pow(), l, <desugar-expr> r)
+  desugar-arith: (op, l) -> <debug> ("[Desugar] Unsupported operation: ", op)
+
   
   desugar-expr: Term(h, []) -> <desugar-expr> h
-//  desugar-expr: Term(h, t) -> 
+  desugar-expr: Term(l, r) -> <foldl(desugar-arith)> (r, <desugar-expr> l)
 
   desugar-expr: Power(exp) -> <desugar-expr> exp
   
@@ -41,6 +53,7 @@ rules
   desugar-atom: (obj, ArgList(list), []) -> Call(<desugar-call> obj, args, kargs)
     where
       (args, kargs) := <desugar-args> list
+
   desugar-atom: (obj, ArgList(list), [h|t]) -> <desugar-atom> ([Call(<desugar-call> obj, args, kargs)], h, t)
     where
       (args, kargs) := <desugar-args> list
@@ -62,19 +75,31 @@ rules
     where
       (n_arg, n_karg) := <desugar-args> h
   
-  desugar-args: CompForArgument(t, None()) -> ([<desugar-test> t], [])
+  desugar-args: CompForArgument(t, None()) -> ([<desugar-expr> t], [])
   
-  desugar-test: Test(or, None()) -> <desugar-test> or
-  desugar-test: Test(l, r) -> Compare(Eq(), <desugar-test> l, <desugar-test> r)
+  desugar-expr: Test(or, None()) -> <desugar-expr> or
+  desugar-expr: Test(l, r) -> Compare(Eq(), <desugar-expr> l, <desugar-expr> r)
   
-  desugar-test: OrTest(and, None()) -> <desugar-test> and
-  desugar-test: OrTest(l, r) -> BoolOp(Or(), <desugar-test> l, <desugar-test> r)
+  desugar-expr: OrTest([and]) -> <desugar-expr> and
+  desugar-expr: OrTest(list) -> BoolOp(Or(), <map(desugar-expr)> list)
   
-  desugar-test: AndTest(comp, []) -> <desugar-test> comp
-//  desugar-test: AndTest(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
+  desugar-expr: AndTest([comp]) -> <desugar-expr> comp
+  desugar-expr: AndTest(list) -> BoolOp(And(), <map(desugar-expr)> list)
   
-  desugar-test: Comparison(exp, []) -> <desugar-expr> exp
-//  desugar-test: Comparison(l, r) -> BoolOp(And(), <desugar-test> l, <desugar-test> r)
-    
-    
-  desugar-expr: e -> <debug> e
+  desugar-expr: Comparison(exp, []) -> <desugar-expr> exp
+  desugar-expr: Comparison(lhs, cmps) -> Compare(<desugar-expr>lhs, ops, exprs)
+    where
+      (ops, exprs) := <unzip><map(desugar-comp)> cmps
+      
+  desugar-comp: Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr> exp)
+  desugar-comp: Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr> exp)
+  desugar-comp: Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr> exp)
+  desugar-comp: Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr> exp)
+  desugar-comp: Comparison(In(),    exp) -> (In(),    <desugar-expr> exp)
+  desugar-comp: Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr> exp)
+  desugar-comp: Comparison(Is(),    exp) -> (Is(),    <desugar-expr> exp)
+  desugar-comp: Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr> exp)
+  
+  desugar-expr: e -> <debug> ("Cannot desugar expression: ", e)

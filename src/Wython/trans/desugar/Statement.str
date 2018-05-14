@@ -1,11 +1,28 @@
 module Statement
 
 imports
-  signatures/Statement-sig
-  
-  ast-syntax/AST-Statement
- 
-  trans/desugar/Expression
+  src-gen/signatures/-
+  ast-syntax/-
 
+  trans/desugar/Expression
+  
 rules
+  desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
+  desugar-suite: BlockLine(stmts, _) -> <mapconcat(desugar-stmt)> stmts
+  
+  desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr> exp)
+  
+  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr> cond, <desugar-suite> body, des-else)]
+    where
+      des-else := <foldr(!<desugar-if> else, desugar-if)> elif
+
+  desugar-if: None() -> None()
+  desugar-if: Some(item) -> <desugar-if> item
+  desugar-if: Else(_, suite) -> <desugar-suite> suite
+  
+  desugar-if: (Elif(cond, _, body), else) -> If(<desugar-expr> cond, <desugar-suite> body, else)
+  
+  desugar-stmt: Pass() -> Pass()
+  
+  desugar-stmt: e -> [<debug> ("Cannot desugar statement: ", e)]

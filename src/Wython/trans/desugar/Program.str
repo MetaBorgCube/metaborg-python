@@ -1,8 +1,7 @@
 module Program
 
 imports
-  signatures/Program-sig
-  signatures/Statement-sig
+  src-gen/signatures/Program-sig
   
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
@@ -24,5 +23,4 @@ rules
        sed-stmts := <mapconcat(desugar)> elems
        
   desugar: NewLine(_) -> []
-  desugar: Statement(stmt, _) -> <desugar> stmt
-  desugar: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
+  desugar: Statement(stmt, _) -> <desugar-stmt> stmt
