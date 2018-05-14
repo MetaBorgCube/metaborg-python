@@ -36,6 +36,7 @@ signature
     ID: String -> ID
     
     IntT: Type
+    BoolT: Type
     StringT: Type
     NoneT: Type
     TupleT: [Type] -> Type
