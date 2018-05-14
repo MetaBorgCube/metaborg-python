@@ -1,18 +1,16 @@
 module Imports
 
 imports
-  signatures/WebAssembly/WastFunc-sig
-  signatures/WebAssembly/WastImport-sig
+  signatures/WebAssembly/-
+  ast-syntax/-
   trans/codegen/-
-  ast-syntax/AST-Wython
-  ast-syntax/AST-Statement
 
 rules
 
   imports:
     _ -> [ 
       WastFunc(
-        Some("$log"),
+        Some("$print"),
         WastImport("\"lib\"", "\"logString\""),
         Some(WastParams([I32(), I32()]))
       ),

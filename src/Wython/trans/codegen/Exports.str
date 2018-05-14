@@ -1,11 +1,9 @@
 module Exports
 
 imports
-  signatures/WebAssembly/WastExport-sig
-  signatures/WebAssembly/WastFunc-sig
+  signatures/WebAssembly/-
+  ast-syntax/-
   trans/codegen/-
-  ast-syntax/AST-Wython
-  ast-syntax/AST-Statement
 
 rules
   exports:

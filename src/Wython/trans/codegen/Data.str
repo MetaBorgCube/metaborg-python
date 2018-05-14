@@ -1,28 +1,21 @@
 module Data
 
 imports
-  signatures/WebAssembly/WastData-sig
-  signatures/WebAssembly/WastExpr-sig
-  signatures/WebAssembly/WastCommon-sig
+  signatures/WebAssembly/-
+  ast-syntax/-
   trans/codegen/-
-  ast-syntax/AST-Wython
-  ast-syntax/AST-Statement
-  ast-syntax/AST-Expression
   
 rules
 
   data:
     callList -> dataList
     where 
-    <debug> callList;
-    dataList := <concat> <map(calls)> callList;
-   <debug> dataList
+    dataList := <concat> <map(importCall)> callList
       
-  calls:
+  importCall:
     ExprStmt(Call(name, args, kwargs)) -> dataList
     where
-      dataList := <map(dataStmt)> args;
-      <debug> dataList
+      dataList := <map(dataStmt)> args
 
   dataStmt:
     (param) -> 
@@ -31,11 +24,12 @@ rules
           Some(val)
         )
       where
-        val := <evaluate> param;
-        <debug> val
+        val := <to-string> param
        
-  evaluate:
-    Int(val) -> val
+  to-string:
+    Num(val) -> string
+      where
+      string := <real-to-string> val
     
-  evaluate:
+  to-string:
     String(val) -> val

@@ -1,20 +1,45 @@
 module Funcs
 
 imports
-  signatures/WebAssembly/WastFunc-sig
-  signatures/WebAssembly/WastExpr-sig
+  signatures/WebAssembly/-
+  ast-syntax/-
   trans/codegen/-
-  ast-syntax/AST-Wython
-  ast-syntax/AST-Statement
 
 rules
 
   funcs:
-    _ -> [ WastFunc(
-          Some("$main")
-        , [ WastExpr(WastInstr(I32Const("0")))
-          , WastExpr(WastInstr(I32Const("8")))
-          , WastExpr(WastCall(WastCall("$log")))
-          ]
-        )
+    exprList -> [ WastFunc(
+          Some("$main"), 
+		  body) ]
+ 	 where 
+ 	 	body := <concat> <map(exprStmt)> exprList
+          
+          
+   exprStmt:
+   	 ExprStmt(Call(name, params, kwargs)) -> exprList
+   	    where
+   	      parameters := <concat> <map(param)> params;
+   	      <debug> parameters;
+   	      call := <callExpr> name;
+   	      <debug> call;
+		  exprList:= <concat> [
+			 parameters,
+			 call
+		  ] 
+   	   
+   callExpr: 
+	   Name(identifier, Load()) -> 
+	   	  [ WastExpr(WastCall(WastCall(name))) ]
+	   where 
+	   name := <varName> identifier
+	   
+   varName:
+   	ID(name) -> <conc-strings> ("$", name)
+
+   param: 
+      String(s) -> [
+	    WastExpr(WastInstr(I32Const("0"))),
+		WastExpr(WastInstr(I32Const(len)))
       ]
+      where
+      len := <int-to-string> <string-length> s

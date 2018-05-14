@@ -1,8 +1,8 @@
 module AST-Common
 
 imports
-  src-gen/signatures/ID-sig
-  src-gen/signatures/Type-sig
+  signatures/ID-sig
+  signatures/Type-sig
   
   ast-syntax/AST-Expression
 
@@ -33,3 +33,4 @@ signature
     
     None: Constant
     ID: String -> ID
+    Int: String -> Int

@@ -1,10 +1,9 @@
 module Program
 
 imports
+  signatures/WebAssembly/-
   trans/codegen/-
-  signatures/WebAssembly/WastModule-sig
-  ast-syntax/AST-Wython
-  ast-syntax/AST-Statement
+  ast-syntax/-
 
 strategies
   codegen-all = codegen
