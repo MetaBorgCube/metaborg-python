@@ -1,1 +1,4 @@
-print("2")
+if false:
+ 	print("false")
+else:
+	print("true")

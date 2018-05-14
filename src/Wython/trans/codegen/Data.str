@@ -15,6 +15,7 @@ rules
   importCall:
     ExprStmt(Call(name, args, kwargs)) -> dataList
     where
+      <debug> args;
       dataList := <map(dataStmt)> args
 
   dataStmt:
@@ -24,11 +25,22 @@ rules
           Some(val)
         )
       where
-        val := <to-string> param
+        <debug> param;
+        val := <to-string> param;
+        <debug> val
        
+  to-string:
+    Int(val) -> string
+      where
+      //string := val
+      <debug> val;
+      string := <int-to-string> val
+      //<debug> string
+
   to-string:
     Num(val) -> string
       where
+      <debug> val;
       string := <real-to-string> val
     
   to-string:
