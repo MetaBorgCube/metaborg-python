@@ -23,23 +23,20 @@ rules
    	      parameters := <concat> <map(param)> <zip> (params, offsets);
    	      <debug> parameters;
    	      call := <callExpr> name;
-   	      <debug> call;
 		  exprList:= <concat> [
 			 parameters,
 			 call
 		  ] 
 		  
-   exprStmt: 
-     (If(expr, body, else), [bodyOffsets, elseOffsets]) -> code
-     where
-      code := <concat> [
-        <evaluate> expr,
-        [WastIf(
-          WastThen(<concat> <map(exprStmt)> <zip> (body, bodyOffsets)),
-          Some(WastElse(<concat> <map(exprStmt)> <zip> (else, elseOffsets)))
-        )]
-      ];
-      <debug> code
+  exprStmt: 
+    (If(expr, body, else), [bodyOffsets, elseOffsets]) -> 
+       <concat> [ 
+          <evaluate> expr,
+          [WastIf(
+            WastThen(<concat> <map(exprStmt)> <zip> (body, bodyOffsets)),
+            Some(WastElse(<concat> <map(exprStmt)> <zip> (else, elseOffsets)))
+          )]
+        ]
 
 
 	evaluate:
@@ -56,6 +53,14 @@ rules
 	   
    varName:
    	ID(name) -> <conc-strings> ("$", name)
+
+   param: 
+      (Int(s), [offset]) -> [
+	    WastExpr(WastInstr(I32Const(offset))),
+      WastExpr(WastInstr(I32Const(len)))
+      ]
+      where
+      len := <int-to-string> <string-length> <int-to-string> <string-to-int> s
 
    param: 
       (String(s), [offset]) -> [

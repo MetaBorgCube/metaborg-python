@@ -53,6 +53,11 @@ rules
   offset-unpack:
     (val, sum) -> (<int-to-string> sum, <addi> (sum, <string-to-int> val))
   
+  calculate-length:
+  	Int(s) -> length
+  	where
+  	<debug> s;
+  	length := [ <int-to-string> <string-length> <int-to-string> <string-to-int> s ]
     	
   calculate-length:
   	String(s) -> length
@@ -80,19 +85,13 @@ rules
           Some(val)
         )]
     where
-      <debug> offset;
       val := <to-string> param
        
   to-string:
-    Int(val) -> string
-      where
-      //string := val
-      string := <int-to-string> val
+    Int(val) -> <concat-strings> ["\"", val, "\""]
 
   to-string:
-    Num(val) -> string
-      where
-      string := <real-to-string> val
+    Num(val) -> <concat-strings> ["\"", val, "\""]
     
   to-string:
     String(val) -> val
