@@ -11,10 +11,12 @@ rules
     stmts -> dataList
     where 
     lengths := <map(calculate-length)> stmts;
-    <debug> lengths;
+    <debug> ("data, lengths:", lengths);
     offsets := <calculate-offset> lengths;
-    <debug> offsets;
-    dataList := <concat> <map(dataStmt)> <zip> (stmts, lengths)
+    <debug> ("data, offsets:", offsets);
+    dataList := <concat> <map(dataStmt)> <zip> (stmts, offsets)
+
+    
     
   calculate-length:
   	If(condition, body, else) -> lengths
@@ -29,14 +31,21 @@ rules
   	length := <map(calculate-length)> args
   		
   calculate-offset:
-    [list] -> [<calculate-offset> (list, 0)]
-  
+    [list] -> result
+    where 
+    <debug> ("Calculate offset, list:", list);
+    result := [<calculate-offset> (list, 0)]
+
   calculate-offset:
     ([], _) -> []
+    where 
+    <debug> ("Calculate offset")
     
   calculate-offset:
     ([h|t], s) -> [hh | <calculate-offset> (t, sum)] 
     where 
+    <debug> ("Calculate offset, h:", h);
+    <debug> ("Calculate offset, t:", h);
 	  (hh, sum) := <offset-unpack> (h, s)
 
   offset-unpack:
@@ -59,19 +68,19 @@ rules
   	]
 
   dataStmt: 
-    (ExprStmt(Call(name, args, kwargs)), lengths)
+    (ExprStmt(Call(name, args, kwargs)), offsets)
        -> dataList 
     where
-      dataList := <concat> <map(dataParam)> <zip> (args, lengths)
+      dataList := <concat> <map(dataParam)> <zip> (args, offsets)
 
   dataParam:
-    (param, [length]) -> [
+    (param, [offset]) -> [
        WastData(
-          WastExpr(WastInstr(I32Const(length))), 
+          WastExpr(WastInstr(I32Const(offset))), 
           Some(val)
         )]
     where
-      <debug> length;
+      <debug> offset;
       val := <to-string> param
        
   to-string:

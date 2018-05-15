@@ -12,13 +12,15 @@ rules
           Some("$main"), 
 		  body) ]
  	 where 
- 	 	<debug> exprList;
- 	 	body := <concat> <map(exprStmt)> exprList
+    lengths := <map(calculate-length)> exprList;
+    offsets := <calculate-offset> lengths;
+    body := <concat> <map(exprStmt)> <zip> (exprList, offsets);
+    <debug> ("Funcs, body:", body)
           
    exprStmt:
-   	 ExprStmt(Call(name, params, kwargs)) -> exprList
+   	 (ExprStmt(Call(name, params, kwargs)), offsets) -> exprList
    	    where
-   	      parameters := <concat> <map(param)> params;
+   	      parameters := <concat> <map(param)> <zip> (params, offsets);
    	      <debug> parameters;
    	      call := <callExpr> name;
    	      <debug> call;
@@ -28,18 +30,23 @@ rules
 		  ] 
 		  
    exprStmt: 
-     If(expr, body, else) -> code
+     (If(expr, body, else), [bodyOffsets, elseOffsets]) -> code
      where
-     	<debug> expr;
-        code := [
-        	<evaluate> expr
-        ]
+      code := <concat> [
+        <evaluate> expr,
+        [WastIf(
+          WastThen(<concat> <map(exprStmt)> <zip> (body, bodyOffsets)),
+          Some(WastElse(<concat> <map(exprStmt)> <zip> (else, elseOffsets)))
+        )]
+      ];
+      <debug> code
+
 
 	evaluate:
-		False() -> WastExpr(WastInstr(I32Const("0")))
+		False() -> [ WastExpr(WastInstr(I32Const("0"))) ]
 
 	evaluate:
-		True() -> WastExpr(WastInstr(I32Const("1")))
+		True() -> [ WastExpr(WastInstr(I32Const("1"))) ]
    	   
    callExpr: 
 	   Name(identifier, Load()) -> 
@@ -51,8 +58,8 @@ rules
    	ID(name) -> <conc-strings> ("$", name)
 
    param: 
-      String(s) -> [
-	    WastExpr(WastInstr(I32Const("0"))),
+      (String(s), [offset]) -> [
+	    WastExpr(WastInstr(I32Const(offset))),
       WastExpr(WastInstr(I32Const(len)))
       ]
       where
