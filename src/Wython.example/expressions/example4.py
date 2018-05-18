@@ -1,1 +1,1 @@
-a = lambda x, y: print(x)
+a = lambda x,y=1+1, z=13: print(x)

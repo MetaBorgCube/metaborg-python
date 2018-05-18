@@ -4,10 +4,13 @@ imports
   signatures/Expression-sig
   signatures/CompoundStatement-sig
   signatures/Test-sig
+  signatures/Parameters-sig
   signatures/Common-sig
   
   ast-syntax/AST-Expression
   ast-syntax/AST-Common
+  
+  trans/desugar/Type
 
 rules  
   desugar-expr(ctx): Exp([item]) -> <desugar-expr(ctx)> item
@@ -128,5 +131,19 @@ rules
   desugar-comp(ctx): Comparison(Is(),    exp) -> (Is(),    <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr(ctx)> exp)
   
+  desugar-expr(ctx): LambdaDef(args, body) -> Lambda(Arguments(des-args, None(), keys, defaults, kwarg, [] ), <desugar-expr(ctx)> body)
+    where
+      (des-args, keywords, kwarg) := <desugar-lambda-args(ctx)> args;
+      (keys, defaults) := <unzip> keywords
+
+  desugar-lambda-args(ctx): Some(Args(args, kwarg)) -> (des-args, keywords, <desugar-lambda-kwarg(ctx)> kwarg)
+  	where
+  	  (des-args, keywords) := <foldr(!([],[]), desugar-lambda-args(ctx))> args
+
+  desugar-lambda-kwarg(ctx): None() -> []
+  desugar-lambda-args(ctx): (ArgDef(name, None()), (arg, kw)) -> ([Arg(name, None()) | arg], kw)
+  desugar-lambda-args(ctx): (ArgDef(name, default), (arg, kw)) -> (arg, [(name, <desugar-lambda-args(ctx)> default) | kw])
+  desugar-lambda-args(ctx): Some(InitialValue(val)) -> <desugar-expr(ctx)> val
+
   desugar-expr(ctx): e -> <debug> ("Cannot desugar expression: ", e)
 
