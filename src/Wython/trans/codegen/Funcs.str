@@ -55,17 +55,9 @@ rules
    	ID(name) -> <conc-strings> ("$", name)
 
    param: 
-      (Int(s), [offset]) -> [
+      (p, [offset]) -> [
 	    WastExpr(WastInstr(I32Const(offset))),
       WastExpr(WastInstr(I32Const(len)))
       ]
       where
-      len := <int-to-string> <string-length> <int-to-string> <string-to-int> s
-
-   param: 
-      (String(s), [offset]) -> [
-	    WastExpr(WastInstr(I32Const(offset))),
-      WastExpr(WastInstr(I32Const(len)))
-      ]
-      where
-      len := <int-to-string> <string-length> s
+      [len] := <calculate-length> p
