@@ -53,7 +53,7 @@ context-free syntax
 
   Atom.False = "False"
   Atom.True = "True"
-  Atom.None = "None"
+  Atom.NoneVal = "None"
   Atom.ThreeDot = "..."
   Atom.String = STRING
   Atom.Int = INT

@@ -6,6 +6,8 @@ imports
   ast-syntax/AST-Statement
   ast-syntax/AST-Expression
   ast-syntax/AST-Common
+  
+  trans/analysis-desugar/Type
 
 strategies
 //  analysis-desugar-all = a-desugar
@@ -16,6 +18,9 @@ strategies
 //  analysis-desugar-all = alltd(debug; a-desugar)
  
 rules  
+  a-desugar: Arg(name, type) -> Arg(name, <a-desugar-type> type)
+  a-desugar: FunctionDef(name, args, body, decorators, type) -> FunctionDef(name, args, body, decorators, <a-desugar-type> type)
+  
   a-desugar: Call(callable, args, kargs) -> Call(callable, <map(a-desugar-enumerate)> <number(id)> args, kargs)
   a-desugar-enumerate: (exp, num) -> (ID(num), exp)
    
