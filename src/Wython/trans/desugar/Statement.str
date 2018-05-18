@@ -14,17 +14,20 @@ rules
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr(!Load())> exp)
   
-  desugar-stmt: For(For(trgt, iter, _, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: While(cond, _, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: If(cond, _, body, elif, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, des-else)]
-    where
-      des-else := <foldr(!<desugar-if> else, desugar-if)> elif
+  desugar-stmt: For(For(trgt, iter, _, body)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, [])]
+  desugar-stmt: For(ForElse(trgt, iter, _, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: While(cond, _, body) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
+  desugar-stmt: WhileElse(cond, _, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: If(cond, _, body) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
+  desugar-stmt: IfElse(cond, _, body, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
 
   desugar-if: None() -> None()
   desugar-if: Some(item) -> <desugar-if> item
-  desugar-if: Else(_, _, suite) -> <desugar-suite> suite
-  
-  desugar-if: (Elif(_, cond, _, body), else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, else)
+
+  desugar-if: Else(_, suite) -> <desugar-suite> suite
+  desugar-if: ElifElse(cond, _, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
+  desugar-if: Elif(cond, _, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
+
   desugar-for: [elem] -> <desugar-expr(!Load())> elem
   desugar-for: List(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Store())
 

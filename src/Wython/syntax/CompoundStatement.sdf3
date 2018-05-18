@@ -17,8 +17,12 @@ context-free start-symbols
 
 context-free syntax
 
-    CompoundStatement.If = "if" Test IndentOpen body:Suite Elif* Else?   { layout (indent "if"    body) }
-    CompoundStatement.While = "while" Test IndentOpen body:Suite Else?   { layout (indent "while" body) }
+    CompoundStatement.If = "if" Test ":" NewLine body:Suite                     { layout (indent "if" body) }
+    CompoundStatement.IfElse = "if" Test ":" NewLine body:Suite else:ElifElse   { layout (indent "if" body && align "if" else) }
+    
+    CompoundStatement.While = "while" Test ":" NewLine body:Suite                 { layout (indent "while" body) }
+    CompoundStatement.WhileElse = "while" Test ":" NewLine body:Suite else:Else   { layout (indent "while" body && align "while" else) }
+
     CompoundStatement.For = For
     CompoundStatement.Try = "try" IndentOpen body:Suite Except+ Else? Finally?
     CompoundStatement.TryFinally = "try" IndentOpen body:Suite Finally
@@ -30,9 +34,13 @@ context-free syntax
     CompoundStatement.AsyncWith = Async With
     CompoundStatement.AsyncFor = Async For
     
-    With.With = "with" { WithItem ","}+ IndentOpen body:Suite
+    ElifElse = Else
+    ElifElse = Elif
+    
+    With.With = "with" { WithItem ","}+ ":" Suite
 
-    For.For = "for" ExpList "in" TestList IndentOpen body:Suite Else?   { layout (indent "for" body) }
+    For.For = "for" ExpList "in" TestList ":" NewLine body:Suite                 { layout (indent "for" body) }
+    For.ForElse = "for" ExpList "in" TestList ":" NewLine body:Suite else:Else   { layout (indent "for" body && align "for" else) }
     
     Finally.Finally = "finally" IndentOpen Suite
 
@@ -79,7 +87,8 @@ context-free syntax
     WithItem.Item = Test WithItemAs?
     WithItemAs.As = "as" Exp
 
-    Elif.Elif = NewLine "elif" Test IndentOpen body:Suite { layout (indent "elif" body) }
+    Elif.Elif = "elif" Test ":" NewLine body:Suite                   { layout (indent "elif" body) }
+    Elif.ElifElse = "elif" Test ":" NewLine body:Suite else:ElifElse { layout (indent "elif" body && align "elif" else) }
     
     Else.Else = NewLine "else" IndentOpen body:Suite { layout (indent "else" body) }
     
