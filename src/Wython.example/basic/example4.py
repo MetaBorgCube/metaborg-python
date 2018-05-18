@@ -1,11 +1,16 @@
 while True:
-  while True:
-    pass
-  else:
-    if True:
-      if True:
-        pass
-      elif:
-        pass
-    else:
-      pass
+	if True: 
+		pass
+		if True:
+			pass
+		elif True:
+			pass
+		elif False:
+			pass
+		else:
+		  banana
+	else:
+		while True:
+		   pass
+		else:
+		   pass 
