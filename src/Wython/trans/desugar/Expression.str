@@ -39,7 +39,7 @@ rules
 
   
   desugar-expr(ctx): Term(h, []) -> <desugar-expr(ctx)> h
-  desugar-expr(ctx): Term(l, r) -> <foldl(desugar-arith)> (r, <desugar-expr(ctx)> l)
+  desugar-expr(ctx): Term(l, r) -> <foldl(desugar-arith(ctx))> (r, <desugar-expr(ctx)> l)
 
   desugar-expr(ctx): Power(exp) -> <desugar-expr(ctx)> exp
   
