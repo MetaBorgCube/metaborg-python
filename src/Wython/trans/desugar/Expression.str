@@ -48,6 +48,10 @@ rules
   
   desugar-expr(ctx): AtomExp(Await(_), a, b) -> Await(<desugar-expr(ctx)> AtomExp(None(), a, b))
   desugar-expr(ctx): AtomExp(None(), YieldOrTestList(list), a) -> Tuple(<desugar-expr(ctx)> list, Load())
+  desugar-expr(ctx): AtomExp(None(), DictOrSet(_, b, _), []) -> Dict(keys, values) where (keys, values) := <desugar-dict> b
+  desugar-expr(ctx): AtomExp(None(), TestListComp(None()), _) -> List([], Load())
+  desugar-expr(ctx): AtomExp(None(), TestListComp(elem  ), _) -> List(<desugar-list> elem, Load())
+  
   desugar-expr(ctx): AtomExp(None(), atom, []) -> atom
   desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
@@ -62,7 +66,21 @@ rules
     where
       (args, kargs) := <desugar-args(ctx)> list
 
-//  desugar-atom: (obj, SubscriptList(list), [h | t]) -> a
+  desugar-atom(ctx): (obj, SubscriptList(list), []) -> Subscript(<desugar-call(ctx)> obj, <desugar-list> list, <ctx>)
+
+  desugar-list: None() -> [] where <debug> "None"
+  desugar-list: Some(elem) -> <desugar-list> elem
+  desugar-list: SubscriptList(list, _) -> <desugar-list><map(desugar-list)> list
+  desugar-list: TestListComp(h, t, _) -> [<desugar-list> h| <map(desugar-list)>t]
+  desugar-list: Test(t) -> <desugar-expr(!Load())> t
+  desugar-list: SetContents(elem) -> <desugar-list> elem
+  desugar-list: [elem] -> elem
+  desugar-list: list -> Tuple(list, Load())
+ 
+  desugar-dict: None() -> ([], [])
+  desugar-dict: Some(DictMaker(h, t, _)) -> <unzip><map(desugar-dict)>[h|t]
+  desugar-dict: KeyValuePair(key, value) -> (<desugar-expr(!Load())> key, <desugar-expr(!Load())> value)
+  desugar-dict: DictContents(_, kvpair) -> <desugar-dict> kvpair
 
   desugar-call(ctx): [ID(name)] -> Name(ID(name), <ctx>)
   desugar-call(ctx): [e] -> e

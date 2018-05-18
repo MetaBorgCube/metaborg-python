@@ -60,7 +60,7 @@ context-free syntax
   Atom.Float = FLOAT
   Atom.ID = ID
   Atom.YieldOrTestList = "(" YieldOrTestList ")"
-  Atom.DictOrSet = "{" DictOrSetMaker? "}"
+  Atom.DictOrSet = "{" NewLine? DictOrSetMaker? NewLine? "}"
   Atom.TestListComp = "[" TestListComp? "]"
 
   Trailer.ArgList = "(" ArgList? ")"
@@ -81,7 +81,7 @@ context-free syntax
   DictContents.KeyValuePair = Test ":" Test
   DictContents.Kwargs = "**" Exp
   
-  DictContentsNode.DictContents = "," DictContents
+  DictContentsNode.DictContents = "," NewLine? DictContents
   DictContentsNode.CompFor = CompFor
   
   YieldOrTestList.Yield = Yield
