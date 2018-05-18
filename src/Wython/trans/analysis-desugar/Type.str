@@ -1,0 +1,18 @@
+module analysis-desugar/Type
+
+imports
+  src-gen/signatures/-
+  ast-syntax/-
+  
+  trans/desugar/Expression
+  
+rules
+  a-desugar-type: None() -> None()
+  a-desugar-type: NoneVal() -> NoneT()
+  a-desugar-type: Name("str", _) -> StringT()
+  a-desugar-type: Name("int", _) -> IntT()
+  a-desugar-type: Name("bool", _) -> BoolT()
+  
+  a-desugar-type: Tuple(types, _) -> TupleT(<map(a-desugar-type)>types)
+
+  a-desugar-type: e -> [<debug> ("Cannot desugar type: ", e)]
