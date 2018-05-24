@@ -24,7 +24,7 @@ rules
   desugar-if: None() -> None()
   desugar-if: Some(item) -> <desugar-if> item
 
-  desugar-if: Else(_, suite) -> <desugar-suite> suite
+  desugar-if: Else(_, _, suite) -> <desugar-suite> suite
   desugar-if: ElifElse(cond, _, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
   desugar-if: Elif(cond, _, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
 
