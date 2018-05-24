@@ -13,12 +13,18 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
 
+/**
+ * External Stratego strategy for compiling .wast to .wasm 
+ */
 public class java_compile_wast_0_0 extends Strategy {
 	
 	public static java_compile_wast_0_0 instance = new java_compile_wast_0_0();
 	//TODO: Find a better way to do this
 	private static final String WASM_COMPILER = new File("wabt/bin/wat2wasm").getAbsolutePath();
 
+	/**
+	 * Main strategy that converts the input, compiles the code and returns the result.
+	 */
 	@Override
 	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
 		ITermFactory factory = context.getFactory();
@@ -28,10 +34,10 @@ public class java_compile_wast_0_0 extends Strategy {
 			String sourceFile = current.getSubterm(0).toString();
 			File wastFile = new File(sourceFile.substring(1, sourceFile.length()-1));
 			
-			// Write wast file to compile
+			// Write wast file to compile (as you cannot pass stdin to the compiler)
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(wastFile))) {
 				String content = current.getSubterm(1).toString();
-				String out = content.substring(1,  content.length()-1).replace("\\n", "\n").replace("\\", "");
+				String out = content.substring(1,  content.length()-1).replace("\\n", "\n").replace("\\", "");	// Sanitize inputs
 				bw.write(out);
 			}
 			
@@ -43,6 +49,13 @@ public class java_compile_wast_0_0 extends Strategy {
 		}
 	}
 
+	/**
+	 * Compile the given file to a .wasm-executable.
+	 * 
+	 * @param wastFile: This .wast-file to compile
+	 * @return The compiled binary as a String
+	 * @throws Exception when compilation fails
+	 */
 	private String compileWasm(File wastFile) throws Exception  {
 		File outFile = new File(wastFile.getAbsolutePath().replace(".wast", ".wasm"));
 		
