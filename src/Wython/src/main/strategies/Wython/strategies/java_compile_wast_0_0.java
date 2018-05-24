@@ -16,9 +16,9 @@ import org.strategoxt.lang.Strategy;
 public class java_compile_wast_0_0 extends Strategy {
 	
 	public static java_compile_wast_0_0 instance = new java_compile_wast_0_0();
-	private static final String WASM_COMPILER = "/home/chiel/wabt/bin/wat2wasm";
+	//TODO: Find a better way to do this
+	private static final String WASM_COMPILER = new File("wabt/bin/wat2wasm").getAbsolutePath();
 
-	
 	@Override
 	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
 		ITermFactory factory = context.getFactory();
