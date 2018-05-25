@@ -8,8 +8,19 @@ imports
 rules
 
   funcs:
+    (FunctionDef(name, args, body, decorators, return), offsets) -> [ WastFunc(
+          Some(<concat-strings>("$", name)),
+          params,
+		  wastBody) ]
+ 	 where 
+    wastBody := <concat> <map(exprStmt)> <zip> (body, offsets);
+    params := <concat> <map(paramDef)> args;
+    <debug> ("Funcs, body:", body)
+          
+  funcs:
     exprList -> [ WastFunc(
-          Some("$main"), 
+          Some("$main"),
+          [],
 		  body) ]
  	 where 
     lengths := <map(calculate-length)> exprList;
@@ -18,15 +29,11 @@ rules
     <debug> ("Funcs, body:", body)
           
    exprStmt:
-   	 (ExprStmt(Call(name, params, kwargs)), offsets) -> exprList
+   	 (ExprStmt(Call(name, params, kwargs)), offsets) -> call
    	    where
    	      parameters := <concat> <map(param)> <zip> (params, offsets);
    	      <debug> parameters;
-   	      call := <callExpr> name;
-		  exprList:= <concat> [
-			 parameters,
-			 call
-		  ] 
+   	      call := <callExpr> (name, parameters)
 		  
   exprStmt: 
     (If(expr, body, else), [bodyOffsets, elseOffsets]) -> 
@@ -38,16 +45,19 @@ rules
           )]
         ]
 
+  paramDef:
+    Arg(name, _) ->
+     WastParam(<concat-strings>("$", name), WastI32())
 
 	evaluate:
-		False() -> [ WastExpr(WastInstr(I32Const("0"))) ]
+		False() -> [ WastI32Const("0") ]
 
 	evaluate:
-		True() -> [ WastExpr(WastInstr(I32Const("1"))) ]
+		True() -> [ WastI32Const("1") ]
    	   
    callExpr: 
-	   Name(identifier, Load()) -> 
-	   	  [ WastExpr(WastCall(WastCall(name))) ]
+	   (Name(identifier, Load()), params) -> 
+	   	  [ WastCall(name, params) ]
 	   where 
 	   name := <varName> identifier
 	   
@@ -56,8 +66,8 @@ rules
 
    param: 
       (p, [offset]) -> [
-	    WastExpr(WastInstr(I32Const(offset))),
-      WastExpr(WastInstr(I32Const(len)))
+        WastI32Const(offset),
+        WastI32Const(len)
       ]
       where
       [len] := <calculate-length> p

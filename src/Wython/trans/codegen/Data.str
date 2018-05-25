@@ -98,7 +98,7 @@ rules
   dataParam:
     (param, [offset]) -> [
        WastData(
-          WastExpr(WastInstr(I32Const(offset))), 
+          WastI32Const(offset), 
           Some(val)
         )]
     where
