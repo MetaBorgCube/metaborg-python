@@ -21,4 +21,3 @@ rules
        fList := <funcs> (stmts, offsets);
        eList :=  <exports> stmts;
        init := WastStart("$main")
-       

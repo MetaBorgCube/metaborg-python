@@ -4,8 +4,10 @@ menus
   
   menu: "Compile" (openeditor)
     
-    action: "Compile to .wast"      = compile-to-wast  (source)
-    action: "Show WebAssembly AST"      = show-wast-ast (source)
+    action: "Show WebAssembly AST"   = show-wast-ast    (source)
+    action: "Compile to .wast"       = compile-to-wast  (source)
+    action: "Compile to .wasm"       = compile-to-wasm  (source)
+    action: "Run"                    = run-wasm         (source)
 
 views
   

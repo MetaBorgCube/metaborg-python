@@ -15,6 +15,8 @@ imports
 
 
 rules // Debugging
+  external java-run-wasm(|)
+  external java-compile-wast(|)
   
   debug-show-aterm:
     (node, _, _, path, project-path) -> (filename, result)
@@ -39,7 +41,19 @@ rules // Debugging
       desugared := <desugar-all> ast;
       code := <codegen-all> desugared;
       text := <pp-debug-wast> code
-
+      
+  compile-to-wasm:
+    (a, b, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wasm")> path;
+      (source, contents) := <compile-to-wast> (a, b, ast, path, project-path);
+      text := <java-compile-wast> (<abspath> source, contents)
+      
+  run-wasm:
+    (a, b, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wasm-out")> path;
+      (source, content) := <compile-to-wasm> (a, b, ast, path, project-path);
+      text := <java-run-wasm> content
+  
       
   editor-analysis-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
