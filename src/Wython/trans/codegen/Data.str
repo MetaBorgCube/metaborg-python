@@ -7,14 +7,39 @@ imports
   
 rules
 
-  data:
-    (stmts, offsets) -> <concat> <map(dataStmt)> <zip> (stmts, offsets)
-    
-  dataStmt: 
+  data: 
     (ExprStmt(Call(name, args, kwargs)), offsets)
        -> dataList 
     where
-      dataList := <concat> <map(dataParam)> <zip> (args, offsets)
+      dataList :=  <concat> <map(dataParam)> <zip> (args, offsets)
+
+  data:
+    (FunctionDef(_,_,body,_,_), offsets) ->  
+    <concat> <map(data)> <zip> (body, offsets)
+
+  data: 
+    (If(expr, body, else), [bodyOffsets, elseOffsets]) -> 
+       <concat> <debug> [ 
+          <concat> <map(data)> <zip> (body, bodyOffsets),
+          <concat> <map(data)> <zip> (else, elseOffsets)
+        ]
+
+  data: 
+    (If(expr, body, else), [bodyOffsets, elseOffsets]) -> 
+       <concat> <debug> [ 
+          <concat> <map(data)> <zip> (body, bodyOffsets),
+          <concat> <map(data)> <zip> (else, elseOffsets)
+        ]
+
+  data: 
+    (If(expr, body, []), [bodyOffsets]) -> 
+        <concat> <map(data)> <zip> (body, bodyOffsets)
+
+  data:
+    error -> []
+ 	 where 
+    <debug> ("data, failed:", error)
+    
 
   dataParam:
     (param, [offset]) -> [
@@ -24,3 +49,9 @@ rules
         )]
     where
       val := <to-string> param
+
+  dataParam:
+    error -> []
+ 	 where 
+    <debug> ("dataParam, failed:", error)
+    

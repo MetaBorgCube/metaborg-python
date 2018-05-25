@@ -8,40 +8,55 @@ imports
 rules
 
   funcs:
+    (funcList, offsets) -> <concat> [funcs, main]
+    where
+    funcs := <concat> <map(funcDef)> <filter(is-func)> <zip> (funcList, offsets);
+    main := <mainDef> <filter(not(?is-func))> <zip> (funcList, offsets)
+
+  funcs:
+    error -> []
+ 	 where 
+    <debug> ("funcs, failed:", error)
+          
+  is-func: (FunctionDef(a,b,c,d,e), o) -> 
+    (FunctionDef(a,b,c,d,e), o)
+
+  funcDef:
     (FunctionDef(
       name,
       Arguments(args,_,_,_,_,_), 
       body, 
       decorators, 
       return
-     ), [offsets]) -> [ 
+     ), offsets) -> [ 
         WastFunc(
-          Some(<concat-strings>("$", name)),
+          Some(<concat-strings>["$", name]),
           params,
           wastBody
       )]
  	 where 
-    <debug> ("FunctionDef, offsets:", offsets);
-    wastBody := <concat> <map(exprStmt)> <zip> (body, offsets);
+    wastBody := <concat> <map(exprStmt)> <debug> <zip> (body, offsets);
     params := <concat> <map(paramDef)> args
+
+  funcDef:
+    error -> []
+ 	 where 
+    <debug> ("funcDef, failed:", error)
           
-  funcs:
-    (exprList, [offsets]) -> [ WastFunc(
+  mainDef:
+    exprList -> [ WastFunc(
           Some("$main"),
           [],
-		  body) ]
+        body
+		  ) ]
  	 where 
-    <debug> ("exprList, offsets:", offsets);
-    body := <concat> <map(exprStmt)> <zip> (exprList, offsets)
-          
-   exprStmt:
+    <debug> ("mainDef, exprList:", exprList);
+    body := <debug> <concat> <debug> <map(exprStmt)> exprList
+    
+  exprStmt:
    	 (ExprStmt(Call(name, params, kwargs)), offsets) -> call
    	    where
-          <debug> ("exprStmt, offsets:", offsets);
-          <debug> ("exprStmt, params:", params);
-          <debug> ("exprStmt, zipped:", <zip> (params, offsets));
    	      parameters := <concat> <map(param)> <zip> (params, offsets);
-   	      <debug> parameters;
    	      call := <callExpr> (name, parameters)
 		  
   exprStmt: 
@@ -54,15 +69,40 @@ rules
           )]
         ]
 
+  exprStmt: 
+    (If(expr, body, []), [bodyOffsets]) -> 
+       <concat> [ 
+          <evaluate> expr,
+          [WastIf(
+            WastThen(<concat> <map(exprStmt)> <zip> (body, bodyOffsets)),
+            None()
+          )]
+        ]
+
+  exprStmt:
+    error -> []
+ 	 where 
+    <debug> ("exprStmt, failed:", error)
+
   paramDef:
     Arg(name, _) ->
-     WastParam(<concat-strings>("$", name), WastI32())
+     WastParam(<concat-strings>["$", name], WastI32())
 
+  paramDef:
+    error -> []
+ 	 where 
+    <debug> ("paramDef, failed:", error)
+          
 	evaluate:
 		False() -> [ WastI32Const("0") ]
 
 	evaluate:
 		True() -> [ WastI32Const("1") ]
+
+  evaluate:
+    error -> []
+ 	 where 
+    <debug> ("param, failed:", error)
    	   
    callExpr: 
 	   (Name(identifier, Load()), params) -> 
@@ -74,10 +114,16 @@ rules
    	ID(name) -> <conc-strings> ("$", name)
 
    param: 
-      (p, offset) -> [
+      (p, [offset]) -> [
         WastI32Const(offset),
         WastI32Const(len)
       ]
       where
-      <debug> ("param, offset:", offset);
+      //<debug> ("param, offset:", offset);
       [len] := <calculate-length> p
+
+   param:
+     error -> []
+     where 
+     <debug> ("param, failed:", error)
+          

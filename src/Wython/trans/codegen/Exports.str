@@ -7,7 +7,4 @@ imports
 
 rules
   exports:
-    _ -> [
-      WastExport("\"main\"", 
-      WastFunc("$main"))
-    ]
+    _ -> []

@@ -8,7 +8,7 @@ imports
 rules
 
   calculate-length:
-    FunctionDef(_,_,body,_,_) -> <map(calculate-length)> body
+    FunctionDef(_,_,body,_,_) -> <concat> <map(calculate-length)> body
           
   calculate-length:
   	If(condition, body, []) -> lengths
@@ -50,36 +50,36 @@ rules
   calculate-offset:
     [h | t] -> result
     where 
-    <debug> ("Calculate offset 1, h:", h);
-    <debug> ("Calculate offset 1, t:", h);
+    //<debug> ("Calculate offset 1, h:", h);
+    //<debug> ("Calculate offset 1, t:", h);
     result := <calculate-offset> ([h | t], 0)
 
   calculate-offset:
     ([], _) -> []
-    where 
-    <debug> ("Calculate offset 2")
+    //where 
+    //<debug> ("Calculate offset 2")
     
   calculate-offset:
     ([h|t], s) -> [hh | <calculate-offset> (t, sum)] 
     where 
-    <debug> ("Calculate offset 3, h:", h);
-    <debug> ("Calculate offset 3, t:", h);
+    //<debug> ("Calculate offset 3, h:", h);
+    //<debug> ("Calculate offset 3, t:", h);
 	  (hh, sum) := <offset-unpack> (h, s)
 	  
   calculate-offset:
     [list] -> result
     where 
-    <debug> ("Calculate offset 4, list:", list);
+    //<debug> ("Calculate offset 4, list:", list);
     result := [<calculate-offset> (list, 0)]
 
   calculate-offset:
     ([list], s) -> result
     where 
-    <debug> ("Calculate offset 5, list:", list);
+    //<debug> ("Calculate offset 5, list:", list);
     result := [<calculate-offset> (list, s)]
 
 	calculate-offset:
-	 e -> <debug> ("Error: ", e)
+	 e -> <debug> ("Error, calculating offsets: ", e)
 
   offset-unpack:
     ([val], sum) -> ([v], s) where (v, s) := <offset-unpack>(val, sum)
