@@ -116,6 +116,75 @@ Now we were able to implement the layout sensitive syntax. Implementing this ide
 Work on the analysis was planned for the last week before the deadline, as it would be beneficial to have the full desugared syntax available. Due to the problems encountered in the codegen, it was decided that the analysis would be postponed in order to focuss on the codegen.
 
 ## Codegen
+In the first milestone the focus was on facilitating compilation of a simple print statement. In the second assignment the scope was widened to include while loops and more complex expressions.
+The main difficulty in writing the assembly code is that there is no direct output. Therefore a lot of time was spent deciding on how to debug whenever a loop got stuck. First we included the writing of statements that printed numbers and strings.
+This worked but each solution ended up quite limited to its own domain, and a more general approach was sought.
+Finally it was decided to delegate such debugging to a helper function in Javascript, and functions therefore were added to the build script.
+Then it was the issue of the syntax itself, which was implemented in SDF3. Because this syntax was developed from the Ground Up by observation instead of by appealing to a standard, a test driven development cycle was followed.
+The Spoofax Language Workbench up being very helpful for this, and it was able to be implemented without much difficulty.
+The rest of the time was spent thinking about different memory and object models. 
+With regards to code generation it was built on top of what had been done before. The functions for offset calculation and other calculations needed in the pipeline were already done, so we thought that the implementation of the new keywords and some additional levels would only require a few recursive strategies.
+
+It turned out that there were a number of problems with thos pre-existing functions. Therefore it was decided to convert the code generation from a multi-pass transformation to a single-pass one. This made all the calculations way simpler, speeding up the development. 
+
+The code generation is now somewhat working for more examples. This means that we can almost run the following program through our entire compiler:
+```
+def func(n):
+  a = 0
+  while a < n:
+  	print("Hello!")
+  	a = a + 1
+  print("World!")
+func(42)
+```
+This results in the following `.wast` code:
+```
+(module
+  (func $print (import "lib" "logString") (param i32 i32))
+  (func $debug (import "debug" "debugger") (param i32 i32))
+  (memory $d (import "memory" "memory") 1)
+  (data (i32.const 0) "Hello!")
+  (data (i32.const 6) "World!")
+  (func $func (param $n i32)
+    (local $a i32)
+    (set_local $a
+      (i32.const 0)
+    )
+    (block
+      (loop
+        (call $print
+          (i32.const 0)
+          (i32.const 6)
+        )
+        (local $a i32)  // Extra varDef
+        (set_local $a
+          (i32.add
+            (get_local $a)
+            (i32.const 1)
+          )
+        )
+        (br_if 0
+          (i32.lt_s
+            (get_local $a)
+            (get_local $n)
+          )
+        )
+        (br 1)
+      )
+    )
+    (call $print
+      (i32.const 6)
+      (i32.const 6)
+    )
+  )
+  (func $main 
+    (call $func
+      (i32.const 42)
+    )
+```
+
+This code does have a small problem when assigning to a variable more than once. This is because there is currently no way to distinguish whether a variable is already declared. Our current solution is to handle each assignment as an declaration with a default value, which results in extra declarations. These break at compile-time, but the code runs smoothly when they are removed. Adding a proper fix for this problem should not be that hard, but we had no time to implement this.
+A second problem is that we can only print strings, as a proper data model is not yet implemented.
 
 ### Spoofax integration
 When we started working on Webassembly, Rasmus created some build scripts to enable us to compile `.wast` files to `.wasm` and insert some HTLP/JavaScript wrapper code such that we can look at the results in a browser using the developer view.  
