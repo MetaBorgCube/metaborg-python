@@ -8,29 +8,38 @@ imports
 rules
 
   funcs:
-    (FunctionDef(name, args, body, decorators, return), offsets) -> [ WastFunc(
+    (FunctionDef(
+      name,
+      Arguments(args,_,_,_,_,_), 
+      body, 
+      decorators, 
+      return
+     ), [offsets]) -> [ 
+        WastFunc(
           Some(<concat-strings>("$", name)),
           params,
-		  wastBody) ]
+          wastBody
+      )]
  	 where 
+    <debug> ("FunctionDef, offsets:", offsets);
     wastBody := <concat> <map(exprStmt)> <zip> (body, offsets);
-    params := <concat> <map(paramDef)> args;
-    <debug> ("Funcs, body:", body)
+    params := <concat> <map(paramDef)> args
           
   funcs:
-    exprList -> [ WastFunc(
+    (exprList, [offsets]) -> [ WastFunc(
           Some("$main"),
           [],
 		  body) ]
  	 where 
-    lengths := <map(calculate-length)> exprList;
-    offsets := <calculate-offset> lengths;
-    body := <concat> <map(exprStmt)> <zip> (exprList, offsets);
-    <debug> ("Funcs, body:", body)
+    <debug> ("exprList, offsets:", offsets);
+    body := <concat> <map(exprStmt)> <zip> (exprList, offsets)
           
    exprStmt:
    	 (ExprStmt(Call(name, params, kwargs)), offsets) -> call
    	    where
+          <debug> ("exprStmt, offsets:", offsets);
+          <debug> ("exprStmt, params:", params);
+          <debug> ("exprStmt, zipped:", <zip> (params, offsets));
    	      parameters := <concat> <map(param)> <zip> (params, offsets);
    	      <debug> parameters;
    	      call := <callExpr> (name, parameters)
@@ -65,9 +74,10 @@ rules
    	ID(name) -> <conc-strings> ("$", name)
 
    param: 
-      (p, [offset]) -> [
+      (p, offset) -> [
         WastI32Const(offset),
         WastI32Const(len)
       ]
       where
+      <debug> ("param, offset:", offset);
       [len] := <calculate-length> p

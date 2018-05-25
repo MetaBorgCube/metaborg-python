@@ -9,14 +9,16 @@ strategies
   codegen-all = codegen
  
 rules
-  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList, start)
+  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList, init)
     where
        <debug> ("Module, stmts:", stmts);
        lengths := <map(calculate-length)> stmts;
+       <debug> ("data, lengths:", lengths);
        offsets := <calculate-offset> lengths;
+       <debug> ("data, offsets:", offsets);
        iList := <imports> stmts;
        dList := <data> (stmts, offsets);
-       fList := <funcs> stmts;
+       fList := <funcs> (stmts, offsets);
        eList :=  <exports> stmts;
-       start := WastStart("$main")
+       init := WastStart("$main")
        
