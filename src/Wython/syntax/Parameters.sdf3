@@ -8,9 +8,9 @@ imports
 
 context-free syntax
 
-  VarArgsList.Args = {ArgDef ","}* Comma? KwargsDefs?
-  VarArgsList.WildCard = ArgDefs
+  VarArgsList.Args = {ArgDef ","}+ KwargDefNode?
   VarArgsList.Kwargs = KwargsDef
+  KwargDefNode.Kwargs = Comma KwargsDef
   
   TypedArgsList.TypedArgs = {TypedArgDef ","}* Comma? TypeDefs?
   TypedArgsList.TypedWildcard = TypeDefs
@@ -19,8 +19,6 @@ context-free syntax
   ArgDef.ArgDef = ID InitialValue? 
 
   TypedArgDef.TypedArgDef = ID TypedArgDefExtension? InitialValue?
-
-  ArgDefs.ArgDefs = {ArgDef ","}* Comma? KwargsDef?
   
   TypeDefs.TypeDefs = "*" {TypedArgDef ","}* Comma? KwargsTypeDef?
   TypeDefs.KwargsDef = KwargsTypeDef
@@ -29,7 +27,6 @@ context-free syntax
   
   KwargsDef.KwargsDef = "**" ID Comma?
 
-  KwargsDefs.KwargsDefs = {ArgDef ","}+ Comma? KwargsDef?
 
   KwargsTypeDef.KwargsTypeDef = "**" TypedArgDef Comma?
   

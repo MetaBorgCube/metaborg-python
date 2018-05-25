@@ -13,6 +13,7 @@ signature
     
     Constant
     ID
+    Type
     
  
   constructors
@@ -20,7 +21,7 @@ signature
     Arguments: [Arg] * Arg   *   [Arg]   *   [Expr]    *    Arg  *  [Expr]-> Arguments
 
     //   arg    annotation
-    Arg: ID  *  Expr -> Arg
+    Arg: ID  *  Type -> Arg
 
     // keyword arguments supplied to call (NULL identifier for **kwargs)
     //       arg    value
@@ -30,6 +31,12 @@ signature
     True: True
     False: False
     
-    None: Constant
+    NoneVal: Constant
     ID: String -> ID
     Int: String -> Int
+    
+    IntT: Type
+    BoolT: Type
+    StringT: Type
+    NoneT: Type
+    TupleT: [Type] -> Type
