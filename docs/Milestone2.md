@@ -108,7 +108,9 @@ Module(
 ```
 
 ### Layout sensitive syntax
-The biggest problem we encountered while writing the sytax/desugaring, was the layout sensitive parsing.
+The biggest problem we encountered while writing the sytax/desugaring, was the layout sensitive parsing. In the [documentation](http://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#layout-sensitive-parsing) the process is clearly explained with examples simmilar to our usecase. Despite this, we had a lot of trouble getting even the examples to work. After contacting Eduardo, two problems were found. The first being that using labels to referece trees was broken in the workbench. Eduardo was able to fix this within a day and with the new nightly build, we were able to compile the code again. The second problem was that, even with these fixes, we were not able to enforece the alignment of elements. After looking through a lot of documentation, an example project provided by Eduardo showed a mismatch in the configuration file. The problem was that the layout sensitive syntax is only supported by the `java` backend, where we were still using the `c` backend.
+
+Now we were able to implement the layout sensitive syntax. Implementing this ... problems on the roadmap
 
 ## Analysis
 
