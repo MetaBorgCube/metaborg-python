@@ -16,7 +16,7 @@ imports
 rules  
   desugar-stmt: ExpStatement(TestFirst(targets, _), AssignList(value)) -> Assign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign> value)
   
-  desugar-assign-target: [elem] -> Name(elem, Store())
+  desugar-assign-target: [elem] -> elem
   desugar-assign-target: list -> Tuple(<map(desugar-assign-target)> list, Store())
   desugar-assign-target: ID(name) -> Name(name, Store())
   desugar-assign-target: AtomExp(None(), atom, [h | t]) -> <desugar-assign-target> ([atom], h, t)

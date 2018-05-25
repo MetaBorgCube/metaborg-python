@@ -2,6 +2,7 @@ module Program
 
 imports
   signatures/WebAssembly/-
+  signatures/WebAssembly-sig
   trans/codegen/-
   ast-syntax/-
 
@@ -9,15 +10,64 @@ strategies
   codegen-all = codegen
  
 rules
-  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList, init)
+  lib-funcs: _ -> [
+  	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
+  	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
+  ]
+  init-memory: _ -> [
+  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
+  ]
+  
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, fList, eList, init)], "")
     where
-       <debug> ("Module, stmts:", stmts);
-       lengths := <map(calculate-length)> stmts;
-       <debug> ("data, lengths:", lengths);
-       offsets := <calculate-offset> lengths;
-       <debug> ("data, offsets:", offsets);
-       iList := <imports> stmts;
-       dList := <concat> <map(data)> <zip> (stmts, offsets);
-       fList := <funcs> (stmts, offsets);
-       eList :=  <exports> stmts;
+	   mainBody := <filter(not(?is-func))> stmts;
+	   functions := <filter(is-func)> stmts;
+	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
+       (iList, dList, fList, eList, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], 0));
+       <debug> ("Memory size", memSize);
        init := WastStart("$main")
+
+  is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
+  
+  wast-add-import(wast): (imp, mem) -> (<concat>[i, [imp]], d, f, e, mptr)
+    where 
+      (i, _, _, e, _) := <wast>;
+      (d, f, mptr) := mem
+    
+  wast-add-data(wast): (data, mem) -> (i, <concat>[d, [data]], f, e, mptr)
+    where 
+      (i, _, _, e, _) := <wast>;
+      (d, f, mptr) := mem
+    
+  wast-add-func(wast): (func, mem) -> (i, d, <concat>[f, [func]], e, mptr)
+    where 
+      (i, _, _, e, _) := <wast>;
+      (d, f, mptr) := mem
+    
+  wast-add-expr(wast): (expr, mem) -> (i, d, f, <concat>[e, [expr]], mptr)
+    where
+      (i, _, _, e, _) := <wast>;
+      (d, f, mptr) := mem
+    
+  codegen-func: (FunctionDef(name, args, body, decorators, None()), wast) -> <wast-add-func(!wast)> (func, mem)
+  	where
+  	  (_, data, funcs, _, mptr) := wast;
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, mptr)));
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), <codegen-func>args, funcbody)
+  	  
+  codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, size)
+  	where
+  	  (_, data, funcs, _, mptr) := wast;
+  	  (funcbody, size) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, mptr)));
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), <codegen-func> args, funcbody)
+  
+  codegen-func: Arguments(args, _, _, _, _, _) -> <map(codegen-func)> args
+  codegen-func: Arg(ID(name), _) -> WastParam(Some(<concat-strings> ["$", name]), WastI32())
+  codegen-func: e -> <debug> e
+  
+  mem-add-string: ((data, funcs, mptr), val) -> (mptr, len, (new-data, funcs, new-mptr))
+    where
+      new-data := <concat> [data, [WastData(WastI32Const(<int-to-string> mptr), Some(val))]];
+      len := <subti>(<string-length> val, 2);
+      new-mptr := <addi> (mptr, len)
+  
