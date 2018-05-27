@@ -7,11 +7,12 @@ imports
 
 
 rules
-  codegen-stmt: (Assign(name, value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem1)
+  codegen-stmt: (Assign(name, value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem2)
     where
       (w-value, mem1) := <codegen-expr> (value, mem);
       w-name := <codegen-name> name;
-      w-stmt := [WastLocal(Some(w-name), WastI32()), WastSetLocal(w-name, w-value)]
+      (w-vardecl, mem2) := <mem-add-var> (mem1, (w-name, WastI32()));
+      w-stmt := <concat> [w-vardecl, [WastSetLocal(w-name, w-value)]]
       
   codegen-stmt: (While(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
