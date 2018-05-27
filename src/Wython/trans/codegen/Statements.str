@@ -11,8 +11,8 @@ rules
     where
       (w-value, mem1) := <codegen-expr> (value, mem);
       w-name := <codegen-name> name;
-      (w-vardecl, mem2) := <mem-add-var> (mem1, (w-name, WastI32()));
-      w-stmt := <concat> [w-vardecl, [WastSetLocal(w-name, w-value)]]
+      mem2 := <mem-add-var> (mem1, (w-name, WastI32()));
+      w-stmt := [WastSetLocal(w-name, w-value)]
       
   codegen-stmt: (While(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
@@ -26,5 +26,6 @@ rules
     where
       (w-stmt, mem') := <codegen-expr> (expr, mem)
   
+  codegen-stmt: (None(), res) -> res
   codegen-stmt: (stmt, (w-stmts, mem)) -> (<concat> [w-stmts, [stmt]], mem) where <debug> ("codegen-stmt failed:", stmt)
   

@@ -48,23 +48,19 @@ rules
     where
       (i, _, _, e, v, _) := <wast>;
       (d, f, _, mptr) := mem
-    
-  codegen-func: (FunctionDef(name, args, body, decorators, None()), wast) -> <wast-add-func(!wast)> (func, mem)
+  
+  codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, mem)
   	where
   	  (_, data, funcs, _, vars, mptr) := wast;
   	  (argdefs, argnames) := <codegen-func> args;
-  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs, funcbody)
-  	  
-  codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, size)
-  	where
-  	  (_, data, funcs, _, vars, mptr) := wast;
-  	  (argdefs, argnames) := <codegen-func> args;
-  	  (funcbody, size) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, <union> (vars, argnames), mptr)));
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , funcbody)
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  (_, _, vardecls, _) := mem;
+  	  w-vardecls := <map(codegen-func)> <diff> (vardecls, argnames);
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <concat>[w-vardecls, funcbody])
   
   codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
-  codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), w-name) where w-name := <concat-strings> ["$", name]
+  codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), (w-name, WastI32())) where w-name := <concat-strings> ["$", name]
+  codegen-func: (name, type) -> WastLocal(name, type)
   codegen-func: e -> <debug> e
   
   mem-add-string: ((data, funcs, vars, mptr), val) -> (mptr, len, (new-data, funcs, vars, new-mptr))
@@ -74,17 +70,20 @@ rules
       new-mptr := <addi> (mptr, len)
       
   // Add existing var -> do nothing
-  mem-add-var: ((data, funcs, vars, mptr), var) -> ([], (data, funcs, vars, mptr))
+  mem-add-var: ((data, funcs, vars, mptr), var) -> (data, funcs, vars, mptr)
     where
       (name, type) := var;
-      new-var := <set-eq> (vars, <union> (vars, [name]));	//Fails when adding new var
+      varnames := <map(mem-extract-varnames)> vars;
+      new-var := <set-eq> (varnames, <union> (varnames, [name]));	//Fails when adding new var
       <debug> ("Vardecl already defined for ", name)
-      
+  
+  mem-extract-varnames: (name, type) -> name
+  
   // Add new var -> do something     
-  mem-add-var: ((data, funcs, vars, mptr), var) -> (w-vardecl, (data, funcs, <concat>[vars, [name]], mptr))
+  mem-add-var: ((data, funcs, vars, mptr), var) -> (data, funcs, <concat>[vars, w-vardecl], mptr)
     where
       (name, type) := var;
       <debug> ("Adding new vardecl for ", name);
-      w-vardecl := [WastLocal(Some(name), type)]
+      w-vardecl := [(name, type)]
   
   
