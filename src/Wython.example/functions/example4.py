@@ -1,7 +1,8 @@
 def a(n):
+  n = 36
   b = 0
   while b < n:
-    print("hello")
+    print("Ping?")
     b = b + 1
-  print("banana")
+  print("Pong!")
 a(42)
