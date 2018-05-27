@@ -22,6 +22,17 @@ rules
       //TODO: add else case
       w-stmt := WastBlock(WastLoop(<concat> [w-body, [WastBrIf("0", w-cond)], [WastBr("1")]]))
       
+  codegen-stmt: (If(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
+    where
+      (w-cond, mem1) := <codegen-expr> (cond, mem);
+      (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
+      (w-else, mem3) := <codegen-stmt-else> (else, mem2);
+      //TODO: add else case
+      w-stmt := WastIf(w-cond, WastThen(w-body), w-else)
+  
+  codegen-stmt-else: ([], mem) -> (None(), mem)
+  codegen-stmt-else: (stmts, mem) -> (Some(WastElse(<foldl(codegen-stmt)> (stmts, ([], mem)))), mem)
+  
   codegen-stmt: (ExprStmt(expr), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem')
     where
       (w-stmt, mem') := <codegen-expr> (expr, mem)

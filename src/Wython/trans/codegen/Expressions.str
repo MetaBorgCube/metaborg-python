@@ -12,8 +12,12 @@ rules
   
   codegen-expr: (Int(val), mem) -> (WastI32Const(val), mem)
   codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string>loc), WastI32Const(<int-to-string>len)], mem1)
-    where
+  where
       (loc, len, mem1) := <mem-add-string> (mem, val)
+      
+  codegen-expr: (True(), mem) -> (WastI32Const("1"), mem)
+  codegen-expr: (False(), mem) -> (WastI32Const("0"), mem)
+    
   codegen-expr: (Name(name, typ), mem) -> (<codegen-name> Name(name, typ), mem)
   
   codegen-expr: (Compare(l, [op], [r]), mem) -> (<codegen-comp-op>(op, w-l, w-r), mem2)
