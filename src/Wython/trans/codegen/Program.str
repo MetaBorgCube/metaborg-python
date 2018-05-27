@@ -52,17 +52,19 @@ rules
   codegen-func: (FunctionDef(name, args, body, decorators, None()), wast) -> <wast-add-func(!wast)> (func, mem)
   	where
   	  (_, data, funcs, _, vars, mptr) := wast;
-  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, vars, mptr)));
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), <codegen-func>args, funcbody)
+  	  (argdefs, argnames) := <codegen-func> args;
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs, funcbody)
   	  
   codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, size)
   	where
   	  (_, data, funcs, _, vars, mptr) := wast;
-  	  (funcbody, size) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, vars, mptr)));
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), <codegen-func> args, funcbody)
+  	  (argdefs, argnames) := <codegen-func> args;
+  	  (funcbody, size) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , funcbody)
   
-  codegen-func: Arguments(args, _, _, _, _, _) -> <map(codegen-func)> args
-  codegen-func: Arg(ID(name), _) -> WastParam(Some(<concat-strings> ["$", name]), WastI32())
+  codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
+  codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), w-name) where w-name := <concat-strings> ["$", name]
   codegen-func: e -> <debug> e
   
   mem-add-string: ((data, funcs, vars, mptr), val) -> (mptr, len, (new-data, funcs, vars, new-mptr))
