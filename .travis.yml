@@ -28,5 +28,5 @@ install:
 script:
   - cd WebAssembly
   - mvn clean install
-  - cd ../../metaborg-python
+  - cd ../../metaborg-python/Wython
   - mvn clean install
