@@ -1,5 +1,5 @@
 # Wython
-
+[![Build Status](https://travis-ci.com/JRasmusBm/metaborg-python.svg?branch=master)](https://travis-ci.com/JRasmusBm/metaborg-python)  
 A Python 3.6 Compiler for WebAssembly, implemented in Spoofax.
 
 ## Authors 
