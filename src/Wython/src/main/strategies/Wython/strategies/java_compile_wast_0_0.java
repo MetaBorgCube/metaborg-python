@@ -20,8 +20,10 @@ public class java_compile_wast_0_0 extends Strategy {
 	
 	public static java_compile_wast_0_0 instance = new java_compile_wast_0_0();
 	//TODO: Find a better way to do this
+
 	private static final String USER_HOME = System.getProperty("user.home");
 	private static final String WASM_COMPILER = USER_HOME + "/wabt/bin/wat2wasm";
+
 
 	/**
 	 * Main strategy that converts the input, compiles the code and returns the result.
