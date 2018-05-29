@@ -9,6 +9,7 @@ imports
 
 strategies
   codegen-all = codegen
+  is-not-func = not(is-func)
  
 rules
 
@@ -22,7 +23,7 @@ rules
   
   codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, fList, eList, init)], "")
     where
-	   mainBody := <filter(not(is-func))> stmts;
+	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;
 	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
        (iList, dList, fList, eList, vars, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], [], 0));
