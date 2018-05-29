@@ -22,7 +22,7 @@ install:
   - cd ../
   - git clone https://github.com/JRasmusBm/metaborg-webassembly.git
   - cd metaborg-webassembly
-  # If there is a branch with the same name, use that one
+  # If there is a branch with the same name, use that one, otherwise skip
   - git checkout $TRAVIS_BRANCH || echo 'No equally named branch available'
 
 script:
