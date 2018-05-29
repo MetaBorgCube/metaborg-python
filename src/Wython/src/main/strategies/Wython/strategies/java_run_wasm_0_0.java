@@ -28,10 +28,10 @@ public class java_run_wasm_0_0 extends Strategy {
     
     /**
      * Callback for logging.
-     * @param text: the logged text
+     * @param value: the logged value
      */
-    public void log(String text){
-            out.append(text);
+    public void log(Object value){
+            out.append(value);
             out.append('\n');
         }
   }

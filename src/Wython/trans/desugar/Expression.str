@@ -55,6 +55,7 @@ rules
   desugar-expr(ctx): AtomExp(None(), TestListComp(None()), _) -> List([], Load())
   desugar-expr(ctx): AtomExp(None(), TestListComp(elem  ), _) -> List(<desugar-list> elem, Load())
   
+  desugar-expr(ctx): AtomExp(None(), ID(name), []) -> Name(ID(name), <ctx>)
   desugar-expr(ctx): AtomExp(None(), atom, []) -> atom
   desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
