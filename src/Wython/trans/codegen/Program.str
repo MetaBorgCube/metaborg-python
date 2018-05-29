@@ -6,10 +6,12 @@ imports
   trans/codegen/-
   ast-syntax/-
 
+
 strategies
   codegen-all = codegen
  
 rules
+
   lib-funcs: _ -> [
   	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
   	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
@@ -88,4 +90,4 @@ rules
       <debug> ("Adding new vardecl for ", name);
       w-vardecl := [(name, type)]
   
-  
+
