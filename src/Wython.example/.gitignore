@@ -5,6 +5,8 @@
 /.project
 /.settings
 /.factorypath
+**/*.wasm
+**/*.html
 
 *.constraints
 *.scope-graph
@@ -14,3 +16,7 @@
 *.gv
 *.dot
 *.pdf
+*.wasm
+*.html
+*.wasm-out
+*.wast

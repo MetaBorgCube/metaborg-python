@@ -1,0 +1,53 @@
+module Expressions
+
+imports
+  signatures/WebAssembly/-
+  trans/codegen/-
+  ast-syntax/-
+
+
+rules
+//  codegen-expr: (Assign(name, value), mem) -> (<concat> [w-stmts, [w-stmt]], mem')
+//    where
+  
+  codegen-expr: (Int(val), mem) -> (WastI32Const(val), mem)
+  codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string>loc), WastI32Const(<int-to-string>len)], mem1)
+  where
+      (loc, len, mem1) := <mem-add-string> (mem, val)
+      
+  codegen-expr: (True(), mem) -> (WastI32Const("1"), mem)
+  codegen-expr: (False(), mem) -> (WastI32Const("0"), mem)
+    
+  codegen-expr: (Name(name, typ), mem) -> (<codegen-name> Name(name, typ), mem)
+  
+  codegen-expr: (Compare(l, [op], [r]), mem) -> (<codegen-comp-op>(op, w-l, w-r), mem2)
+    where
+      (w-l, mem1) := <codegen-expr> (l, mem);
+      (w-r, mem2) := <codegen-expr> (r, mem1)
+      
+  codegen-expr: (BinOp(op, l, r), mem) -> (<codegen-bin-op>(op, w-l, w-r), mem2)
+    where
+      (w-l, mem1) := <codegen-expr> (l, mem);
+      (w-r, mem2) := <codegen-expr> (r, mem1)
+      
+  codegen-comp-op: (Lt(), l, r) -> WastI32LtS(l, r)
+  codegen-bin-op: (Add(), l, r) -> WastAdd(l, r)
+      
+  codegen-expr: (Call(obj, args, kargs), mem) -> (WastCall(<codegen-call-name> obj, w-args), mem1)
+    where
+      (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
+  
+  codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", expr), mem)
+  
+  codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
+  codegen-name: Name(ID(name), Load()) ->  WastGetLocal(<concat-strings> ["$", name])
+  codegen-call-name: Name(ID(name), Load()) ->  <concat-strings> ["$", name]
+  
+  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, w-arg], mem1)
+    where
+      (w-arg, mem1) := <codegen-expr> (arg, mem)
+      
+  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, [w-arg]], mem1)
+    where
+      (w-arg, mem1) := <codegen-expr> (arg, mem)
+ 

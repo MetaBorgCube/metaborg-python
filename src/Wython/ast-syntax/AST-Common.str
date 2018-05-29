@@ -1,8 +1,8 @@
 module AST-Common
 
 imports
-  src-gen/signatures/ID-sig
-  src-gen/signatures/Type-sig
+  signatures/ID-sig
+  signatures/Type-sig
   
   ast-syntax/AST-Expression
 
@@ -11,7 +11,6 @@ signature
     Arguments
     Keyword
     
-    Singleton
     Constant
     ID
     Type
@@ -28,16 +27,16 @@ signature
     //       arg    value
     Keyword: ID  *  Expr -> Keyword
     
-    None: Singleton
-    True: Singleton
-    False: Singleton
+    None: None
+    True: True
+    False: False
     
     NoneVal: Constant
     ID: String -> ID
+    Int: String -> Int
     
     IntT: Type
     BoolT: Type
     StringT: Type
     NoneT: Type
     TupleT: [Type] -> Type
-    
