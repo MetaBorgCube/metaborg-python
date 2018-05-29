@@ -20,7 +20,7 @@ rules
   
   codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, fList, eList, init)], "")
     where
-	   mainBody := <filter(is-not-func)> stmts;
+	   mainBody := <filter(not(?is-func))> stmts;
 	   functions := <filter(is-func)> stmts;
 	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
        (iList, dList, fList, eList, vars, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], [], 0));
@@ -28,8 +28,8 @@ rules
        init := WastStart("$main")
 
   is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
-  is-not-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e) where false
-  is-not-func: e -> e
+//  is-not-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e) where false
+//  is-not-func: e -> e
   
   wast-add-import(wast): (imp, mem) -> (<concat>[i, [imp]], d, f, e, v, mptr)
     where 
