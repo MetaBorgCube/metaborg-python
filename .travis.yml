@@ -19,7 +19,6 @@ env:
 ################################################################################
 
 install:
-  - ls
   - cd ../
   - git clone https://github.com/JRasmusBm/metaborg-webassembly.git
   - cd metaborg-webassembly
@@ -29,5 +28,5 @@ install:
 script:
   - cd WebAssembly
   - mvn clean install
-  - cd $CI_SOURCE_PATH/Wython
+  - cd $CI_SOURCE_PATH/src/Wython
   - mvn clean install
