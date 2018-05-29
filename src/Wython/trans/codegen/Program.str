@@ -3,6 +3,7 @@ module Program
 imports
   trans/codegen/-
   signatures/WebAssembly/WastModule-sig
+  signatures/WebAssembly/WastStart-sig
   ast-syntax/AST-Wython
   ast-syntax/AST-Statement
 
@@ -10,11 +11,12 @@ strategies
   codegen-all = codegen
  
 rules
-  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList)
+  codegen: Module(stmts) -> WastModule(iList, dList, fList, eList, start)
     where
        <debug> stmts;
        iList := <imports> stmts;
        dList := <data> stmts;
        fList := <funcs> stmts;
-       eList :=  <exports> stmts
+       eList :=  <exports> stmts;
+       start := WastStart("$main")
        

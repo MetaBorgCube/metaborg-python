@@ -14,3 +14,7 @@
 *.gv
 *.dot
 *.pdf
+*.wasm
+*.html
+*.wasm-out
+*.wast
