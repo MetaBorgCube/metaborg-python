@@ -1,4 +1,9 @@
-a = 0
-while a < 0:
-  print("Hi!")
-  a = a + 1
+def a():
+  print("a")
+  print("b")
+if True:
+  print("True!")
+if False:
+  print("False!")
+print("c")
+a()
