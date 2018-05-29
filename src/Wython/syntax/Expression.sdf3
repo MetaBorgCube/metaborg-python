@@ -79,7 +79,7 @@ context-free syntax
   TestListCompContents.StarExp = StarExp
   
   DictContents.KeyValuePair = Test ":" Test
-  DictContents.Kwargs = "**" Exp
+  DictContents.DictKwargs = "**" Exp
   
   DictContentsNode.DictContents = "," NewLine? DictContents
   DictContentsNode.CompFor = CompFor

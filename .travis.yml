@@ -1,0 +1,32 @@
+dist: trusty
+language: java
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+
+branches:
+  except:
+  - /^doc-.*$/
+
+# Configuration variables.
+env:
+  global:
+    - CI_SOURCE_PATH=$(pwd)
+
+################################################################################
+
+install:
+  - cd ../
+  - git clone https://github.com/JRasmusBm/metaborg-webassembly.git
+  - cd metaborg-webassembly
+  # If there is a branch with the same name, use that one, otherwise skip
+  - git checkout $TRAVIS_BRANCH || echo 'No equally named branch available'
+
+script:
+  - cd WebAssembly
+  - mvn clean install
+  - cd $CI_SOURCE_PATH/src/Wython
+  - mvn clean install
