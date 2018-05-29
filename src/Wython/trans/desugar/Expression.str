@@ -131,6 +131,7 @@ rules
   desugar-comp(ctx): Comparison(Is(),    exp) -> (Is(),    <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr(ctx)> exp)
   
+  desugar-expr(ctx): LambdaDef(lambdaDef) -> <desugar-expr(ctx)> lambdaDef
   desugar-expr(ctx): LambdaDef(args, body) -> Lambda(Arguments(des-args, None(), keys, defaults, kwarg, [] ), <desugar-expr(ctx)> body)
     where
       (des-args, keywords, kwarg) := <desugar-lambda-args(ctx)> args;
