@@ -20,7 +20,7 @@ rules
       (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
       (w-else, mem3) := <foldl(codegen-stmt)> (else, ([], mem2));
       //TODO: add else case
-      w-stmt := WastBlock(WastLoop(<concat> [w-body, [WastBrIf("0", w-cond)], [WastBr("1")]]))
+      w-stmt := WastIf(w-cond, WastThen([WastBlock(WastLoop(<concat> [w-body, [WastBrIf("0", w-cond)], [WastBr("1")]]))]), None())
       
   codegen-stmt: (If(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
