@@ -31,8 +31,6 @@ rules
        init := WastStart("$main")
 
   is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
-//  is-not-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e) where false
-//  is-not-func: e -> e
   
   wast-add-import(wast): (imp, mem) -> (<concat>[i, [imp]], d, f, e, v, mptr)
     where 

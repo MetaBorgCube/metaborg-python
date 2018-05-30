@@ -5,8 +5,11 @@
 /.project
 /.settings
 /.factorypath
+**/*.sh
 **/*.wasm
 **/*.html
+**/*.js
+**/*.wast
 
 *.constraints
 *.scope-graph
