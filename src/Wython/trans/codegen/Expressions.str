@@ -30,8 +30,16 @@ rules
       (w-l, mem1) := <codegen-expr> (l, mem);
       (w-r, mem2) := <codegen-expr> (r, mem1)
       
+  codegen-comp-op: (Eq(), l, r) -> WastI32Eq(l, r)
   codegen-comp-op: (Lt(), l, r) -> WastI32LtS(l, r)
-  codegen-bin-op: (Add(), l, r) -> WastAdd(l, r)
+  codegen-comp-op: (Gt(), l, r) -> WastI32GtS(l, r)
+  codegen-comp-op: (LtE(), l, r) -> WastI32LeS(l, r)
+  codegen-comp-op: (GtE(), l, r) -> WastI32GeS(l, r)
+  codegen-bin-op: (Add(), l, r) -> WastI32Add(l, r)
+  codegen-bin-op: (Sub(), l, r) -> WastSub(l, r)
+  codegen-bin-op: (Mult(), l, r) -> WastI32Mul(l, r)
+  codegen-bin-op: (FloorDiv(), l, r) -> WastI32Div(l, r)
+  codegen-bin-op: (Mod(), l, r) -> WastI32Rest(l, r)
       
   codegen-expr: (Call(obj, args, kargs), mem) -> (WastCall(<codegen-call-name> obj, w-args), mem1)
     where
