@@ -1,3 +1,6 @@
+pass
+x = 2
+y = 3
 def a():
   print("a")
   print("b")
@@ -8,6 +11,6 @@ if True:
     a = a - 1 + 2 * 1
   print("True!")
 print("d")
-if False:
+if x > y:
   print("False!")
 a()
