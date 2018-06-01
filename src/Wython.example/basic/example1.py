@@ -2,10 +2,10 @@ def a():
   print("a")
   print("b")
 if True:
-  a = 10
-  while a > 0:
+  a = 0
+  while a != 10:
     print("Hi!")
-    a = a - 3
+    a = a - 1 + 2 * 1
   print("True!")
 print("d")
 if False:

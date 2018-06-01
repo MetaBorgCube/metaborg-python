@@ -126,7 +126,7 @@ rules
   desugar-comp(ctx): Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): Comparison(Neq(),   exp) -> (NotEq(),   <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(In(),    exp) -> (In(),    <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr(ctx)> exp)
   desugar-comp(ctx): Comparison(Is(),    exp) -> (Is(),    <desugar-expr(ctx)> exp)
