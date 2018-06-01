@@ -1,0 +1,31 @@
+module Types
+
+imports
+  signatures/WebAssembly/-
+  trans/codegen/-
+  ast-syntax/-
+
+rules
+
+// TYPE
+
+get-type:
+  Int(n) -> (type, size, value)
+  where 
+  type := 1;
+  size := 4;
+  value := n
+
+get-type:
+  String(s) -> (type, size, value)
+  where 
+  type := 2;
+  size := <length> s;
+  value := s 
+
+get-type:
+  e -> e
+  where
+  <debug> ("get-type, error:", e)
+
+// INTEGERS
