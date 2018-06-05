@@ -8,7 +8,6 @@ imports
   trans/desugar/Type
   
 rules
-  desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
   desugar-suite: BlockLine(stmts) -> <mapconcat(desugar-stmt)> stmts
   
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts

@@ -94,5 +94,4 @@ context-free syntax
     
     FuncType.FuncType = "->" Test
 
-    Suite.Statement = SimpleStatement   {prefer}
     Suite.BlockLine = {Statement "\n"}+ { layout (align 1) }
