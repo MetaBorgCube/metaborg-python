@@ -37,7 +37,7 @@ context-free syntax
     ElifElse = Else
     ElifElse = Elif
     
-    With.With = "with" { WithItem ","}+ ":" body:Suite	{ layout (indent "with" body) }
+    With.With = "with" { WithItem ","}+ IndentOpen body:Suite	{ layout (indent "with" body) }
 
     For.For = "for" ExpList "in" TestList IndentOpen body:Suite                 { layout (indent "for" body) }
     For.ForElse = "for" ExpList "in" TestList IndentOpen body:Suite else:Else   { layout (indent "for" body && align "for" else) }
