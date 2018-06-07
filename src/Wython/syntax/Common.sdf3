@@ -8,13 +8,13 @@ lexical syntax
   Semicolon      = ";"
   Comma          = ","
   LAYOUT         = [\ \t]
+  LAYOUT         = NewLine
   LAYOUT         = "#" ~[\n\r]* EOF 
   NewLine        = [\n\r]
   NewLineEOF     = NewLine
   NewLineEOF     = EOF 
   EOF            =  
   StatementEnd   = [\;]
-  IndentOpen     = ":" LAYOUT* NewLine
 
 lexical restrictions
   // EOF may not be followed by any char

@@ -17,18 +17,18 @@ context-free start-symbols
 
 context-free syntax
 
-    CompoundStatement.If = "if" Test IndentOpen body:Suite                     { layout (indent "if" body) }
-    CompoundStatement.IfElse = "if" Test IndentOpen body:Suite else:ElifElse   { layout (indent "if" body && align "if" else) }
+    CompoundStatement.If = "if" Test ":" body:Suite                     { layout (indent "if" body) }
+    CompoundStatement.IfElse = "if" Test ":" body:Suite else:ElifElse   { layout (indent "if" body && align "if" else) }
     
-    CompoundStatement.While = "while" Test IndentOpen body:Suite                 { layout (indent "while" body) }
-    CompoundStatement.WhileElse = "while" Test IndentOpen body:Suite else:Else   { layout (indent "while" body && align "while" else) }
+    CompoundStatement.While = "while" Test ":" body:Suite                 { layout (indent "while" body) }
+    CompoundStatement.WhileElse = "while" Test ":" body:Suite else:Else   { layout (indent "while" body && align "while" else) }
 
     CompoundStatement.For = For
-    CompoundStatement.Try = "try" IndentOpen body:Suite Except+ Else? Finally? { layout (indent "try" body) }
-    CompoundStatement.TryFinally = "try" IndentOpen body:Suite Finally		   { layout (indent "try" body) }
+    CompoundStatement.Try = "try" ":" body:Suite Except+ Else? Finally? { layout (indent "try" body) }
+    CompoundStatement.TryFinally = "try" ":" body:Suite Finally		   { layout (indent "try" body) }
     CompoundStatement.With = With
     CompoundStatement.FuncDef =  FuncDef
-    CompoundStatement.ClassDef = "class" ID ArgListInBraces? IndentOpen body:Suite { layout (indent "class" body) }
+    CompoundStatement.ClassDef = "class" ID ArgListInBraces? ":" body:Suite { layout (indent "class" body) }
     CompoundStatement.Decorated = Decorators Definition
     CompoundStatement.AsyncFunc = Async FuncDef
     CompoundStatement.AsyncWith = Async With
@@ -37,15 +37,15 @@ context-free syntax
     ElifElse = Else
     ElifElse = Elif
     
-    With.With = "with" { WithItem ","}+ IndentOpen body:Suite	{ layout (indent "with" body) }
+    With.With = "with" { WithItem ","}+ ":" body:Suite	{ layout (indent "with" body) }
 
-    For.For = "for" ExpList "in" TestList IndentOpen body:Suite                 { layout (indent "for" body) }
-    For.ForElse = "for" ExpList "in" TestList IndentOpen body:Suite else:Else   { layout (indent "for" body && align "for" else) }
+    For.For = "for" ExpList "in" TestList ":" body:Suite                 { layout (indent "for" body) }
+    For.ForElse = "for" ExpList "in" TestList ":" body:Suite else:Else   { layout (indent "for" body && align "for" else) }
     
-    Finally.Finally = "finally" IndentOpen body:Suite { layout (indent "finally" body) }
+    Finally.Finally = "finally:" body:Suite { layout (indent "finally:" body) }
 
 // TODO Default Except Clause
-    Except.Except = ExceptClause IndentOpen body:Suite { layout (indent 1 body) }
+    Except.Except = ExceptClause ":" body:Suite { layout (indent 1 body) }
     
     ExceptClause.ExceptClause = "except" ExceptArgument?
 
@@ -53,7 +53,7 @@ context-free syntax
 
     Decorators.Decorators = Decorator+
     
-    Decorator.Decorator = "@" DottedName ArgListInBraces? NewLine
+    Decorator.Decorator = "@" DottedName ArgListInBraces?
 
     ArgListInBraces.ArgListInBraces = "(" ArgList? ")"
 
@@ -62,7 +62,7 @@ context-free syntax
     
     AsyncFuncDef.AsyncFuncDef = Async FuncDef
     
-    FuncDef.FuncDef = "def" ID Parameters FuncType? IndentOpen body:Suite { layout (indent "def" body) }
+    FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite { layout (indent "def" body) }
     
     SubscriptList.SubscriptList = {Subscript ","}+ Comma?
     
@@ -87,11 +87,11 @@ context-free syntax
     WithItem.Item = Test WithItemAs?
     WithItemAs.As = "as" Exp
 
-    Elif.Elif = "elif" Test IndentOpen body:Suite                   { layout (indent "elif" body) }
-    Elif.ElifElse = "elif" Test IndentOpen body:Suite else:ElifElse { layout (indent "elif" body && align "elif" else) }
+    Elif.Elif = "elif" Test ":" body:Suite                   { layout (indent "elif" body) }
+    Elif.ElifElse = "elif" Test ":" body:Suite else:ElifElse { layout (indent "elif" body && align "elif" else) }
     
-    Else.Else = NewLine "else" IndentOpen body:Suite { layout (indent "else" body) }
+    Else.Else = "else:" body:Suite { layout (indent "else:" body) }
     
     FuncType.FuncType = "->" Test
 
-    Suite.BlockLine = {Statement "\n"}+ { layout (align 1) }
+    Suite.BlockLine = Statement+ { layout (align 1) }
