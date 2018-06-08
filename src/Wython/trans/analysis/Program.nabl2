@@ -28,6 +28,7 @@ sorts Type
      StringT : Type
      BoolT : Type
      NoneT : Type
+     UnitT: Type
      
      CallableT : list(Type) * Type -> Type
      GeneratorT : Type -> Type
@@ -44,6 +45,10 @@ rules
     IntT() <! NumT(),
     FloatT() <! NumT(),
     
+    NumT() <! UnitT(),
+    StringT() <! UnitT(),
+    BoolT() <! UnitT(),
+    
     // Builtin '__name__'
     Var{"__name__"} <- initial,
     Var{"__name__"}: StringT()!,
@@ -56,34 +61,10 @@ rules
     Var{"range"} <- initial,
     Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
     
-  
-  Fold[[ [If(cond, then, else)|xs] ^ (s, endif_s)]] :=
-    new if_then_s, if_then_s ---> s,
-    new if_else_s, if_else_s ---> s,
-    
-    Expr[[ cond ^ (s) : ty]],
-    ty <? BoolT() | error $[Non-boolean condition],
-    Fold[[ then ^ (if_then_s, then_bot)]],
-    Fold[[ else ^ (if_else_s, else_bot)]],
-    
-    new endif_s, endif_s ---> then_bot, endif_s ---> else_bot, 
-    
-    // TODO: Generate may/must stuff here
-    
-    new a,
-    Fold[[ xs ^ (endif_s, a)]].
-  
-  Fold[[ [x|xs] ^ (s1, s2)]] :=
-    Stmt[[ x ^ (s1)]],
-    Fold[[ xs ^ (s1, s2)]],
-    s1 == s2.
-  
-  Fold[[ [] ^ (s1, s2)]] := s1 == s2.
-    
   [[Module(stmts) ^ (s)]] :=
     Module{"__main__"} <- s,
     new s_module, s_module ---> s,
       Module{"__main__"} ===> s_module,
-      Fold[[stmts ^ (s_module, _)]].
+      Map1(Stmt)[[stmts ^ (s_module)]].
       
       

@@ -9,10 +9,61 @@ rules
   Stmt[[ [] ^(s)]].	// Empty else and stuff
     
   Stmt[[ExprStmt(exp) ^(s)]] :=
-    Expr[[exp ^(s): _]].
+    Expr[[exp ^(s): ty]],
+    true.
+//    ty <? NoneT() | note $[Result of calculation is not stored].
     
-  Stmt[[Assign(obj, val) ^(s)]] :=
-    Name[[obj ^(s) : ty]],
+  Stmt[[If(cond, then, else) ^(s)]] :=
+    Expr[[cond ^(s): condty]],
+    condty <? BoolT() | error $[non-boolean condition, found [condty]],
+    new if_then_s, if_then_s ---> s,
+    new if_else_s, if_else_s ---> s,
+     Map1(Stmt)[[then ^(if_then_s)]],
+     Map1(Stmt)[[else ^(if_else_s)]].
+  
+  Stmt[[While(cond, body, else) ^(s)]] :=
+    Expr[[cond ^(s): condty]],
+    condty <? BoolT() | error $[non-boolean condition, found [condty]],
+    new while_body_s, while_body_s ---> s,
+    new while_else_s, while_else_s ---> s,
+     Map1(Stmt)[[body ^(while_body_s)]],
+     Map1(Stmt)[[else ^(while_else_s)]].
+    
+  Stmt[[FunctionDef(name, Arguments(args, _, _ , _, _, _), body, decorators, typeAnnotation) ^(s)]] :=
+  	Var{name} <- s,
+  	new fun_s, fun_s ---> s,
+  	Var{name} ===> fun_s,
+  	Map1T(Args)[[args ^(fun_s): argtys]],
+  	
+  	Type[[typeAnnotation: retty]],
+  	Var{name}: CallableT(argtys, retty)!,
+  	
+  	Var{"_$_return"} <- fun_s,
+  	Var{"_$_return"}: retty!,
+  	Map1(Stmt)[[body ^(fun_s)]].
+    
+  Args[[Arg(ID(name), type) ^(s) : ty]] :=
+  	Var{name} <- s,
+  	Type[[type: ty]],
+  	Var{name}: ty!.
+ 
+  Type[[None(): UnitT()]].
+  Type[[IntT(): IntT()]].
+  Type[[StringT(): StringT()]].
+  Type[[NoneT(): NoneT()]].
+  Type[[BoolT(): BoolT()]].
+  	
+  Stmt[[Return(val) ^(s)]] :=
+  	Expr[[val ^(s): ty]],
+  	Var{"_$_return"} -> s,
+  	Var{"_$_return"} |-> d,
+  	d: expty,
+  	ty <? expty | error $[Invalid return type. Found [ty], expected [expty]].
+  
+  Stmt[[Assign(Name(ID(id), _), val) ^(s)]] :=
     Expr[[val ^(s) : tyval]],
-    tyval == ty,
-    tyval <? ty | warning $[You are assigning a value of type [tyval] to a variable containing type [ty]].
+    Var{id} <- s,
+    Var{id} : ty!,
+    true.
+//    Var{id} |-> d | error,
+//    d : ty | warning $[You are assigning a value of type [tyval] to a variable containing type [ty]].

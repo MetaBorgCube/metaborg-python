@@ -60,6 +60,7 @@ rules
   desugar-expr(ctx): AtomExp(None(), True(), []) -> True()
   desugar-expr(ctx): AtomExp(None(), False(), []) -> False()
   desugar-expr(ctx): AtomExp(None(), Int(val), []) -> Int(<string-to-int> val)
+  desugar-expr(ctx): AtomExp(None(), NoneVal(),[]) -> NoneVal()
   
   desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
