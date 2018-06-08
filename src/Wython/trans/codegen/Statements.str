@@ -34,6 +34,9 @@ rules
     where
     (else-stmts, mem') := <foldl(codegen-stmt)> (stmts, ([], mem))
     
+  codegen-stmt: (Return(expr), (stmts, mem)) -> (<concat> [stmts, [WastReturn(w-expr)]], mem1)
+      where
+      (w-expr, mem1) := <codegen-expr> (expr, mem)
   
   codegen-stmt: (ExprStmt(expr), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem')
     where

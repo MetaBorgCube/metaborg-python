@@ -11,6 +11,8 @@ rules
   desugar-type: NoneVal() -> NoneVal()
   desugar-type: Some(TypedArgDefExtension(exp)) -> <desugar-type><desugar-expr(!Load())>exp
   desugar-type: Some(FuncType(exp)) -> <desugar-type><desugar-expr(!Load())>exp
+  desugar-type: Name(type, Load()) -> <desugar-type> type
+  desugar-type: ID("int") -> IntT()
   
   desugar-type: ID(name) -> Name(name, Load())
   desugar-type: Tuple(types, _) -> Tuple(<map(desugar-type)>types, Load())

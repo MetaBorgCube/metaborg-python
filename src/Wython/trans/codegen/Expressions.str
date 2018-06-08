@@ -29,7 +29,7 @@ rules
     where
       (w-l, mem1) := <codegen-expr> (l, mem);
       (w-r, mem2) := <codegen-expr> (r, mem1)
-      
+   
   codegen-comp-op: (Eq(), l, r) -> WastI32Eq(l, r)
   codegen-comp-op: (NotEq(), l, r) -> WastI32Ne(l, r)
   codegen-comp-op: (Lt(), l, r) -> WastI32LtS(l, r)
@@ -44,6 +44,17 @@ rules
   codegen-bin-op: (FloorDiv(), l, r) -> WastI32DivS(l, r)
   codegen-bin-op: (Mod(), l, r) -> WastI32RemS(l, r)
       
+  codegen-expr: (Call(Name(ID("print"), Load()), args, kargs), mem) -> (WastCall("$print", str), mem1)
+    where
+      <debug> "Printing!";
+      (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem));
+      str := <i-to-string> w-args
+
+  //codegen-expr: (Call(Name(ID("print"), Load()), args, kargs), mem) -> (WastCall("$print", str), mem1)
+    //where
+      //(w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem));
+      //str := <s-to-string> w-args
+
   codegen-expr: (Call(obj, args, kargs), mem) -> (WastCall(<codegen-call-name> obj, w-args), mem1)
     where
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
@@ -53,7 +64,7 @@ rules
   codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
   codegen-name: Name(ID(name), Load()) ->  WastGetLocal(<concat-strings> ["$", name])
   codegen-call-name: Name(ID(name), Load()) ->  <concat-strings> ["$", name]
-  
+
   codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, w-arg], mem1)
     where
       (w-arg, mem1) := <codegen-expr> (arg, mem)

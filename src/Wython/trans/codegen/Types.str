@@ -7,6 +7,126 @@ imports
 
 rules
 
+// REPR
+
+  int-repr-func: _ -> [
+    WastFunc(
+      Some("$intRepr")
+    , [WastParam(Some("$value"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [ WastLocal(Some("$digit"), WastI32())
+      , WastLocal(Some("$location"), WastI32())
+      , WastLocal(Some("$currLocation"), WastI32())
+      , WastLocal(Some("$len"), WastI32())
+      , WastSetLocal("$len", WastCall("$length", [WastGetLocal("$value")]))
+      , WastSetLocal("$location", WastGrowMemory(WastGetLocal("$len")))
+      , WastSetLocal(
+          "$digit"
+        , WastCall(
+            "$pow"
+          , [WastI32Const("10"), WastI32Sub(WastGetLocal("$len"), WastI32Const("1"))]
+          )
+        )
+      , WastSetLocal("$currLocation", WastGetLocal("$location"))
+      , WastBlock(
+          WastLoop(
+            [ WastI32Store(
+                WastGetLocal("$currLocation")
+              , WastI32Add(
+                  WastI32RemS(WastI32DivS(WastGetLocal("$value"), WastGetLocal("$digit")), WastI32Const("10"))
+                , WastI32Const("48")
+                )
+              )
+            , WastSetLocal("$currLocation", WastI32Add(WastGetLocal("$currLocation"), WastI32Const("1")))
+            , WastSetLocal("$digit", WastI32DivS(WastGetLocal("$digit"), WastI32Const("10")))
+            , WastBrIf("1", WastI32LeS(WastGetLocal("$digit"), WastI32Const("0")))
+            , WastBr("0")
+            ]
+          )
+        )
+      , WastGetLocal("$location")
+      ]
+    )
+  ]
+
+  repr-funcs: _ -> <concat> [
+    <int-repr-func>
+  ]
+  
+  int-length-func: _ -> [
+    WastFunc(
+        Some("$length")
+      , [WastParam(Some("$value"), WastI32())]
+      , Some(WastResult(WastI32()))
+      , [ WastLocal(Some("$len"), WastI32())
+        , WastSetLocal("$len", WastI32Const("0"))
+        , WastBlock(
+            WastLoop(
+              [ WastSetLocal("$len", WastI32Add(WastGetLocal("$len"), WastI32Const("1")))
+              , WastSetLocal("$value", WastI32DivS(WastGetLocal("$value"), WastI32Const("10")))
+              , WastBrIf("1", WastI32Eq(WastGetLocal("$value"), WastI32Const("0")))
+              , WastBr("0")
+              ]
+            )
+          )
+        , WastGetLocal("$len")
+        ]
+    )
+  ]
+  
+  length-funcs: _ -> <concat> [
+    <int-length-func>
+  ]
+  
+  pow-func: _ -> [
+      WastFunc(
+        Some("$pow")
+      , [WastParam(Some("$value"), WastI32()), WastParam(Some("$exp"), WastI32())]
+      , Some(WastResult(WastI32()))
+      , [ WastIf(
+            WastI32LeS(WastGetLocal("$exp"), WastI32Const("0"))
+          , WastThen([WastReturn(WastI32Const("1"))])
+          , Some(
+              WastElse(
+                [ WastIf(
+                    WastI32Eq(WastGetLocal("$exp"), WastI32Const("1"))
+                  , WastThen([WastReturn(WastGetLocal("$value"))])
+                  , Some(
+                      WastElse(
+                        [ WastReturn(
+                            WastI32Mul(
+                              WastGetLocal("$value")
+                            , WastCall(
+                                "$pow"
+                              , [WastGetLocal("$value"), WastI32Sub(WastGetLocal("$exp"), WastI32Const("1"))]
+                              )
+                            )
+                          )
+                        ]
+                      )
+                    )
+                  )
+                ]
+              )
+            )
+          )
+        , WastReturn(WastI32Const("-1"))
+        ]
+      )
+  ]
+  
+  math-funcs: _ -> <concat> [
+    <pow-func>
+  ]
+  
+  i-to-string: val -> [
+    WastCall("$intRepr", val), 
+    WastCall("$length", val)
+  ]
+
+  s-to-string: val -> val
+  
+  
 // TYPE
 
 get-type:

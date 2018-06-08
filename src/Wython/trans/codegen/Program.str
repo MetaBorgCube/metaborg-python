@@ -17,11 +17,12 @@ rules
   	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
   	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
   ]
+
   init-memory: _ -> [
   	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
   ]
   
-  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, fList, eList, init)], "")
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, fList] , eList, init)], "")
     where
 	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;
@@ -54,12 +55,19 @@ rules
   
   codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, mem)
   	where
+  	  <debug> ("Return:", return);
   	  (_, data, funcs, _, vars, mptr) := wast;
   	  (argdefs, argnames) := <codegen-func> args;
-  	  (funcbody, mem) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
   	  (_, _, vardecls, _) := mem;
   	  w-vardecls := <map(codegen-func)> <diff> (vardecls, argnames);
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <concat>[w-vardecls, funcbody])
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <result> return, <concat>[w-vardecls, funcbody])
+  	  
+  result: IntT() -> Some(WastResult(WastI32()))
+  result: None() -> None()
+  result: e -> e
+    where
+    <debug> ("Result failed", e)
   
   codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
   codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), (w-name, WastI32())) where w-name := <concat-strings> ["$", name]
