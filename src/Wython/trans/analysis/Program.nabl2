@@ -57,20 +57,21 @@ rules
     Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
     
   
-  Fold[[ [If(cond, then, else)|xs] ^ (s, nested_s)]] :=
+  Fold[[ [If(cond, then, else)|xs] ^ (s, endif_s)]] :=
     new if_then_s, if_then_s ---> s,
     new if_else_s, if_else_s ---> s,
     
     Expr[[ cond ^ (s) : ty]],
-    ty == BoolT() | error $[Non-boolean condition],
+    ty <? BoolT() | error $[Non-boolean condition],
     Fold[[ then ^ (if_then_s, then_bot)]],
     Fold[[ else ^ (if_else_s, else_bot)]],
     
-    new nested_s, nested_s ---> then_bot, nested_s ---> else_bot, 
+    new endif_s, endif_s ---> then_bot, endif_s ---> else_bot, 
     
     // TODO: Generate may/must stuff here
     
-    Fold[[ xs ^ (nested_s, _)]].
+    new a,
+    Fold[[ xs ^ (endif_s, a)]].
   
   Fold[[ [x|xs] ^ (s1, s2)]] :=
     Stmt[[ x ^ (s1)]],
