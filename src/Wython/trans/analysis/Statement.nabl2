@@ -4,6 +4,15 @@ imports
   desugar/-
   analysis/-
 
-rules
-  [[ExprStmt(exp) ^(s)]] :=
-    [[exp ^(s)]].
+rules  
+  
+  Stmt[[ [] ^(s)]].	// Empty else and stuff
+    
+  Stmt[[ExprStmt(exp) ^(s)]] :=
+    Expr[[exp ^(s): _]].
+    
+  Stmt[[Assign(obj, val) ^(s)]] :=
+    Name[[obj ^(s) : ty]],
+    Expr[[val ^(s) : tyval]],
+    tyval == ty,
+    tyval <? ty | warning $[You are assigning a value of type [tyval] to a variable containing type [ty]].

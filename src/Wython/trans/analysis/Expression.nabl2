@@ -6,35 +6,43 @@ imports
       
 rules
 
-  callable[[ Name(ID(a), Load()) ^(s) ]] := 
+  Name[[ Name(ID(a), Store()) ^(s): ty]] := 
+    distinct/name V(s)/Var | error $[Redefinition of variable] @NAMES,
+    Var{a} <- s,
+    
+//    Var{a} |-> d | warning $[Variable [a] might not be defined],
+    Var{a}: ty!.
+    
+  Name[[ Name(ID(a), Load()) ^(s): ty]] := 
     Var{a} -> s,
-    Var{a} |-> d | warning $[Object [a] might not be defined],  // TODO: When this fails do not continue
+    Var{a} |-> d | warning $[Variable [a] might not be defined],  // TODO: When this fails do not continue
+    Var{a}: ty.
     
-    new s_fun, s_fun ---> s,
-      // Import the object body
-      d <=== s_fun,
-      Function{"__call__"} -> s_fun,
-      
-      //FIXME: This does not work, while the scope-graph looks correct
-//      Function{"__call__"} |-> d | warning $[Function '__call__' might not be defined for this object].
-      true.
-    
-  argument[[(ID(i), expr) ^(s)]] :=
+  argument[[(ID(i), expr) ^(s) : ty]] :=
     //TODO: try to check if argument match function definition
-    [[expr ^(s)]].
+    Expr[[expr ^(s): ty]].
 
-  [[ Call(func, args, kargs) ^(s) ]] :=
-    callable[[func  ^(s)]],
-    Map1(argument)[[args  ^(s)]],
-    Map1(argument)[[kargs ^(s)]].
+  Expr[[ Call(func, args, kargs) ^(s) : rtype]] :=
+    Name[[func  ^(s) : objType]],
+
+    objType == CallableT(argTypes, rtype) | warning $[Object might not be callable],
+    Map1T(argument)[[args  ^(s): argtys]],
+    Map1T(argument)[[kargs ^(s): kargtys]].
     
     
   // Arithmatic Expressions
-  [[BinOp(op, l, r) ^(s)]] :=
-    [[l ^(s)]],
-    [[r ^(s)]].
+  Expr[[BinOp(op, l, r) ^(s): ty]] :=
+    Expr[[l ^(s): t1]],
+    Expr[[r ^(s): t2]],
+    t2 == t1 | error $[Types not equal: [t1] != [t2]],
+    ty == t1.
 
 
   // Atoms
-  [[Int(x) ^(s)]].
-  [[String(x) ^(s)]].
+  Expr[[Int(_) ^(s): IntT()]].
+  Expr[[String(_) ^(s): StringT()]].
+  Expr[[True() ^(s): BoolT()]].
+  Expr[[False() ^(s): BoolT()]].
+  
+  
+  

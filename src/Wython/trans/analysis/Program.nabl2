@@ -23,24 +23,66 @@ name resolution
 sorts Type
    constructors
      NumT : Type
-     CallableT : Type
-     Object : Type
+     IntT: Type
+     FloatT: Type
+     StringT : Type
+     BoolT : Type
+     NoneT : Type
+     
+     CallableT : list(Type) * Type -> Type
+     GeneratorT : Type -> Type
+     ObjectT : Type
+     TupleT : Type -> Type
+     
+     Defined: Definition
+     Maybe: Definition
      
 rules
-  
-  init ^ (s) :=
-    new s,
+
+  init ^ (initial) :=
+    new initial,
+    IntT() <! NumT(),
+    FloatT() <! NumT(),
+    
+    // Builtin '__name__'
+    Var{"__name__"} <- initial,
+    Var{"__name__"}: StringT()!,
     
     // Builtin 'print()'
-    Var{"print"} <- s,
-    new s_builtin_print, s_builtin_print ---> s,
-      Var{"print"} ===> s_builtin_print,
-      Function{"__call__"} <- s_builtin_print.
-
-
-
+    Var{"print"} <- initial,
+    Var{"print"}: CallableT([ObjectT()], NoneT())!,
+    
+    // Builtin 'range()'
+    Var{"range"} <- initial,
+    Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
+    
+  
+  Fold[[ [If(cond, then, else)|xs] ^ (s, nested_s)]] :=
+    new if_then_s, if_then_s ---> s,
+    new if_else_s, if_else_s ---> s,
+    
+    Expr[[ cond ^ (s) : ty]],
+    ty == BoolT() | error $[Non-boolean condition],
+    Fold[[ then ^ (if_then_s, then_bot)]],
+    Fold[[ else ^ (if_else_s, else_bot)]],
+    
+    new nested_s, nested_s ---> then_bot, nested_s ---> else_bot, 
+    
+    // TODO: Generate may/must stuff here
+    
+    Fold[[ xs ^ (nested_s, _)]].
+  
+  Fold[[ [x|xs] ^ (s1, s2)]] :=
+    Stmt[[ x ^ (s1)]],
+    Fold[[ xs ^ (s1, s2)]],
+    s1 == s2.
+  
+  Fold[[ [] ^ (s1, s2)]] := s1 == s2.
+    
   [[Module(stmts) ^ (s)]] :=
     Module{"__main__"} <- s,
     new s_module, s_module ---> s,
       Module{"__main__"} ===> s_module,
-      Map1[[ stmts ^ (s_module) ]].
+      Fold[[stmts ^ (s_module, _)]].
+      
+      

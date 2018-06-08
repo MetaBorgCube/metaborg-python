@@ -56,7 +56,11 @@ rules
   desugar-expr(ctx): AtomExp(None(), TestListComp(elem  ), _) -> List(<desugar-list> elem, Load())
   
   desugar-expr(ctx): AtomExp(None(), ID(name), []) -> Name(ID(name), <ctx>)
-  desugar-expr(ctx): AtomExp(None(), atom, []) -> atom
+  desugar-expr(ctx): AtomExp(None(), String(string), []) -> String(string)
+  desugar-expr(ctx): AtomExp(None(), True(), []) -> True()
+  desugar-expr(ctx): AtomExp(None(), False(), []) -> False()
+  desugar-expr(ctx): AtomExp(None(), Int(val), []) -> Int(<string-to-int> val)
+  
   desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
   desugar-atom(ctx): (obj, DotName(name), [h | t]) -> <desugar-atom(ctx)> (<concat>[obj, [ID(name)]], h, t)
