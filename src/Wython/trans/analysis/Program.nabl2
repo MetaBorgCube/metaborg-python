@@ -23,24 +23,48 @@ name resolution
 sorts Type
    constructors
      NumT : Type
-     CallableT : Type
-     Object : Type
+     IntT: Type
+     FloatT: Type
+     StringT : Type
+     BoolT : Type
+     NoneT : Type
+     UnitT: Type
+     
+     CallableT : list(Type) * Type -> Type
+     GeneratorT : Type -> Type
+     ObjectT : Type
+     TupleT : Type -> Type
+     
+     Defined: Definition
+     Maybe: Definition
      
 rules
-  
-  init ^ (s) :=
-    new s,
+
+  init ^ (initial) :=
+    new initial,
+    IntT() <! NumT(),
+    FloatT() <! NumT(),
+    
+    NumT() <! UnitT(),
+    StringT() <! UnitT(),
+    BoolT() <! UnitT(),
+    
+    // Builtin '__name__'
+    Var{"__name__"} <- initial,
+    Var{"__name__"}: StringT()!,
     
     // Builtin 'print()'
-    Var{"print"} <- s,
-    new s_builtin_print, s_builtin_print ---> s,
-      Var{"print"} ===> s_builtin_print,
-      Function{"__call__"} <- s_builtin_print.
-
-
-
+    Var{"print"} <- initial,
+    Var{"print"}: CallableT([ObjectT()], NoneT())!,
+    
+    // Builtin 'range()'
+    Var{"range"} <- initial,
+    Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
+    
   [[Module(stmts) ^ (s)]] :=
     Module{"__main__"} <- s,
     new s_module, s_module ---> s,
       Module{"__main__"} ===> s_module,
-      Map1[[ stmts ^ (s_module) ]].
+      Map1(Stmt)[[stmts ^ (s_module)]].
+      
+      
