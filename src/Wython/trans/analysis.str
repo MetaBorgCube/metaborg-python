@@ -9,9 +9,10 @@ imports
   desugar/Program
   analysis-desugar/desugar
   analysis/-
+  trash-amb
 
 rules // Analysis
-  editor-analyze = nabl2-analyze(desugar-all; analysis-desugar-all)
+  editor-analyze = nabl2-analyze(trash-amb; desugar-all; analysis-desugar-all)
 
 rules // Debuggings
   
