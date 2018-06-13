@@ -28,47 +28,14 @@ sorts Type
      StringT : Type
      BoolT : Type
      NoneT : Type
+     UnitT : Type
      
      CallableT : list(Type) * Type -> Type
      GeneratorT : Type -> Type
      ObjectT : Type
      TupleT : Type -> Type
      
-     Defined: Definition
-     Maybe: Definition
-     
 rules
-  Fold[[ [] ^(s1, s2)]] := s1 == s2.
-  
-  Fold[[ [If(cond, then, else) | t] ^(s1, s2) ]] :=
-  	Expr[[cond ^(s): condty]],
-    condty <? BoolT() | error $[non-boolean condition, found [condty]],
-    new if_then_s, if_then_s ---> s1,
-    new if_else_s, if_else_s ---> s1,
-     Fold()[[then ^(if_then_s, if_then_end_s)]],
-     Fold()[[else ^(if_else_s, if_else_end_s)]],
-    new if_end, if_end ---> if_then_end_s, if_end ---> if_else_end_s,
-    
-    CombineScopes[[ cond ^(s1, if_then_end_s, if_else_end_s, if_end)]],
-    Fold[[t ^(if_end, s2)]].
-
-  CombineScopes[[ _ ^(base, b1, b2, bot)]] :=
-  	distinct/name (V(b1)/Var minus V(base)/Var),
-  	distinct/name (V(b2)/Var minus V(base)/Var).
-  	
-  Fold[[ [Assign(Name(ID(id), _), val) | t] ^(s1, s2)]] :=
-    new s, s ---> s1,
-    Expr[[val ^(s) : ty]],
-    Var{id} <- s,
-    Var{id} : ty!,
-  	Var{id}.status := Defined(),
-    ExistsT[[id ^(s1) :ty]],
-    Fold[[t ^(s, s2)]].
-
-  Fold[[ [h|t] ^(s1, s2)]] :=
-  	Stmt[[h ^(s)]],
-  	Fold[[t ^(s1, s2)]].
-
   init ^ (initial) :=
     new initial,
     IntT() <! NumT(),
@@ -85,30 +52,6 @@ rules
     // Builtin 'range()'
     Var{"range"} <- initial,
     Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
-    
-  
-  Fold[[ [If(cond, then, else)|xs] ^ (s, endif_s)]] :=
-    new if_then_s, if_then_s ---> s,
-    new if_else_s, if_else_s ---> s,
-    
-    Expr[[ cond ^ (s) : ty]],
-    ty <? BoolT() | error $[Non-boolean condition],
-    Fold[[ then ^ (if_then_s, then_bot)]],
-    Fold[[ else ^ (if_else_s, else_bot)]],
-    
-    new endif_s, endif_s ---> then_bot, endif_s ---> else_bot, 
-    
-    // TODO: Generate may/must stuff here
-    
-    new a,
-    Fold[[ xs ^ (endif_s, a)]].
-  
-  Fold[[ [x|xs] ^ (s1, s2)]] :=
-    Stmt[[ x ^ (s1)]],
-    Fold[[ xs ^ (s1, s2)]],
-    s1 == s2.
-  
-  Fold[[ [] ^ (s1, s2)]] := s1 == s2.
     
   [[Module(stmts) ^ (s)]] :=
     Module{"__main__"} <- s,

@@ -7,32 +7,11 @@ imports
 rules  
   
   Stmt[[ [] ^(s)]].	// Empty else and stuff
+  Stmt[[ Pass() ^(s)]].
     
   Stmt[[ExprStmt(exp) ^(s)]] :=
     Expr[[exp ^(s): ty]],
-    true.
-//    ty <? NoneT() | note $[Result of calculation is not stored].
-  
-//  Stmt[[While(cond, body, else) ^(s)]] :=
-//    Expr[[cond ^(s): condty]],
-//    condty <? BoolT() | error $[non-boolean condition, found [condty]],
-//    new while_body_s, while_body_s ---> s,
-//    new while_else_s, while_else_s ---> s,
-//     Map1(Stmt)[[body ^(while_body_s)]],
-//     Map1(Stmt)[[else ^(while_else_s)]].
-    
-//  Stmt[[FunctionDef(name, Arguments(args, _, _ , _, _, _), body, decorators, typeAnnotation) ^(s)]] :=
-//  	Var{name} <- s,
-//  	new fun_s, fun_s ---> s,
-//  	Var{name} ===> fun_s,
-//  	Map1T(Args)[[args ^(fun_s): argtys]],
-//  	
-//  	Type[[typeAnnotation: retty]],
-//  	Var{name}: CallableT(argtys, retty)!,
-//  	
-//  	Var{"_$_return"} <- fun_s,
-//  	Var{"_$_return"}: retty!,
-//  	Map1(Stmt)[[body ^(fun_s)]].
+    ty != NoneT() | note $[Result of calculation is not stored] @exp.
     
   Args[[Arg(ID(name), type) ^(s) : ty]] :=
   	Var{name} <- s,
@@ -50,10 +29,10 @@ rules
   	Var{"_$_return"} -> s,
   	Var{"_$_return"} |-> d,
   	d: expty,
-  	ty <? expty | error $[Invalid return type. Found [ty], expected [expty]].
+  	ty <? expty | error $[Invalid return type. Found [ty], expected [expty]] @val.
   	
   ExistsT[[id ^(s) : ty ]] :=
   	Var{id} -> s, // This should not be needed
-  	Var{id} |-> d | note $[Fistr declariation of variable [id]] @id,
+  	Var{id} |-> d | note $[First declariation of variable [id]] @id,
     d : ty_old,
     ty_old == ty | warning $[You are assigning a value of type [ty] to a variable containing type [ty_old]] @id.

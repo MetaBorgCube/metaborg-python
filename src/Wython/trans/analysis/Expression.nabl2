@@ -6,24 +6,17 @@ imports
       
 rules
 
-  Name[[ Name(ID(a), Store()) ^(s): ty]] := 
-//    distinct/name V(s)/Var | error $[Redefinition of variable] @NAMES,
-    Var{a} <- s,
-    
-    Var{a} |-> d | warning $[Variable [a] might not be defined],
-    Var{a}: ty!.
-    
-  Name[[ Name(ID(a), Load()) ^(s): ty]] := 
+  Expr[[ Name(ID(a), Load()) ^(s): ty]] := 
     Var{a} -> s,
-    Var{a} |-> d | warning $[Variable [a] might not be defined],  // TODO: When this fails do not continue
-    Var{a}: ty.
+    Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
+    d: ty.
     
   argument[[(ID(i), expr) ^(s) : ty]] :=
     //TODO: try to check if argument match function definition
     Expr[[expr ^(s): ty]].
 
   Expr[[ Call(func, args, kargs) ^(s) : rtype]] :=
-    Name[[func  ^(s) : objType]],
+    Expr[[func  ^(s) : objType]],
 
     objType == CallableT(argTypes, rtype) | warning $[Object might not be callable],
     Map1T(argument)[[args  ^(s): argtys]],
