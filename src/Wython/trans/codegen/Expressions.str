@@ -10,7 +10,7 @@ rules
 //  codegen-expr: (Assign(name, value), mem) -> (<concat> [w-stmts, [w-stmt]], mem')
 //    where
   
-  codegen-expr: (Int(val), mem) -> (WastI32Const(val), mem)
+  codegen-expr: (Int(val), mem) -> (WastI32Const(<int-to-string>val), mem)
   codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string>loc), WastI32Const(<int-to-string>len)], mem1)
   where
       (loc, len, mem1) := <mem-add-string> (mem, val)
