@@ -1,9 +1,7 @@
-def a():
-  print("a")
-  print("b")
+a = 12
 if True:
-  print("True!")
-if False:
-  print("False!")
-print("c")
-a()
+	b = 13
+	if True:
+		b = 14
+	c = 14
+c = 12

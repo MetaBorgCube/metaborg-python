@@ -7,10 +7,10 @@ imports
 rules
 
   Name[[ Name(ID(a), Store()) ^(s): ty]] := 
-    distinct/name V(s)/Var | error $[Redefinition of variable] @NAMES,
+//    distinct/name V(s)/Var | error $[Redefinition of variable] @NAMES,
     Var{a} <- s,
     
-//    Var{a} |-> d | warning $[Variable [a] might not be defined],
+    Var{a} |-> d | warning $[Variable [a] might not be defined],
     Var{a}: ty!.
     
   Name[[ Name(ID(a), Load()) ^(s): ty]] := 
