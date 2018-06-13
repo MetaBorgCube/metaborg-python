@@ -44,19 +44,18 @@ rules
   codegen-bin-op: (FloorDiv(), l, r) -> WastI32DivS(l, r)
   codegen-bin-op: (Mod(), l, r) -> WastI32RemS(l, r)
       
-  codegen-expr: (Call(Name(ID("print"), Load()), args, kargs), mem) -> (WastCall("$print", str), mem1)
+  codegen-expr: (Call(Name(ID("print"), Load()), arg, kargs), mem) -> (WastCall("$print", str), mem1)
     where
       <debug> "Printing!";
-      (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem));
-      str := <i-to-string> w-args
-
-  //codegen-expr: (Call(Name(ID("print"), Load()), args, kargs), mem) -> (WastCall("$print", str), mem1)
-    //where
-      //(w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem));
-      //str := <s-to-string> w-args
+      [type] := <map(get-type)> arg;
+      <debug> ("types: ", type);
+      (w-args, mem1) := <foldl(codegen-arg-fold)> (arg, ([], mem));
+      <debug> ("w-args", w-args);
+      str := <expr-to-string> (w-args, type)
 
   codegen-expr: (Call(obj, args, kargs), mem) -> (WastCall(<codegen-call-name> obj, w-args), mem1)
     where
+      <debug> "Calling normal function!";
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
   
   codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", expr), mem)

@@ -1,5 +1,9 @@
-def factorial(n) -> int:
+def factorial(n: int) -> int:
   if n <= 0:
     return 1
   return n * factorial(n-1)
-print(factorial(5))
+n = 6
+print("Factorial of:")
+print(n)
+print("Equals: ")
+print(factorial(n))

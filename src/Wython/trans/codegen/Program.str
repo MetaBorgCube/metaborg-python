@@ -18,11 +18,11 @@ rules
   	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
   ]
 
-  init-memory: _ -> [
-  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
+  init-memory: n -> [
+  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), <int-to-string> n)
   ]
   
-  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, fList] , eList, init)], "")
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, fList] , eList, init)], "")
     where
 	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;

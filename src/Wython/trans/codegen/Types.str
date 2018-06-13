@@ -1,6 +1,7 @@
 module Types
 
 imports
+  nabl2/api
   signatures/WebAssembly/-
   trans/codegen/-
   ast-syntax/-
@@ -119,29 +120,46 @@ rules
     <pow-func>
   ]
   
-  i-to-string: val -> [
+  expr-to-string: (val, IntT()) -> [
     WastCall("$intRepr", val), 
     WastCall("$length", val)
   ]
+    where 
+    <debug> ("Evaluating int:",  val)
 
-  s-to-string: val -> val
+  expr-to-string: (val, StringT()) -> val
+    where 
+    <debug> ("Evaluating string:",  val)
+  
+  expr-to-string: e -> e
+    where
+    <debug> ("to-string, error: ", e )
   
   
 // TYPE
 
 get-type:
-  Int(n) -> (type, size, value)
-  where 
-  type := 1;
-  size := 4;
-  value := n
+  Int(n) -> IntT()
 
 get-type:
-  String(s) -> (type, size, value)
-  where 
-  type := 2;
-  size := <length> s;
-  value := s 
+  String(s) -> StringT()
+ 
+get-type:
+  Name(ID(name), _) -> type
+  where
+  <debug> ("get-type, name: ", name);
+  //ast := <nabl2-get-ast-analysis>;
+  //occurrence := <nabl2-mk-occurrence(|"Var")> name;
+  //<debug> ("get-type, occurrence: ", occurrence);
+  type := IntT()
+  //<debug> ("get-type, type: ", type)
+
+get-type: 
+  Call(func,_,_) -> type
+  where
+  <debug> ("get-type, func: ", func);
+  type := <get-type> func;
+  <debug> ("get-type, type: ", type)
 
 get-type:
   e -> e
