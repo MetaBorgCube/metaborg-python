@@ -8,7 +8,11 @@ imports
   ast-syntax/AST-Common
   
   trans/analysis-desugar/Type
-
+  
+signature
+  constructors
+    A-Compare: Cmpop * Expr * Expr -> Compare
+    
 strategies
 //  analysis-desugar-all = a-desugar
 //  analysis-desugar-all = topdown(debug; a-desugar)       //
@@ -18,9 +22,14 @@ strategies
 //  analysis-desugar-all = alltd(debug; a-desugar)
  
 rules  
-  a-desugar: Arg(name, type) -> Arg(name, <a-desugar-type> type)
-  a-desugar: FunctionDef(name, args, body, decorators, type) -> FunctionDef(name, args, body, decorators, <a-desugar-type> type)  
+a-desugar: Compare(l, [op], [r]) -> A-Compare(op, l , r)
+a-desugar: Compare(l, [op| opt], [r|rt]) -> <a-desugar-compare> Compare(A-Compare(op, l ,r), opt, rt)
+a-desugar-compare: Compare(l, [op], [r]) -> A-Compare(op, l , r)
+a-desugar-compare: Compare(l, [op | opt], [r|rt]) -> Compare(A-Compare(op, l ,r), opt, rt)
+//<foldl(!([],[]), desugar-lambda-args(ctx))> args
+//  a-desugar: Arg(name, type) -> Arg(name, <a-desugar-type> type)
+//  a-desugar: FunctionDef(name, args, body, decorators, type) -> FunctionDef(name, args, body, decorators, <a-desugar-type> type)  
   
-  a-desugar: Call(callable, args, kargs) -> Call(callable, <map(a-desugar-enumerate)> <number(id)> args, kargs)
-  a-desugar-enumerate: (exp, num) -> (ID(num), exp)
+//  a-desugar: Call(callable, args, kargs) -> Call(callable, <map(a-desugar-enumerate)> <number(id)> args, kargs)
+//  a-desugar-enumerate: (exp, num) -> (ID(num), exp)
    

@@ -41,6 +41,10 @@ rules
     IntT() <! NumT(),
     FloatT() <! NumT(),
     
+    NumT() <! UnitT(),
+    StringT() <! UnitT(),
+    BoolT() <! UnitT(),
+    
     // Builtin '__name__'
     Var{"__name__"} <- initial,
     Var{"__name__"}: StringT()!,

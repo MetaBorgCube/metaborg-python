@@ -11,7 +11,8 @@ rules
     Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
     d: ty.
     
-  argument[[(ID(i), expr) ^(s) : ty]] :=
+//  argument[[(ID(i), expr) ^(s) : ty]] :=
+  argument[[expr ^(s) : ty]] :=
     //TODO: try to check if argument match function definition
     Expr[[expr ^(s): ty]].
 
@@ -19,23 +20,41 @@ rules
     Expr[[func  ^(s) : objType]],
 
     objType == CallableT(argTypes, rtype) | warning $[Object might not be callable],
-    Map1T(argument)[[args  ^(s): argtys]],
+    Map1T(argument)[[args  ^(s): argTypes]],
     Map1T(argument)[[kargs ^(s): kargtys]].
     
-    
-  // Arithmatic Expressions
-  Expr[[BinOp(op, l, r) ^(s): ty]] :=
-    Expr[[l ^(s): t1]],
-    Expr[[r ^(s): t2]],
-    t2 == t1 | error $[Types not equal: [t1] != [t2]],
-    ty == t1.
+  
+  Expr[[Name(ID(id), _) ^(s): ty]] :=
+    Var{id} -> s,
+    Var{id} |-> d | warning $[Variable [id] does not seem to be defined],
+    d: ty.
 
+  Expr[[BinOp(op, l, r) ^(s) : ty]] :=
+  	Expr[[l ^(s):lty]],
+  	Expr[[r ^(s):rty]],
+    Op[[op: (lty, rty, ty)]].
+    
+  Expr[[A-Compare(op, l, r) ^(s) : ty]] :=
+  	Expr[[l ^(s):lty]],
+  	Expr[[r ^(s):rty]],
+    Op[[op: (lty, rty, ty)]].
+
+  Op[[Lt():  (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == BoolT().
+  Op[[LtE(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == BoolT().
+  Op[[Add(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == IntT().
+  Op[[Sub(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == IntT().
+  
+  Expr[[Name(ID(id), _) ^(s) : ty]] :=
+  	Var{id} -> s,
+  	Var{id} |-> d,
+  	d: ty.
 
   // Atoms
   Expr[[Int(_) ^(s): IntT()]].
   Expr[[String(_) ^(s): StringT()]].
   Expr[[True() ^(s): BoolT()]].
   Expr[[False() ^(s): BoolT()]].
+  Expr[[NoneVal() ^(s): NoneT()]].
   
   
   

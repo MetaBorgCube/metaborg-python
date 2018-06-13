@@ -12,7 +12,7 @@ rules
   Stmt[[ExprStmt(exp) ^(s)]] :=
     Expr[[exp ^(s): ty]],
     ty != NoneT() | note $[Result of calculation is not stored] @exp.
-    
+
   Args[[Arg(ID(name), type) ^(s) : ty]] :=
   	Var{name} <- s,
   	Type[[type: ty]],
@@ -27,7 +27,7 @@ rules
   Stmt[[Return(val) ^(s)]] :=
   	Expr[[val ^(s): ty]],
   	Var{"_$_return"} -> s,
-  	Var{"_$_return"} |-> d,
+  	Var{"_$_return"} |-> d | error $[Not inside a function],
   	d: expty,
   	ty <? expty | error $[Invalid return type. Found [ty], expected [expty]] @val.
   	
