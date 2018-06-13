@@ -8,31 +8,30 @@ imports
   trans/desugar/Type
   
 rules
-  desugar-suite: Statement(stmt) -> <desugar-stmt> stmt
   desugar-suite: BlockLine(stmts) -> <mapconcat(desugar-stmt)> stmts
   
   desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
   desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr(!Load())> exp)
   
-  desugar-stmt: For(For(trgt, iter, _, body)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, [])]
-  desugar-stmt: For(ForElse(trgt, iter, _, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: While(cond, _, body) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
-  desugar-stmt: WhileElse(cond, _, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
-  desugar-stmt: If(cond, _, body) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
-  desugar-stmt: IfElse(cond, _, body, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: For(For(trgt, iter, body)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, [])]
+  desugar-stmt: For(ForElse(trgt, iter, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: While(cond, body) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
+  desugar-stmt: WhileElse(cond, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
+  desugar-stmt: If(cond, body) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
+  desugar-stmt: IfElse(cond, body, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
 
   desugar-if: None() -> None()
   desugar-if: Some(item) -> <desugar-if> item
 
-  desugar-if: Else(_, _, suite) -> <desugar-suite> suite
-  desugar-if: ElifElse(cond, _, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
-  desugar-if: Elif(cond, _, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
+  desugar-if: Else(suite) -> <desugar-suite> suite
+  desugar-if: ElifElse(cond, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
+  desugar-if: Elif(cond, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
 
   desugar-for: [elem] -> <desugar-expr(!Load())> elem
   desugar-for: List(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Store())
 
 
-  desugar-stmt: ClassDef(name, params, _, body) -> [ClassDef(ID(name), bases, keywords, <desugar-suite> body, decorators)]
+  desugar-stmt: ClassDef(name, params, body) -> [ClassDef(ID(name), bases, keywords, <desugar-suite> body, decorators)]
   	where
   	  (bases, keywords) := <desugar-class> params;
   	  decorators := []
@@ -43,7 +42,7 @@ rules
   desugar-class: (CompForArgument(exp, _), (bases, keywords)) -> ([<desugar-expr(!Load())> exp | bases], keywords)
 
   
-  desugar-stmt: FuncDef(FuncDef(name, Parameters(args), type-ann, _, body)) -> [FunctionDef(name, des-args, <desugar-suite> body, decorators, <desugar-type> type-ann)]
+  desugar-stmt: FuncDef(FuncDef(name, Parameters(args), type-ann, body)) -> [FunctionDef(name, des-args, <desugar-suite> body, decorators, <desugar-type> type-ann)]
     where
       des-args := <desugar-fun> args;
       decorators := []
@@ -70,4 +69,5 @@ rules
   desugar-return: [elem] -> elem
   desugar-return: list -> Tuple(list, Load())
   
+  desugar-stmt: amb(list) -> amb(<map(desugar-stmt)> list)
   desugar-stmt: e -> [<debug> ("Cannot desugar statement: ", e)]

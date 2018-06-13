@@ -7,14 +7,13 @@ lexical syntax
   Await          = "await"
   Semicolon      = ";"
   Comma          = ","
-  LAYOUT         = [\ \t]
-  LAYOUT         = "#" ~[\n\r]* EOF 
+  LAYOUT         = [\ \t\n\r]
+  LAYOUT         = "#" ~[\n\r]* NewLineEOF 
   NewLine        = [\n\r]
   NewLineEOF     = NewLine
-  NewLineEOF     = EOF 
+  NewLineEOF     = EOF
   EOF            =  
   StatementEnd   = [\;]
-  IndentOpen     = ":" LAYOUT* NewLine
 
 lexical restrictions
   // EOF may not be followed by any char
