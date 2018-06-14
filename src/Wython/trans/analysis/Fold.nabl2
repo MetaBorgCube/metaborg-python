@@ -9,24 +9,24 @@ rules
   
   Fold[[ [If(cond, then, else) | t] ^(s1, s2) ]] :=
   	Expr[[cond ^(s1): condty]],
-    condty <? BoolT() | error $[non-boolean condition, found [condty]] @cond,
-    new if_then_s, if_then_s ---> s1,
-    new if_else_s, if_else_s ---> s1,
+    condty <sub? BoolT() | error $[non-boolean condition, found [condty]] @cond,
+    new if_then_s, if_then_s -T-> s1,
+    new if_else_s, if_else_s -E-> s1,
      Fold()[[then ^(if_then_s, if_then_end_s)]],
      Fold()[[else ^(if_else_s, if_else_end_s)]],
-    new if_end, if_end ---> if_then_end_s, if_end ---> if_else_end_s,
+    new if_end, if_end -T-> if_then_end_s, if_end -E-> if_else_end_s,
     
-    Fold[[t ^(if_end, s2)]],
-    CombineScopes[[ cond ^(s1, if_then_end_s, if_else_end_s, if_end)]].
+    CombineScopes[[ cond ^(s1, if_then_end_s, if_else_end_s, if_end)]],
+    Fold[[t ^(if_end, s2)]].
     
   Fold[[ [While(cond, body, else) | t] ^(s1, s2) ]] :=
   	Expr[[cond ^(s1): condty]],
-    condty <? BoolT() | error $[non-boolean condition, found [condty]] @cond,
-    new while_body_s, while_body_s ---> s1,
-    new while_else_s, while_else_s ---> s1,
+    condty <sub? BoolT() | error $[non-boolean condition, found [condty]] @cond,
+    new while_body_s, while_body_s -T-> s1,
+    new while_else_s, while_else_s -E-> s1,
      Fold()[[body ^(while_body_s, while_body_end_s)]],
      Fold()[[else ^(while_else_s, while_else_end_s)]],
-    new while_end, while_end ---> while_body_end_s, while_end ---> while_else_end_s,
+    new while_end, while_end -T-> while_body_end_s, while_end -E-> while_else_end_s,
     
     Fold[[t ^(while_end, s2)]],
     CombineScopes[[ cond ^(s1, while_body_end_s, while_else_end_s, while_end)]].
@@ -48,6 +48,7 @@ rules
   	Map1T(Args)[[args ^(fun_s): argtys]],
   	
   	Type[[typeAnnotation: retty]],
+  	false | warning $[CallableT([argtys], [retty])],
   	Var{name}: CallableT(argtys, retty)!,
   	
   	Var{"_$_return"} <- fun_s,

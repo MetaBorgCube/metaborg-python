@@ -9,7 +9,7 @@ rules
   Expr[[ Name(ID(a), Load()) ^(s): ty]] := 
     Var{a} -> s,
     Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
-    d: ty.
+    d: ty | warning $[Incompatible types, found [ty]] @a.
     
 //  argument[[(ID(i), expr) ^(s) : ty]] :=
   argument[[expr ^(s) : ty]] :=
@@ -19,9 +19,11 @@ rules
   Expr[[ Call(func, args, kargs) ^(s) : rtype]] :=
     Expr[[func  ^(s) : objType]],
 
-    objType == CallableT(argTypes, rtype) | warning $[Object might not be callable],
     Map1T(argument)[[args  ^(s): argTypes]],
-    Map1T(argument)[[kargs ^(s): kargtys]].
+    Map1T(argument)[[kargs ^(s): kargtys]],
+    objType == CallableT(expArgTy, expRetTy) | warning $[Object might not be callable, found [objType]] @func,
+    rtype <sub? expRetTy | error $[Types not compatible, found [rtype] and [expRetTy]],
+    argTypes <sub? expArgTy | error $[Types not compatible, found [argTypes] and [expArgTy]].
     
   
   Expr[[Name(ID(id), _) ^(s): ty]] :=
@@ -29,21 +31,41 @@ rules
     Var{id} |-> d | warning $[Variable [id] does not seem to be defined],
     d: ty.
 
-  Expr[[BinOp(op, l, r) ^(s) : ty]] :=
+  Expr[[A-Compare(Lt(), l, r) ^(s) : ty]] :=
   	Expr[[l ^(s):lty]],
   	Expr[[r ^(s):rty]],
-    Op[[op: (lty, rty, ty)]].
+    lty <sub? ComparableT() | error $[Not a comparable, found [lty]] @l,
+    rty <sub? ComparableT() | error $[Not a comparable, found [rty]] @r,
+    ty == BoolT().
     
-  Expr[[A-Compare(op, l, r) ^(s) : ty]] :=
+  Expr[[A-Compare(LtE(), l, r) ^(s) : ty]] :=
   	Expr[[l ^(s):lty]],
   	Expr[[r ^(s):rty]],
-    Op[[op: (lty, rty, ty)]].
-
-  Op[[Lt():  (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == BoolT().
-  Op[[LtE(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == BoolT().
-  Op[[Add(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == IntT().
-  Op[[Sub(): (t1, t2, ty)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]], ty == IntT().
+    lty <sub? ComparableT() | error $[Not a comparable, found [lty]] @l,
+    rty <sub? ComparableT() | error $[Not a comparable, found [rty]] @r,
+    ty == BoolT().
   
+  Expr[[BinOp(Add(), l, r) ^(s) : ty]] :=
+  	Expr[[l ^(s):lty]],
+  	Expr[[r ^(s):rty]],
+    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
+    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
+    ty is sub.lub of (lty, try).
+  
+  Expr[[BinOp(Sub(), l, r) ^(s) : ty]] :=
+  	Expr[[l ^(s):lty]],
+  	Expr[[r ^(s):rty]],
+    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
+    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
+    ty is sub.lub of (lty, try).
+    
+  Expr[[BinOp(Mult(), l, r) ^(s) : ty]] :=
+  	Expr[[l ^(s):lty]],
+  	Expr[[r ^(s):rty]],
+    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
+    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
+    ty is sub.lub of (lty, try).
+
   Expr[[Name(ID(id), _) ^(s) : ty]] :=
   	Var{id} -> s,
   	Var{id} |-> d,
