@@ -2,7 +2,7 @@ module Operators_test
 
 language Wython
 
-start symbol Test
+start symbol Exp
 
 /*
  * Binary arithmatic expressions [**, *, /, //, %, +, -]

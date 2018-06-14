@@ -2,7 +2,7 @@ module other_test
 
 language Wython
 
-start symbol Test
+start symbol Exp
 
 
 // Expression "[" Expression "]"

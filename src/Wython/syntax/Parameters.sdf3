@@ -1,0 +1,36 @@
+module Parameters
+
+imports
+  
+  Common
+  ID
+  Expression
+
+context-free syntax
+
+  VarArgsList.Args = {ArgDef ","}+ KwargDefNode?
+  VarArgsList.Kwargs = KwargsDef
+  KwargDefNode.Kwargs = Comma KwargsDef
+  
+  ArgDefList.TypedArgs = {TypedArgDef ","}* Comma? TypeDefs?
+  ArgDefList.TypedWildcard = TypeDefs
+  ArgDefList.TypedKwargs = KwargsTypeDef
+  
+  ArgDef.ArgDef = ID InitialValue? 
+
+  TypedArgDef.TypedArgDef = ID TypedArgDefExtension? InitialValue?
+  
+  TypeDefs.TypeDefs = "*" {TypedArgDef ","}* Comma? KwargsTypeDef?
+  TypeDefs.KwargsDef = KwargsTypeDef
+
+  TypedArgDefExtension.TypedArgDefExtension = ":" Exp
+  
+  KwargsDef.KwargsDef = "**" ID Comma?
+
+
+  KwargsTypeDef.KwargsTypeDef = "**" TypedArgDef Comma?
+  
+  Parameters.Parameters = "(" ExpList ")"
+  Arguments.Arguments = "(" ArgDefList ")"
+
+  InitialValue.InitialValue = "=" Exp

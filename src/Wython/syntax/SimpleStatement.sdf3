@@ -2,8 +2,8 @@ module SimpleStatement
 
 imports
   
-//  Common
-//  ID
+  Common
+  ID
   Expression
 
 sorts
@@ -16,79 +16,58 @@ context-free start-symbols
 
 context-free syntax
   SimpleStatement.Expression = Exp
-//  SimpleStatement.Delete = "del" ExpList
+  SimpleStatement.Delete = "del" ExpList
   SimpleStatement.Pass = "pass"
-//  SimpleStatement.ImportName = "import" DottedAsNames
-//  SimpleStatement.ImportFrom = "from" ImportFromArgs "import" ImportItems
-//  SimpleStatement.Global = "global" {ID ","}+
-//  SimpleStatement.NonLocal = "nonlocal" {ID ","}+
-//  SimpleStatement.Assert = "assert" {Test ","}+
+  SimpleStatement.ImportName = "import" DottedAsNames
+  SimpleStatement.ImportFrom = "from" ImportFromArgs "import" ImportItems
+  SimpleStatement.Global = "global" {ID ","}+
+  SimpleStatement.NonLocal = "nonlocal" {ID ","}+
+  SimpleStatement.Assert = "assert" {Exp ","}+
   SimpleStatement = FlowStatement
   
   FlowStatement.Break = "break"
   FlowStatement.Continue = "continue"
-//  FlowStatement.Return = "return" TestList?
-//  FlowStatement.Yield = Yield
-//  FlowStatement.Raise = "raise" RaiseArguments?
+  FlowStatement.Return = "return" {Exp ","}*
+  FlowStatement.YieldEmpty = "yield"
+  FlowStatement.RaiseEmpty = "raise"
+  FlowStatement.Yield = "yield" FromExp
+  FlowStatement.Raise = "raise" FromExp
   
-//  ExpExtension.AnnAssign = AnnAssign
-//  ExpExtension.AuggAssign = AuggAssign AuggAssignArguments
-//  ExpExtension.AssignList = AssignList
-//
-//  AnnAssign.AnnAssign = ":" Test InitialValue*
-//
-//  AuggAssignArguments.Yield = Yield
-//  AuggAssignArguments.TestList = TestList
-//  
-//  AssignList.AssignList = "=" AssignArguments 
-//  AssignArguments.Yield = Yield
-//  AssignArguments.TestListStarExp = TestListStarExp
-//  
-//  TestListStarExp.TestFirst = {Test ","}+ Comma?
-//  TestListStarExp.StarExpFirst = {StarExp ","}+ Comma?
-//
-//
-//  AuggAssign.PlusEqual = "+="
-//  AuggAssign.MinusEqual = "-="
-//  AuggAssign.TimesEqual = "*="
-//  AuggAssign.AtEqual = "@="
-//  AuggAssign.DivEqual = "/="
-//  AuggAssign.ModEqual = "%="
-//  AuggAssign.BitwiseAndEqual = "&="
-//  AuggAssign.BitwiseOrEqual = "|="
-//  AuggAssign.BitwiseXorEqual = "^="
-//  AuggAssign.ShiftLeftEqual = "<<="
-//  AuggAssign.ShiftRightEqual = ">>="
-//  AuggAssign.PowEqual = "**="
-//  AuggAssign.IntegerDivEqual = "//="
-//
-//  DottedAsNames.Names = {DottedAsName ","}+
-//  
-//  DottedAsName.AsName = DottedName AsName?
-//
-//  AsName.AsName= "as" ID
-//
-//  NameList.NameList = "," ID
-//
-//  DottedName.Name = {ID "."}+
-//
-//  Dots.Dot = "."
-//  Dots.Dots = "..."
-//
-//  ImportFromArgs.DottedName = Dots* DottedName
-//  ImportFromArgs.JustDots = Dots+
-//
-//  ImportItems.All = "*"
-//  ImportItems.Bracketed = "(" ImportAsNames ")" 
-//  ImportItems.Normal = {ImportAsNames ","}+
-//  
-//  ImportAsNames.ImportAsNames = ID ImportAsNamesParam?
-//  ImportAsNamesParam.Param = "as" ID
-//  
-//  RaiseArguments.RaiseArgs = Test TestArguments?
-//  TestArguments.TestArgs = "from" Test
-//  
-//  Yield.Yield = "yield" YieldArguments?
-//
-//  YieldArguments.Test = "from" Test
-//  YieldArguments.TestList = TestList
+  FromExp =  Exp
+  FromExp.From =  Exp "from" Exp
+  
+  SimpleStatement.Assign = {AssignTarget ","}+ "=" {Exp ","}+
+  SimpleStatement.AugAssign = AssignTarget AssignOp Exp
+  AssignTarget.Target = Exp
+  
+  AssignOp.PlusEqual = "+="
+  AssignOp.MinusEqual = "-="
+  AssignOp.TimesEqual = "*="
+  AssignOp.AtEqual = "@="
+  AssignOp.DivEqual = "/="
+  AssignOp.ModEqual = "%="
+  AssignOp.BitwiseAndEqual = "&="
+  AssignOp.BitwiseOrEqual = "|="
+  AssignOp.BitwiseXorEqual = "^="
+  AssignOp.ShiftLeftEqual = "<<="
+  AssignOp.ShiftRightEqual = ">>="
+  AssignOp.PowEqual = "**="
+  AssignOp.IntegerDivEqual = "//="
+  
+  
+  DottedAsNames.Names = {DottedAsName ","}+
+  DottedAsName.AsName = DottedName AsName?
+  DottedName.Name = {ID "."}+
+  
+  ImportFromArgs.DottedName = Dots* DottedName
+  ImportFromArgs.JustDots = Dots+
+  
+  Dots.Dot = "."
+  Dots.Dots = "..." {prefer}
+
+  ImportItems.All = "*"
+  ImportItems.Bracketed = "(" ImportAsNames ")" 
+  ImportItems.Normal = {ImportAsNames ","}+
+  
+  ImportAsNames.ImportAsNames = ID ImportAsNamesParam?
+  ImportAsNamesParam.Param = "as" ID
