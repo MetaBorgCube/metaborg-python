@@ -32,3 +32,17 @@ test EBR normal case            [[ (1) ]]           parse succeeds
 test EBR double brackets        [[ ((1)) ]]         parse succeeds
 test EBR bracket mismatch       [[ ((1) ]]          parse fails
 test EBR bracket mismatch       [[ (1)) ]]          parse fails
+
+// Lists, sets and dictionaries
+test emptylist       [[[ [] ]]]                      parse succeeds
+test list            [[[ [a, b, 12, 13] ]]]          parse succeeds
+test list times      [[[ [a] * 13 ]]]                parse succeeds
+test list trailing , [[[ [a, b,] ]]]                 parse succeeds
+
+test list mismatch1  [[[ [a, b} ]]]                  parse fails
+test list mismatch2  [[[ [a, b ]]]                   parse fails
+test list mismatch2  [[[ [a, b]] ]]]                 parse fails
+
+test emptyset        [[[ {} ]]]                      parse succeeds
+test list            [[[ {a, b, 12, 13} ]]]          parse succeeds
+test list trailing , [[[ {a, b,} ]]]                 parse succeeds
