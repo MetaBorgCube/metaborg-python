@@ -1,53 +1,35 @@
 module Assign
-//
-//imports
-//  signatures/Expression-sig
-//  signatures/CompoundStatement-sig
-//  signatures/SimpleStatement-sig
-//  signatures/Test-sig
-//  signatures/Common-sig
-//  
-//  ast-syntax/AST-Statement
-//  ast-syntax/AST-Expression
-//  ast-syntax/AST-Common
-//  
-//  trans/desugar/Expression
-//
-//rules  
-//  desugar-stmt: ExpStatement(TestFirst(targets, _), AssignList(value)) -> Assign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign> value)
-//  desugar-stmt: ExpStatement(TestFirst(targets, _), AuggAssign(op, value)) -> AugAssign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign-op> op, <desugar-assign> <desugar-expr(!Load())>value)
-//  
-//  desugar-assign-op: PlusEqual()       -> Add()
-//  desugar-assign-op: MinusEqual()      -> Sub()
-//  desugar-assign-op: TimesEqual()      -> Mult()
-//  desugar-assign-op: AtEqual()         -> MatMult()
-//  desugar-assign-op: DivEqual()        -> Div()
-//  desugar-assign-op: ModEqual()        -> Mod()
-//  desugar-assign-op: BitwiseAndEqual() -> BitAnd()
-//  desugar-assign-op: BitwiseOrEqual()  -> BitOr()
-//  desugar-assign-op: BitwiseXorEqual() -> BitXor()
-//  desugar-assign-op: ShiftLeftEqual()  -> LShift()
-//  desugar-assign-op: ShiftRightEqual() -> RShift()
-//  desugar-assign-op: PowEqual()         -> Pow()
-//  desugar-assign-op: IntegerDivEqual() -> FloorDiv()
-//  
-//  desugar-assign-target: [elem] -> elem
-//  desugar-assign-target: list -> Tuple(<map(desugar-assign-target)> list, Store())
-//  desugar-assign-target: ID(name) -> Name(name, Store())
-//  desugar-assign-target: AtomExp(None(), atom, [h | t]) -> <desugar-assign-target> ([atom], h, t)
-//  
-//  desugar-assign-target: (obj, DotName(name), [h | t]) -> <desugar-atom(!Store())> (<concat>[obj, [ID(name)]], h, t)
-//  desugar-assign-target: (obj, DotName(name), []) -> <desugar-assign-target> <concat> [obj, [ID(name)]]
-//  desugar-assign-target: [ID(name)] -> Name(ID(name), Store())
-//  desugar-assign-target: [e] -> e
-//  desugar-assign-target: [h | t] -> Attribute(<desugar-assign-target> t, h, Store())
-//
-//  desugar-assign-target: e -> <debug> ("Cannot desugar assign target", e)
-//  
-//  desugar-assign: [elem] -> elem
-//  desugar-assign: [h|t] -> Tuple([h|t], Load())
-//  
-//  desugar-assign: AssignList(list) -> <desugar-assign> list
-//  desugar-assign: TestListStarExp(exp) -> <desugar-assign> exp
-//  desugar-assign: TestFirst([elem], _) -> <desugar-expr(!Load())> elem
-//  desugar-assign: TestFirst(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Load())
+
+imports
+  signatures/Expression-sig
+  signatures/CompoundStatement-sig
+  signatures/SimpleStatement-sig
+  signatures/Common-sig
+  
+  ast-syntax/AST-Statement
+  ast-syntax/AST-Expression
+  ast-syntax/AST-Common
+  
+  trans/desugar/Expression
+
+rules  
+	desugar-stmt: Assign(targets, values) -> Assign(<map(desugar-assign-target)> targets, <desugar-assign> <map(desugar-expr(!Load()))> values)
+	desugar-stmt: AugAssign(target, op, value) -> AugAssign(<desugar-assign-target> target, <desugar-assign-op> op, <desugar-expr(!Load())> value)
+	desugar-assign-target: Target(obj) -> <desugar-expr(!Store())> obj
+	
+    desugar-assign: [elem] -> elem
+    desugar-assign: [h|t] -> Tuple([h|t], Load())
+	
+	desugar-assign-op: PlusEqual()       -> Add()
+    desugar-assign-op: MinusEqual()      -> Sub()
+    desugar-assign-op: TimesEqual()      -> Mult()
+    desugar-assign-op: AtEqual()         -> MatMult()
+    desugar-assign-op: DivEqual()        -> Div()
+    desugar-assign-op: ModEqual()        -> Mod()
+    desugar-assign-op: BitwiseAndEqual() -> BitAnd()
+    desugar-assign-op: BitwiseOrEqual()  -> BitOr()
+    desugar-assign-op: BitwiseXorEqual() -> BitXor()
+    desugar-assign-op: ShiftLeftEqual()  -> LShift()
+    desugar-assign-op: ShiftRightEqual() -> RShift()
+    desugar-assign-op: PowEqual()        -> Pow()
+    desugar-assign-op: IntegerDivEqual() -> FloorDiv()

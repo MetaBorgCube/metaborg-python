@@ -31,7 +31,7 @@ context-free syntax
     CompoundStatement.With = With
     CompoundStatement.FuncDef =  FuncDef
     CompoundStatement.ClassDef = "class" ID Arguments ":" body:Suite  { layout (indent "class" body) }
-    FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite    { layout (indent "def" body) }
+    FuncDef.FuncDef = "def" ID Arguments FuncType? ":" body:Suite    { layout (indent "def" body) }
     
     CompoundStatement.AsyncFunc = Async FuncDef
     CompoundStatement.AsyncWith = Async With

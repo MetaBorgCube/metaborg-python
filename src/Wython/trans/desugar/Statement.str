@@ -1,73 +1,70 @@
 module Statement
-//
-//imports
-//  src-gen/signatures/-
-//  ast-syntax/-
-//
-//  trans/desugar/Expression
-//  trans/desugar/Type
-//  
-//rules
-//  desugar-suite: BlockLine(stmts) -> <mapconcat(desugar-stmt)> stmts
-//  
-//  desugar-stmt: SimpleStatement(stmts, _) -> <map(desugar-stmt)> stmts
-//  desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr(!Load())> exp)
-//  
-//  desugar-stmt: For(For(trgt, iter, body)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, [])]
-//  desugar-stmt: For(ForElse(trgt, iter, body, else)) -> [For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)]
-//  desugar-stmt: While(cond, body) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
-//  desugar-stmt: WhileElse(cond, body, else) -> [While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
-//  desugar-stmt: If(cond, body) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])]
-//  desugar-stmt: IfElse(cond, body, else) -> [If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)]
-//
-//  desugar-if: None() -> None()
-//  desugar-if: Some(item) -> <desugar-if> item
-//
-//  desugar-if: Else(suite) -> <desugar-suite> suite
-//  desugar-if: ElifElse(cond, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
-//  desugar-if: Elif(cond, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
-//
-//  desugar-for: [elem] -> <desugar-expr(!Load())> elem
-//  desugar-for: List(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Store())
-//
-//
-//  desugar-stmt: ClassDef(name, params, body) -> [ClassDef(ID(name), bases, keywords, <desugar-suite> body, decorators)]
-//  	where
-//  	  (bases, keywords) := <desugar-class> params;
-//  	  decorators := []
-//  desugar-class: None() -> ([], [])
-//  desugar-class: Some(list) -> <desugar-class> list
-//  desugar-class: ArgListInBraces(list) -> <desugar-class> list
-//  desugar-class: ArgList(list, _) -> <foldr(!([],[]), desugar-class)> list
-//  desugar-class: (CompForArgument(exp, _), (bases, keywords)) -> ([<desugar-expr(!Load())> exp | bases], keywords)
-//
-//  
-//  desugar-stmt: FuncDef(FuncDef(name, Parameters(args), type-ann, body)) -> [FunctionDef(name, des-args, <desugar-suite> body, decorators, <desugar-type> type-ann)]
-//    where
-//      des-args := <desugar-fun> args;
-//      decorators := []
-//
-//  desugar-fun: TypedArgs(args, _, _) -> Arguments(des-args, vararg, kwname, kwvals, kwvararg, [])
-//    where
-//      (des-args, vararg, kwargs, kwvararg) := <foldr(!([], [], [], []), desugar-fun-args)> args;
-//      (kwname, kwvals) := <desugar-fun-args> kwargs
-//      
-//  desugar-fun-args: (TypedArgDef(name, type, None()), (args, vararg, kwargs, kwvararg)) -> 
-//  	([Arg(ID(name), <desugar-type> type) | args], vararg, kwargs, kwvararg)
-//  desugar-fun-args: (TypedArgDef(name, type, Some(value)),  (args, vararg, kwargs, kwvararg)) -> 
-//  	(args, vararg, [(Arg(ID(name), <desugar-type> type), <desugar-fun-args> value) | kwargs], kwvararg)
-//  desugar-fun-args: [] -> ([], []) 	
-//  desugar-fun-args: [h | t] -> <unzip> [h|t]
-// 
-//  desugar-fun-args: InitialValue(val) -> <desugar-expr(!Load())> val
-//  desugar-fun-args: e -> <debug> ("a", e)
-//  
-//  desugar-stmt: Pass() -> Pass()
-//  desugar-stmt: Flow(exp) -> <desugar-flow> exp
-//  desugar-flow: Return(Some(val)) -> Return(<desugar-return><desugar-expr(!Load())> val)
-//  desugar-flow: Return(None()) -> Return(NoneVal())
-//  desugar-return: [elem] -> elem
-//  desugar-return: list -> Tuple(list, Load())
-//  
-//  desugar-stmt: amb(list) -> amb(<map(desugar-stmt)> list)
-//  desugar-stmt: e -> [<debug> ("Cannot desugar statement: ", e)]
+
+imports
+  src-gen/signatures/-
+  ast-syntax/-
+
+  trans/desugar/Expression
+  trans/desugar/Type
+  
+rules
+    desugar-suite: Suite(stmts) -> <map(desugar-stmt)> stmts
+
+    desugar-stmt: Expression(exp) -> ExprStmt(<desugar-expr(!Load())> exp)
+    desugar-stmt: Pass() -> Pass()
+    desugar-stmt: Break() -> Break()
+  
+  
+    desugar-stmt: For(For(trgt, iter, body)) -> For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, [])
+    desugar-stmt: For(ForElse(trgt, iter, body, else)) -> For(<desugar-for> trgt, <desugar-expr(!Load())> iter, <desugar-suite> body, <desugar-if> else)
+    desugar-stmt: While(cond, body) -> While(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
+    desugar-stmt: WhileElse(cond, body, else) -> While(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
+    desugar-stmt: If(cond, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
+    desugar-stmt: IfElse(cond, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
+
+    desugar-if: None() -> None()
+    desugar-if: Some(item) -> <desugar-if> item
+    desugar-if: Else(suite) -> <desugar-suite> suite
+    desugar-if: ElifElse(cond, body, else) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, <desugar-if> else)
+    desugar-if: Elif(cond, body) -> If(<desugar-expr(!Load())> cond, <desugar-suite> body, [])
+
+    desugar-for: [elem] -> <desugar-expr(!Load())> elem
+    desugar-for: List(list, _) -> Tuple(<map(desugar-expr(!Load()))> list, Store())
+
+
+    desugar-stmt: ClassDef(name, params, body) -> ClassDef(ID(name), bases, keywords, <desugar-suite> body, decorators)
+      where
+   	    (bases, keywords) := <desugar-class> params;
+        decorators := []
+  	  
+    desugar-class: Arguments(args) -> <desugar-class> args
+    desugar-class: TypedArgs(args, None(), kwarg) -> (<map(desugar-class)> args, [])
+    desugar-class: TypedArgs(args, kwargs, kwarg) -> (<map(desugar-class)> args, <map(desugar-class)> kwargs)
+    desugar-class: TypedArgDef(name, _, None()) -> Name(ID(name), Load())
+  
+ 
+    desugar-stmt: FuncDef(FuncDef(name, Arguments(args), type-ann, body)) -> FunctionDef(name, des-args, <desugar-suite> body, decorators, <desugar-type> type-ann)
+      where
+        des-args := <desugar-fun> args;
+        decorators := []
+
+    desugar-fun: TypedArgs(args, _, _) -> Arguments(des-args, vararg, kwname, kwvals, kwvararg, [])
+      where
+        (des-args, vararg, kwargs, kwvararg) := <foldr(!([], [], [], []), desugar-fun-args)> args;
+        (kwname, kwvals) := <desugar-fun-args> kwargs
+
+    desugar-fun-args: (TypedArgDef(name, type, None()), (args, vararg, kwargs, kwvararg)) -> 
+    	([Arg(ID(name), <desugar-type> type) | args], vararg, kwargs, kwvararg)
+    desugar-fun-args: (TypedArgDef(name, type, Some(value)),  (args, vararg, kwargs, kwvararg)) -> 
+    	(args, vararg, [(Arg(ID(name), <desugar-type> type), <desugar-fun-args> value) | kwargs], kwvararg)
+    desugar-fun-args: [] -> ([], []) 	
+    desugar-fun-args: [h | t] -> <unzip> [h|t]
+ 
+    desugar-fun-args: InitialValue(val) -> <desugar-expr(!Load())> val
+
+    desugar-stmt: Return([]) -> Return(NoneVal())
+    desugar-stmt: Return(val) -> Return(<desugar-return><map(desugar-expr(!Load()))> val)
+    desugar-return: [elem] -> elem
+    desugar-return: list -> Tuple(list, Load())
+
+    desugar-stmt: e -> [<debug> ("Cannot desugar statement: ", e)]
