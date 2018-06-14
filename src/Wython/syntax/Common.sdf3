@@ -24,5 +24,3 @@ context-free restrictions
   // Ensure greedy matching for comments
   
   LAYOUT? -/- [\ \t]
-  LAYOUT? -/- [\/].[\/]
-  LAYOUT? -/- [\/].[\*]

@@ -64,8 +64,6 @@ context-free syntax
     
     FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite { layout (indent "def" body) }
     
-    SubscriptList.SubscriptList = {Subscript ","}+ Comma?
-    
     Subscript.Test = Test
     Subscript.Slice = Test? ":" Test? SliceOp?
     
