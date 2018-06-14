@@ -19,6 +19,7 @@ strategies
 //  desugar-all = alltd(debug; desugar)
  
 rules
-  desugar: FileInput(body) -> Module(sed-stmts)
-    where
-       sed-stmts := <desugar-suite> body
+	desugar: e -> e
+//  desugar: FileInput(body) -> Module(sed-stmts)
+//    where
+//       sed-stmts := <desugar-suite> body

@@ -2,7 +2,7 @@ module Atom_test
 
 language Wython
 
-start symbol Atom
+start symbol Exp
 
 /*
  * Numbers

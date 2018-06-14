@@ -1,16 +1,15 @@
 module Statement
 
 imports
-  Common
-  ID
-  Expression
-  Program
   SimpleStatement
   CompoundStatement
 
 context-free start-symbols
   Statement
+  Suite
   
 context-free syntax
+  Statement = CompoundStatement
   Statement = SimpleStatement
-  Statement = CompoundStatement  
+    
+  Suite.Suite = Statement+ { layout (align 1) }

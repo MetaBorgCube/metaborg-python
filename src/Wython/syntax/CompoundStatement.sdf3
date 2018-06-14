@@ -5,11 +5,7 @@ imports
   Common
   ID
   Expression
-  Program
   Statement
-  SimpleStatement
-  Parameters
-  Test
 
 context-free start-symbols
 
@@ -17,79 +13,77 @@ context-free start-symbols
 
 context-free syntax
 
-    CompoundStatement.If = "if" Test ":" body:Suite                     { layout (indent "if" body) }
-    CompoundStatement.IfElse = "if" Test ":" body:Suite else:ElifElse   { layout (indent "if" body && align "if" else) }
+    CompoundStatement.If = "if" Exp ":" body:Suite                     { layout (indent "if" body) }
+    CompoundStatement.IfElse = "if" Exp ":" body:Suite else:ElifElse   { layout (indent "if" body && align "if" else) }
     
-    CompoundStatement.While = "while" Test ":" body:Suite                 { layout (indent "while" body) }
-    CompoundStatement.WhileElse = "while" Test ":" body:Suite else:Else   { layout (indent "while" body && align "while" else) }
+    CompoundStatement.While = "while" Exp ":" body:Suite                 { layout (indent "while" body) }
+    CompoundStatement.WhileElse = "while" Exp ":" body:Suite else:Else   { layout (indent "while" body && align "while" else) }
 
-    CompoundStatement.For = For
+//    CompoundStatement.For = For
     CompoundStatement.Try = "try:" body:Suite				   	{ layout (indent "try:" body) }
     CompoundStatement.TryElse = "try:" body:Suite else:TryElse 	{ layout (indent "try:" body && align "try:" else) }
     
-    TryElse.Except = ExceptClause ":" body:Suite 				  { layout (indent 1 body) }
-    TryElse.ExceptElse = ExceptClause ":" body:Suite else:TryElse { layout (indent 1 body && align 1 else) }
+//    TryElse.Except = ExceptClause ":" body:Suite 				  { layout (indent 1 body) }
+//    TryElse.ExceptElse = ExceptClause ":" body:Suite else:TryElse { layout (indent 1 body && align 1 else) }
     TryElse.Finally = "finally:" body:Suite 					  { layout (indent "finally:" body) }
     
     CompoundStatement.With = With
-    CompoundStatement.FuncDef =  FuncDef
-    CompoundStatement.ClassDef = "class" ID ArgListInBraces? ":" body:Suite { layout (indent "class" body) }
-    CompoundStatement.Decorated = Decorators Definition
-    CompoundStatement.AsyncFunc = Async FuncDef
-    CompoundStatement.AsyncWith = Async With
-    CompoundStatement.AsyncFor = Async For
-    
+//    CompoundStatement.FuncDef =  FuncDef
+//    CompoundStatement.ClassDef = "class" ID ArgListInBraces? ":" body:Suite { layout (indent "class" body) }
+//    CompoundStatement.Decorated = Decorators Definition
+//    CompoundStatement.AsyncFunc = Async FuncDef
+//    CompoundStatement.AsyncWith = Async With
+//    CompoundStatement.AsyncFor = Async For
+//    
     ElifElse = Else
     ElifElse = Elif
     
     With.With = "with" { WithItem ","}+ ":" body:Suite	{ layout (indent "with" body) }
 
-    For.For = "for" ExpList "in" TestList ":" body:Suite                 { layout (indent "for" body) }
-    For.ForElse = "for" ExpList "in" TestList ":" body:Suite else:Else   { layout (indent "for" body && align "for" else) }
-    
-    ExceptClause.ExceptClause = "except" ExceptArgument?
+//    For.For = "for" ExpList "in" TestList ":" body:Suite                 { layout (indent "for" body) }
+//    For.ForElse = "for" ExpList "in" TestList ":" body:Suite else:Else   { layout (indent "for" body && align "for" else) }
+//    
+//    ExceptClause.ExceptClause = "except" ExceptArgument?
+//
+//    ExceptArgument.ExceptArgument = Test AsName?
+//
+//    Decorators.Decorators = Decorator+
+//    
+//    Decorator.Decorator = "@" DottedName ArgListInBraces?
+//
+//    ArgListInBraces.ArgListInBraces = "(" ArgList? ")"
+//
+//    Definition.FuncDef = FuncDef
+//    Definition.AsyncFuncDef = AsyncFuncDef
+//    
+//    AsyncFuncDef.AsyncFuncDef = Async FuncDef
+//    
+//    FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite { layout (indent "def" body) }
+//    
+//    Subscript.Test = Test
+//    Subscript.Slice = Test? ":" Test? SliceOp?
+//    
+//    SliceOp.SliceOp = ":" Test?
+//    
+//    ArgList.ArgList = {Argument ","}+  Comma? 
+//
+//    Argument.CompForArgument = Test CompFor?
+//    Argument.Assignment = Test "=" Test
+//    Argument.Kwargs = "**" Test
+//    Argument.Args = "*" Test
+//
+//    CompFor.CompFor = Async? "for" ExpList "in" OrTest CompIter?
+//    
+//    CompIf.CompIf = "if" TestNocond CompIter?
+//
+//    CompIter.CompFor = CompFor
+//
+    WithItem.Item = Exp WithItemAs?
+    WithItemAs.As = "as" ID
 
-    ExceptArgument.ExceptArgument = Test AsName?
-
-    Decorators.Decorators = Decorator+
-    
-    Decorator.Decorator = "@" DottedName ArgListInBraces?
-
-    ArgListInBraces.ArgListInBraces = "(" ArgList? ")"
-
-    Definition.FuncDef = FuncDef
-    Definition.AsyncFuncDef = AsyncFuncDef
-    
-    AsyncFuncDef.AsyncFuncDef = Async FuncDef
-    
-    FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite { layout (indent "def" body) }
-    
-    Subscript.Test = Test
-    Subscript.Slice = Test? ":" Test? SliceOp?
-    
-    SliceOp.SliceOp = ":" Test?
-    
-    ArgList.ArgList = {Argument ","}+  Comma? 
-
-    Argument.CompForArgument = Test CompFor?
-    Argument.Assignment = Test "=" Test
-    Argument.Kwargs = "**" Test
-    Argument.Args = "*" Test
-
-    CompFor.CompFor = Async? "for" ExpList "in" OrTest CompIter?
-    
-    CompIf.CompIf = "if" TestNocond CompIter?
-
-    CompIter.CompFor = CompFor
-
-    WithItem.Item = Test WithItemAs?
-    WithItemAs.As = "as" Exp
-
-    Elif.Elif = "elif" Test ":" body:Suite                   { layout (indent "elif" body) }
-    Elif.ElifElse = "elif" Test ":" body:Suite else:ElifElse { layout (indent "elif" body && align "elif" else) }
+    Elif.Elif = "elif" Exp ":" body:Suite                   { layout (indent "elif" body) }
+    Elif.ElifElse = "elif" Exp ":" body:Suite else:ElifElse { layout (indent "elif" body && align "elif" else) }
     
     Else.Else = "else:" body:Suite { layout (indent "else:" body) }
     
-    FuncType.FuncType = "->" Test
-
-    Suite.BlockLine = Statement+ { layout (align 1) }
+    FuncType.FuncType = "->" Exp
