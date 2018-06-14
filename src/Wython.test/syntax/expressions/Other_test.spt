@@ -11,7 +11,6 @@ test EAR normal case space      [[[ id [6] ]]]      parse succeeds
 test EAR int case               [[[ 6[6] ]]]        parse succeeds
 test EAR boolean case           [[[ True[False] ]]] parse succeeds
 test EAR complex case           [[[ id[1 + 2] ]]]   parse succeeds
-test EAR complex case AST       [[[ id[1 + 2] ]]]   run desugar to [[[ id[(1+2)] ]]]
 
 test EAR missing second bracket [[[ id[12 ]]]       parse fails
 test EAR missing first bracket  [[[ id 12] ]]]      parse fails
@@ -25,8 +24,7 @@ test ENO double not             [[ not not True ]]         parse succeeds
 test ENO normal case            [[ not 0 ]]                parse succeeds
 test ENO normal case            [[ not identifier ]]       parse succeeds
 test ENO invalid expression     [[ not def ]]              parse fails
-test ENO invalid expression     [[ not0 ]]                 parse fails
-test ENO associativity          [[ not True and False ]]   parse to Wython [[(not True) and False]]
+test ENO invalid expression     [[ not0 ]]                 parse succeeds // This is just an ID
 
 // "(" Expression ")"
 test EBR empty brackets         [[ () ]]            parse fails
