@@ -22,7 +22,7 @@ rules
   	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), <int-to-string> n)
   ]
   
-  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, fList] , eList, init)], "")
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, <string-funcs>, fList] , eList, init)], "")
     where
 	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;

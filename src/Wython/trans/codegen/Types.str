@@ -54,6 +54,8 @@ rules
     <int-repr-func>
   ]
   
+  // Length Funcs
+
   int-length-func: _ -> [
     WastFunc(
         Some("$length")
@@ -79,6 +81,8 @@ rules
     <int-length-func>
   ]
   
+  // Math Funcs
+
   pow-func: _ -> [
       WastFunc(
         Some("$pow")
@@ -135,35 +139,104 @@ rules
     where
     <debug> ("to-string, error: ", e )
   
+
+// STRINGS
+
+  add-strings: _ -> [
+    WastFunc(
+      Some("$add_strings"),
+      [ 
+         WastParam(Some("$str1"), WastI32()),
+         WastParam(Some("$len1"), WastI32()),
+         WastParam(Some("$str2"), WastI32()),
+         WastParam(Some("$len2"), WastI32())
+      ], 
+      Some(WastResult(WastI32())),
+      [
+         WastLocal(Some("$pos"), WastI32()),
+         WastLocal(Some("$currPos"), WastI32()),
+         WastSetLocal("$pos", 
+          WastGrowMemory(WastI32Add(WastGetLocal("$len1"), WastGetLocal("$len2")))
+         ),
+         WastSetLocal("$currPos", WastGetLocal("$pos")),
+         WastIf(
+            WastI32Ne(WastGetLocal("$len1"), WastI32Const("0")), 
+            WastThen(
+              [ WastBlock(
+                  WastLoop(
+                    [ WastI32Store(WastGetLocal("$currPos"), WastI32Load(WastGetLocal("$str1")))
+                    , WastSetLocal("$str1", WastI32Add(WastGetLocal("$str1"), WastI32Const("1")))
+                    , WastSetLocal("$len1", WastI32Sub(WastGetLocal("$len1"), WastI32Const("1")))
+                    , WastSetLocal("$currPos", WastI32Add(WastGetLocal("$currPos"), WastI32Const("1")))
+                    , WastBrIf("1", WastI32Eq(WastGetLocal("$len1"), WastI32Const("0")))
+                    , WastBr("0")
+                    ]
+                  )
+                )
+              ]
+            )
+          , None()
+          )
+        , WastIf(
+            WastI32Ne(WastGetLocal("$len2"), WastI32Const("0"))
+          , WastThen(
+              [ WastBlock(
+                  WastLoop(
+                    [ WastI32Store(WastGetLocal("$currPos"), WastI32Load(WastGetLocal("$str2")))
+                    , WastSetLocal("$str2", WastI32Add(WastGetLocal("$str2"), WastI32Const("1")))
+                    , WastSetLocal("$len2", WastI32Sub(WastGetLocal("$len2"), WastI32Const("1")))
+                    , WastSetLocal("$currPos", WastI32Add(WastGetLocal("$currPos"), WastI32Const("1")))
+                    , WastBrIf("1", WastI32Eq(WastGetLocal("$len2"), WastI32Const("0")))
+                    , WastBr("0")
+                    ]
+                  )
+                )
+              ]
+            )
+          , None()
+          ),
+          WastReturn(WastGetLocal("$pos"))
+      ]
+      
+      
+    )
+  ]
+
+  string-funcs:
+    _ -> <concat> [ <add-strings>
+  ]
   
 // TYPE
 
-get-type:
-  Int(n) -> IntT()
+  get-type:
+    Int(n) -> IntT()
 
-get-type:
-  String(s) -> StringT()
- 
-get-type:
-  Name(ID(name), _) -> type
-  where
-  <debug> ("get-type, name: ", name);
-  //ast := <nabl2-get-ast-analysis>;
-  //occurrence := <nabl2-mk-occurrence(|"Var")> name;
-  //<debug> ("get-type, occurrence: ", occurrence);
-  type := IntT()
-  //<debug> ("get-type, type: ", type)
+  get-type:
+    String(s) -> StringT()
+   
+  get-type:
+    Name(ID(name), _) -> type
+    where
+    <debug> ("get-type, name: ", name);
+    //ast := <nabl2-get-ast-analysis>;
+    //occurrence := <nabl2-mk-occurrence(|"Var")> name;
+    //<debug> ("get-type, occurrence: ", occurrence);
+    type := IntT()
+    //<debug> ("get-type, type: ", type)
+    
+  get-type: 
+    BinOp(_, a, b) -> type
+    where
+    type := <get-type> a
 
-get-type: 
-  Call(func,_,_) -> type
-  where
-  <debug> ("get-type, func: ", func);
-  type := <get-type> func;
-  <debug> ("get-type, type: ", type)
+  get-type: 
+    Call(func,_,_) -> type
+    where
+    <debug> ("get-type, func: ", func);
+    type := <get-type> func;
+    <debug> ("get-type, type: ", type)
 
-get-type:
-  e -> e
-  where
-  <debug> ("get-type, error:", e)
-
-// INTEGERS
+  get-type:
+    e -> e
+    where
+    <debug> ("get-type, error:", e)

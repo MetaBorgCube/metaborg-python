@@ -25,6 +25,22 @@ rules
       (w-l, mem1) := <codegen-expr> (l, mem);
       (w-r, mem2) := <codegen-expr> (r, mem1)
       
+  codegen-expr: (BinOp(Add(), l, r), (a0, b0, c0, mptr0)) -> ([WastCall("$add_strings", <concat> [w-l,  w-r]), lengths], (a2, b2, c2, mptr2))
+    where
+    l-type := <get-type> l;
+    r-type := <get-type> r;
+    <debug> ("codegen-expr, l-type: ", l-type);
+    <debug> ("codegen-expr, r-type: ", r-type);
+    <?StringT()> l-type;
+    <?StringT()> r-type;
+    (w-l, (a1, b1, c1, mptr1) ) := <codegen-expr> (l, (a0, b0, c0, mptr0));
+    (w-r, (a2, b2, c2, mptr2)) := <codegen-expr> (r, (a1, b1, c1, mptr1));
+    lengths := WastI32Add(
+      WastI32Const(<int-to-string> <subt>(mptr1, mptr0)),
+      WastI32Const(<int-to-string> <subt>(mptr2, mptr1)))
+    
+
+      
   codegen-expr: (BinOp(op, l, r), mem) -> (<codegen-bin-op>(op, w-l, w-r), mem2)
     where
       (w-l, mem1) := <codegen-expr> (l, mem);
