@@ -1,0 +1,53 @@
+module FunctionDef_test
+
+language Wython
+
+start symbol Statement
+
+test simple function
+[[def a():
+	pass
+]] parse succeeds
+
+test simple function no indent
+[[def a():
+pass
+]] parse fails
+
+test function complex body
+[[def a():
+	if True:
+		pass
+	else:
+		pass
+]] parse succeeds
+
+test function invalid name
+[[def 12a():
+	pass
+]] parse fails
+
+test function args
+[[def func(a):
+	pass
+]] parse succeeds
+
+test function typed args
+[[def func(a: int) -> bool:
+	pass
+]] parse succeeds
+
+test function args
+[[def func(a, b, c=12, *list):
+	pass
+]] parse succeeds
+
+test function args after keyword
+[[def func(a, b, c=12, d, *list):
+	pass
+]] parse fails
+
+test function invalid arg name
+[[def func(12):
+	pass
+]] parse fails

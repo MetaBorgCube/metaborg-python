@@ -85,7 +85,7 @@ context-free syntax
 
   ImportItems.All = "*"
   ImportItems.Bracketed = "(" ImportAsNames ")" 
-  ImportItems.Normal = ImportAsNames 
+  ImportItems.Normal = {ImportAsNames ","}+
   
   ImportAsNames.ImportAsNames = ID ImportAsNamesParam?
   ImportAsNamesParam.Param = "as" ID

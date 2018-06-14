@@ -1,0 +1,35 @@
+module Statements_test
+
+language Wython
+
+start symbol Statement
+
+test return         [[ return 12 ]]  parse succeeds
+test return mult    [[ return 1,2 ]] parse succeeds
+test return list    [[ return [] ]]  parse succeeds
+test return nothing [[ return ]]     parse succeeds
+test return complex [[ return 1+1 ]] parse succeeds
+test return keyword [[ return in ]]  parse fails
+
+test raise         [[ raise 12 ]]  parse succeeds
+test raise list    [[ raise [] ]]  parse succeeds
+test raise nothing [[ raise ]]     parse succeeds
+test raise complex [[ raise 1+1 ]] parse succeeds
+test raise keyword [[ raise in ]]  parse fails
+
+test yield         [[ yield 12 ]]  parse succeeds
+test yield mult    [[ yield 1,2 ]] parse succeeds
+test yield list    [[ yield [] ]]  parse succeeds
+test yield nothing [[ yield ]]     parse succeeds
+test yield complex [[ yield 1+1 ]] parse succeeds
+test yield keyword [[ yield in ]]  parse fails
+
+test pass           [[ pass ]]       parse succeeds
+test break          [[ break ]]      parse succeeds
+test continue       [[ continue ]]   parse succeeds
+
+test import               [[ import numpy ]]               parse succeeds
+test import multiple      [[ import numpy, gitcovery ]]    parse succeeds
+test import from          [[ from module import a ]]       parse succeeds
+test import multiple from [[ from module import a, b ]]    parse succeeds
+test import from as       [[ from module import a as b ]]  parse succeeds

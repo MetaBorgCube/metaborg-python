@@ -18,3 +18,18 @@ test assign to obj field field  [[ obj.field.field = 42 ]]    parse succeeds
 test assign to obj arr          [[ obj.arr[0] = 42 ]]         parse succeeds
 test assign to obj field arr    [[ obj.field.arr[0] = 42 ]]   parse succeeds
 test assign to 2d array         [[ data[0][12] = 42 ]]        parse succeeds
+
+
+test augmented assign +=  [[ obj.field.arr[0] += 42 ]]   parse succeeds
+test augmented assign -=  [[ obj.field.arr[0] -= 42 ]]   parse succeeds
+test augmented assign *=  [[ obj.field.arr[0] *= 42 ]]   parse succeeds
+test augmented assign @=  [[ obj.field.arr[0] @= 42 ]]   parse succeeds
+test augmented assign /=  [[ obj.field.arr[0] /= 42 ]]   parse succeeds
+test augmented assign %=  [[ obj.field.arr[0] %= 42 ]]   parse succeeds
+test augmented assign &=  [[ obj.field.arr[0] &= 42 ]]   parse succeeds
+test augmented assign |=  [[ obj.field.arr[0] |= 42 ]]   parse succeeds
+test augmented assign ^=  [[ obj.field.arr[0] ^= 42 ]]   parse succeeds
+test augmented assign <<= [[ obj.field.arr[0] <<= 42 ]]  parse succeeds
+test augmented assign >>= [[ obj.field.arr[0] >>= 42 ]]  parse succeeds
+test augmented assign **= [[ obj.field.arr[0] **= 42 ]]  parse succeeds
+test augmented assign //= [[ obj.field.arr[0] //= 42 ]]  parse succeeds
