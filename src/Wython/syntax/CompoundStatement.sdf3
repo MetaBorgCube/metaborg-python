@@ -24,8 +24,13 @@ context-free syntax
     CompoundStatement.WhileElse = "while" Test ":" body:Suite else:Else   { layout (indent "while" body && align "while" else) }
 
     CompoundStatement.For = For
-    CompoundStatement.Try = "try" ":" body:Suite Except+ Else? Finally? { layout (indent "try" body) }
-    CompoundStatement.TryFinally = "try" ":" body:Suite Finally		   { layout (indent "try" body) }
+    CompoundStatement.Try = "try:" body:Suite				   	{ layout (indent "try:" body) }
+    CompoundStatement.TryElse = "try:" body:Suite else:TryElse 	{ layout (indent "try:" body && align "try:" else) }
+    
+    TryElse.Except = ExceptClause ":" body:Suite 				  { layout (indent 1 body) }
+    TryElse.ExceptElse = ExceptClause ":" body:Suite else:TryElse { layout (indent 1 body && align 1 else) }
+    TryElse.Finally = "finally:" body:Suite 					  { layout (indent "finally:" body) }
+    
     CompoundStatement.With = With
     CompoundStatement.FuncDef =  FuncDef
     CompoundStatement.ClassDef = "class" ID ArgListInBraces? ":" body:Suite { layout (indent "class" body) }
@@ -41,11 +46,6 @@ context-free syntax
 
     For.For = "for" ExpList "in" TestList ":" body:Suite                 { layout (indent "for" body) }
     For.ForElse = "for" ExpList "in" TestList ":" body:Suite else:Else   { layout (indent "for" body && align "for" else) }
-    
-    Finally.Finally = "finally:" body:Suite { layout (indent "finally:" body) }
-
-// TODO Default Except Clause
-    Except.Except = ExceptClause ":" body:Suite { layout (indent 1 body) }
     
     ExceptClause.ExceptClause = "except" ExceptArgument?
 
@@ -63,8 +63,6 @@ context-free syntax
     AsyncFuncDef.AsyncFuncDef = Async FuncDef
     
     FuncDef.FuncDef = "def" ID Parameters FuncType? ":" body:Suite { layout (indent "def" body) }
-    
-    SubscriptList.SubscriptList = {Subscript ","}+ Comma?
     
     Subscript.Test = Test
     Subscript.Slice = Test? ":" Test? SliceOp?

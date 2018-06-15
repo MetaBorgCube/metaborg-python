@@ -41,6 +41,7 @@ context-free syntax
   ComparisonOperator.Geq = ">="
   ComparisonOperator.Leq = "<="
   ComparisonOperator.Neq = "!="
+  ComparisonOperator.Neq2 = "<>"
   ComparisonOperator.In = "in"
   ComparisonOperator.NotIn = "not" "in"
   ComparisonOperator.Is = "is"

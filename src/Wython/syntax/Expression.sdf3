@@ -64,7 +64,7 @@ context-free syntax
   Atom.TestListComp = "[" TestListComp? "]"
 
   Trailer.ArgList = "(" ArgList? ")"
-  Trailer.SubscriptList = "[" SubscriptList? "]"
+  Trailer.SubscriptList = "[" {Subscript ","}+ Comma? "]"
   Trailer.DotName = "." ID
 
   DictOrSetMaker.DictMaker = DictContents DictContentsNode* Comma?

@@ -55,7 +55,12 @@ rules
   desugar-expr(ctx): AtomExp(None(), TestListComp(elem  ), _) -> List(<desugar-list> elem, Load())
   
   desugar-expr(ctx): AtomExp(None(), ID(name), []) -> Name(ID(name), <ctx>)
-  desugar-expr(ctx): AtomExp(None(), atom, []) -> atom
+  desugar-expr(ctx): AtomExp(None(), String(string), []) -> String(string)
+  desugar-expr(ctx): AtomExp(None(), True(), []) -> True()
+  desugar-expr(ctx): AtomExp(None(), False(), []) -> False()
+  desugar-expr(ctx): AtomExp(None(), Int(val), []) -> Int(<string-to-int> val)
+  desugar-expr(ctx): AtomExp(None(), NoneVal(),[]) -> NoneVal()
+  
   desugar-expr(ctx): AtomExp(None(), atom, [h | t]) -> <desugar-atom(ctx)> ([atom], h, t)
   
   desugar-atom(ctx): (obj, DotName(name), [h | t]) -> <desugar-atom(ctx)> (<concat>[obj, [ID(name)]], h, t)
@@ -69,11 +74,10 @@ rules
     where
       (args, kargs) := <desugar-args(ctx)> list
 
-  desugar-atom(ctx): (obj, SubscriptList(list), []) -> Subscript(<desugar-call(ctx)> obj, <desugar-list> list, <ctx>)
+  desugar-atom(ctx): (obj, SubscriptList(list, _), []) -> Subscript(<desugar-call(ctx)> obj, <desugar-list><map(desugar-list)> list, <ctx>)
 
   desugar-list: None() -> [] where <debug> "None"
   desugar-list: Some(elem) -> <desugar-list> elem
-  desugar-list: SubscriptList(list, _) -> <desugar-list><map(desugar-list)> list
   desugar-list: TestListComp(h, t, _) -> [<desugar-list> h| <map(desugar-list)>t]
   desugar-list: Test(t) -> <desugar-expr(!Load())> t
   desugar-list: SetContents(elem) -> <desugar-list> elem
@@ -110,26 +114,26 @@ rules
   desugar-expr(ctx): TestList(list, _) -> Tuple(<map(desugar-expr(ctx))> list, Load())
   
   desugar-expr(ctx): OrTest([and]) -> <desugar-expr(ctx)> and
-  desugar-expr(ctx): OrTest(list) -> BoolOp(Or(), <map(desugar-expr(ctx))> list)
+  desugar-expr(ctx): OrTest([h|tail]) -> BoolOp(Or(), <desugar-expr(ctx)> h, <desugar-expr(ctx)> OrTest(tail))
   
   desugar-expr(ctx): AndTest([comp]) -> <desugar-expr(ctx)> comp
-  desugar-expr(ctx): AndTest(list) -> BoolOp(And(), <map(desugar-expr(ctx))> list)
+  desugar-expr(ctx): AndTest([h|tail]) -> BoolOp(And(), <desugar-expr(ctx)> h, <desugar-expr(ctx)> AndTest(tail))
   
   desugar-expr(ctx): Comparison(exp, []) -> <desugar-expr(ctx)> exp
-  desugar-expr(ctx): Comparison(lhs, cmps) -> Compare(<desugar-expr(ctx)>lhs, ops, exprs)
-    where
-      (ops, exprs) := <unzip><map(desugar-comp(ctx))> cmps
+  desugar-expr(ctx): Comparison(l, cmps) -> <foldl(desugar-comp(ctx))> (cmps, <desugar-expr(ctx)>l)
 
-  desugar-comp(ctx): Comparison(Eq(),    exp) -> (Eq(),    <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Lt(),    exp) -> (Lt(),    <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Gt(),    exp) -> (Gt(),    <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Geq(),   exp) -> (GtE(),   <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Leq(),   exp) -> (LtE(),   <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Neq(),   exp) -> (Neq(),   <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(In(),    exp) -> (In(),    <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(NotIn(), exp) -> (NotIn(), <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(Is(),    exp) -> (Is(),    <desugar-expr(ctx)> exp)
-  desugar-comp(ctx): Comparison(IsNot(), exp) -> (IsNot(), <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Eq(),    exp), l) -> Compare(Eq(),    l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Lt(),    exp), l) -> Compare(Lt(),    l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Gt(),    exp), l) -> Compare(Gt(),    l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Geq(),   exp), l) -> Compare(GtE(),   l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Leq(),   exp), l) -> Compare(LtE(),   l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Neq(),   exp), l) -> Compare(Neq(),   l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Neq2(),  exp), l) -> Compare(Neq(),   l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(In(),    exp), l) -> Compare(In(),    l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(NotIn(), exp), l) -> Compare(NotIn(), l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(Is(),    exp), l) -> Compare(Is(),    l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (Comparison(IsNot(), exp), l) -> Compare(IsNot(), l, <desugar-expr(ctx)> exp)
+  desugar-comp(ctx): (e, _) -> (e, e) where <debug> e
   
   desugar-expr(ctx): LambdaDef(lambdaDef) -> <desugar-expr(ctx)> lambdaDef
   desugar-expr(ctx): LambdaDef(args, body) -> Lambda(Arguments(des-args, None(), keys, defaults, kwarg, [] ), <desugar-expr(ctx)> body)

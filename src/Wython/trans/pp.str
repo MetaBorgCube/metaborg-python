@@ -15,7 +15,7 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[pp.[ext]])> path
-    ; result   := <pp-debug> <trash-amb> node
+    ; result   := <pp-debug> node
 
 rules
   

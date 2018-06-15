@@ -10,37 +10,88 @@ signature
 
 name resolution
   labels
-    P I
+    P I T E
 
   order
     D < P,
     D < I,
-    I < P
+    I < P,
+    T < E
 
   well-formedness
-    P* I*
+    (P* T* E*)* I*
+
+
+signature
+  relations
+     reflexive, transitive sub: Type * Type {
+     	CallableT(-sub, +sub),
+    	GeneratorT(+sub),
+    	TupleT(+sub),
+    	ArrayT(+sub),
+    	DictT(+sub, +sub),
+    	[+sub]
+     }
 
 sorts Type
    constructors
      NumT : Type
-     CallableT : Type
-     Object : Type
+     IntT: Type
+     FloatT: Type
+     StringT : Type
+     BoolT : Type
+     NoneT : Type
+     UnitT : Type
      
+     ComparableT : Type
+     
+     CallableT : list(Type) * Type -> Type
+     GeneratorT : Type -> Type
+     ObjectT : Type
+     TupleT : Type -> Type
+     ArrayT : Type -> Type
+     DictT : StringT * Type -> Type
+
 rules
-  
-  init ^ (s) :=
-    new s,
+  init ^ (initial) :=
+    new initial,
+    
+    NumT() <sub! UnitT(),
+    StringT() <sub! UnitT(),
+    BoolT() <sub! UnitT(),
+    NoneT() <sub! UnitT(),
+    
+    IntT() <sub! NumT(),
+    FloatT() <sub! NumT(),
+     
+    ComparableT() <sub! UnitT(),
+    NumT() <sub! ComparableT(),
+    BoolT() <sub! ComparableT(),
+    StringT() <sub! ComparableT(),
+     
+//    CallableT(_, _) <sub! UnitT(),
+//    GeneratorT(_) <sub! UnitT(),
+//    TupleT(_) <sub! UnitT(),
+//    ArrayT(_) <sub! UnitT(),
+//    DictT(_, _) <sub! UnitT(),
+//    ArrayT(a) <sub! GeneratorT(a),
+    
+    // Builtin '__name__'
+    Var{"__name__"} <- initial,
+    Var{"__name__"}: StringT()!,
     
     // Builtin 'print()'
-    Var{"print"} <- s,
-    new s_builtin_print, s_builtin_print ---> s,
-      Var{"print"} ===> s_builtin_print,
-      Function{"__call__"} <- s_builtin_print.
-
-
-
+    Var{"print"} <- initial,
+    Var{"print"}: CallableT([UnitT()], NoneT())!,
+    
+    // Builtin 'range()'
+    Var{"range"} <- initial,
+    Var{"range"}: CallableT([IntT(), IntT()], GeneratorT(IntT()))!.
+    
   [[Module(stmts) ^ (s)]] :=
     Module{"__main__"} <- s,
     new s_module, s_module ---> s,
       Module{"__main__"} ===> s_module,
-      Map1[[ stmts ^ (s_module) ]].
+      Fold[[stmts ^ (s_module, _)]].
+      
+      
