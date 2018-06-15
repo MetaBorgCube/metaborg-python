@@ -2,5 +2,7 @@ def factorial(n: int) -> int:
   if n <= 0:
     return 1
   return n * factorial(n-1)
-n = 6
-print("Hello " + "Chiel!")
+def printFactorial(n: int):
+  print("The factorial of " + n + " is:  " + factorial(n))
+printFactorial(3*2)
+print(2 + 2)

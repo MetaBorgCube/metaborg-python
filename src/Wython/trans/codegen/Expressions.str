@@ -10,41 +10,50 @@ rules
 //  codegen-expr: (Assign(name, value), mem) -> (<concat> [w-stmts, [w-stmt]], mem')
 //    where
   
-  codegen-expr: (Int(val), mem) -> (WastI32Const(<int-to-string>val), mem)
+  codegen-expr: (Int(val), mem) -> ([WastI32Const(<int-to-string>val)], mem)
   codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string>loc), WastI32Const(<int-to-string>len)], mem1)
   where
       (loc, len, mem1) := <mem-add-string> (mem, val)
       
-  codegen-expr: (True(), mem) -> (WastI32Const("1"), mem)
-  codegen-expr: (False(), mem) -> (WastI32Const("0"), mem)
+  codegen-expr: (True(), mem) -> ([WastI32Const("1")], mem)
+  codegen-expr: (False(), mem) -> ([WastI32Const("0")], mem)
     
-  codegen-expr: (Name(name, typ), mem) -> (<codegen-name> Name(name, typ), mem)
+  codegen-expr: (Name(name, typ), mem) -> ([<codegen-name> Name(name, typ)], mem)
   
-  codegen-expr: (Compare(l, [op], [r]), mem) -> (<codegen-comp-op>(op, w-l, w-r), mem2)
+  codegen-expr: (Compare(l, [op], [r]), mem) -> ([<codegen-comp-op>(op, w-l, w-r)], mem2)
     where
-      (w-l, mem1) := <codegen-expr> (l, mem);
-      (w-r, mem2) := <codegen-expr> (r, mem1)
-      
-  codegen-expr: (BinOp(Add(), l, r), (a0, b0, c0, mptr0)) -> ([WastCall("$add_strings", <concat> [w-l,  w-r]), lengths], (a2, b2, c2, mptr2))
+      ([w-l], mem1) := <codegen-expr> (l, mem);
+      ([w-r], mem2) := <codegen-expr> (r, mem1)
+
+  codegen-expr: (BinOp(Add(), l, r), (a0, b0, c0, mptr0)) -> ([WastCall("$add_strings", <concat> [typed-w-l, typed-w-r]), lengths], (a2, b2, c2, mptr2))
     where
     l-type := <get-type> l;
     r-type := <get-type> r;
     <debug> ("codegen-expr, l-type: ", l-type);
     <debug> ("codegen-expr, r-type: ", r-type);
-    <?StringT()> l-type;
-    <?StringT()> r-type;
     (w-l, (a1, b1, c1, mptr1) ) := <codegen-expr> (l, (a0, b0, c0, mptr0));
     (w-r, (a2, b2, c2, mptr2)) := <codegen-expr> (r, (a1, b1, c1, mptr1));
+    (<?StringT()> l-type <+ <?StringT()> r-type);
+    typed-w-l := <if ?StringT() then !w-l else !<expr-to-string> (w-l, l-type) end> l-type;
+    typed-w-r := <if ?StringT() then !w-r else !<expr-to-string> (w-r, r-type) end> r-type;
+    l-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr1, mptr0)) else !<get-length> (w-l, l-type) end> l-type;
+    r-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr2, mptr1)) else !<get-length> (w-r, r-type) end> r-type;
     lengths := WastI32Add(
-      WastI32Const(<int-to-string> <subt>(mptr1, mptr0)),
-      WastI32Const(<int-to-string> <subt>(mptr2, mptr1)))
+      l-length,
+      r-length)
+    //<debug> ("Add Strings, l-type: ", l-type);
+    //<debug> ("Add Strings, r-type: ", r-type);
+    //<debug> ("Add Strings, w-l: ", w-l);
+    //<debug> ("Add Strings, typed-w-r: ", typed-w-r);
+    //<debug> ("Add Strings, typed-w-l: ", typed-w-l);
+    //<debug> ("Add Strings, lengths: ", lengths)
     
 
       
-  codegen-expr: (BinOp(op, l, r), mem) -> (<codegen-bin-op>(op, w-l, w-r), mem2)
+  codegen-expr: (BinOp(op, l, r), mem) -> ([<codegen-bin-op>(op, w-l, w-r)], mem2)
     where
-      (w-l, mem1) := <codegen-expr> (l, mem);
-      (w-r, mem2) := <codegen-expr> (r, mem1)
+      ([w-l], mem1) := <codegen-expr> (l, mem);
+      ([w-r], mem2) := <codegen-expr> (r, mem1)
    
   codegen-comp-op: (Eq(), l, r) -> WastI32Eq(l, r)
   codegen-comp-op: (NotEq(), l, r) -> WastI32Ne(l, r)
@@ -60,7 +69,7 @@ rules
   codegen-bin-op: (FloorDiv(), l, r) -> WastI32DivS(l, r)
   codegen-bin-op: (Mod(), l, r) -> WastI32RemS(l, r)
       
-  codegen-expr: (Call(Name(ID("print"), Load()), arg, kargs), mem) -> (WastCall("$print", str), mem1)
+  codegen-expr: (Call(Name(ID("print"), Load()), arg, kargs), mem) -> ([WastCall("$print", str)], mem1)
     where
       <debug> "Printing!";
       [type] := <map(get-type)> arg;
@@ -69,12 +78,12 @@ rules
       <debug> ("w-args", w-args);
       str := <expr-to-string> (w-args, type)
 
-  codegen-expr: (Call(obj, args, kargs), mem) -> (WastCall(<codegen-call-name> obj, w-args), mem1)
+  codegen-expr: (Call(obj, args, kargs), mem) -> ([WastCall(<codegen-call-name> obj, w-args)], mem1)
     where
       <debug> "Calling normal function!";
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
   
-  codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", expr), mem)
+  codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", [expr]), mem)
   
   codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
   codegen-name: Name(ID(name), Load()) ->  WastGetLocal(<concat-strings> ["$", name])
@@ -82,9 +91,11 @@ rules
 
   codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, w-arg], mem1)
     where
+      <debug> arg;
       (w-arg, mem1) := <codegen-expr> (arg, mem)
       
   codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, [w-arg]], mem1)
     where
+      <debug> arg;
       (w-arg, mem1) := <codegen-expr> (arg, mem)
  

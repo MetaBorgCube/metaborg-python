@@ -81,6 +81,8 @@ rules
     <int-length-func>
   ]
   
+  get-length: (val, IntT()) -> WastCall("$length", val)
+  
   // Math Funcs
 
   pow-func: _ -> [
@@ -203,7 +205,7 @@ rules
   ]
 
   string-funcs:
-    _ -> <concat> [ <add-strings>
+    _ -> <concat> [<add-strings>
   ]
   
 // TYPE
