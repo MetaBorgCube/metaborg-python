@@ -189,7 +189,7 @@ Module(
 ## Name Binding Analysis
 
 For the name binding analysis we started working on a scope graph. This scope
-graph has the following structure for the simple print statement: ![Wcope
+graph has the following structure for the simple print statement: ![Scope
 graph](img/M1-scope-graph.png)
 
 At the moment the analysis is able to identify whether the called function is
