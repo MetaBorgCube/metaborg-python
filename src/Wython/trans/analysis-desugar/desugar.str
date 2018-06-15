@@ -20,5 +20,5 @@ strategies
 //  analysis-desugar-all = bottomup(try(debug; a-desugar))
 //  analysis-desugar-all = alltd(debug; a-desugar)
  
-rules  
-a-desugar: e -> e
+rules
+  a-desugar: e -> e

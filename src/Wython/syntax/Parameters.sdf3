@@ -4,32 +4,32 @@ imports
   
   Common
   ID
-  Test
+  Expression
 
 context-free syntax
 
-  VarArgsList.Args = {ArgDef ","}+ KwargDefNode?
+  VarArgsList.Args = {ArgDef ","}* KwargDefNode?
   VarArgsList.Kwargs = KwargsDef
   KwargDefNode.Kwargs = Comma KwargsDef
   
-  TypedArgsList.TypedArgs = {TypedArgDef ","}* Comma? TypeDefs?
-  TypedArgsList.TypedWildcard = TypeDefs
-  TypedArgsList.TypedKwargs = KwargsTypeDef
+  ArgDef.ArgDef = ID InitialValue
+  ArgDef.ArgDef = Exp 
   
-  ArgDef.ArgDef = ID InitialValue? 
-
+  KwargsDef.KwargsDef = "**" Exp Comma?
+  KwargsTypeDef.KwargsTypeDef = "**" TypedArgDef Comma?
+  
+  
+  ArgDefList.TypedArgs = {TypedArgDef ","}* Comma? TypeDefs?
+  ArgDefList.TypedWildcard = TypeDefs
+  ArgDefList.TypedKwargs = KwargsTypeDef
+  
   TypedArgDef.TypedArgDef = ID TypedArgDefExtension? InitialValue?
-  
   TypeDefs.TypeDefs = "*" {TypedArgDef ","}* Comma? KwargsTypeDef?
   TypeDefs.KwargsDef = KwargsTypeDef
 
-  TypedArgDefExtension.TypedArgDefExtension = ":" Test
+  TypedArgDefExtension.TypedArgDefExtension = ":" Exp
   
-  KwargsDef.KwargsDef = "**" ID Comma?
+  Parameters.Parameters = "(" VarArgsList ")"
+  Arguments.Arguments = "(" ArgDefList ")"
 
-
-  KwargsTypeDef.KwargsTypeDef = "**" TypedArgDef Comma?
-  
-  Parameters.Parameters = "(" TypedArgsList ")"
-
-  InitialValue.InitialValue = "=" Test
+  InitialValue.InitialValue = "=" Exp

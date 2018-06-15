@@ -12,7 +12,6 @@ imports
   codegen/Program
 
   analysis-desugar/desugar
-  trash-amb
 
 
 rules // Debugging
@@ -28,18 +27,18 @@ rules // Debugging
   editor-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"desugared.aterm")> path ;
-      text     := <desugar-all> <trash-amb> ast
+      text     := <desugar-all> ast
 
   show-wast-ast:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"wast.aterm")> path ;
-      desugared := <desugar-all> <trash-amb> ast;
+      desugared := <desugar-all>ast;
       text     := <codegen-all> desugared
     
   compile-to-wast:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"wast")> path ;
-      desugared := <desugar-all> <trash-amb> ast;
+      desugared := <desugar-all> ast;
       code := <codegen-all> desugared;
       text := <pp-debug-wast> code
       
@@ -59,5 +58,5 @@ rules // Debugging
   editor-analysis-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"a-desugared.aterm")> path ;
-      text     := <analysis-desugar-all> <desugar-all> <trash-amb> ast
+      text     := <analysis-desugar-all> <desugar-all> ast
 
