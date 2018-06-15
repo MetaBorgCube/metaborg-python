@@ -19,9 +19,6 @@ strategies
 //  desugar-all = alltd(debug; desugar)
  
 rules
-  desugar: FileInput(elems) -> Module(sed-stmts)
+  desugar: FileInput(body) -> Module(sed-stmts)
     where
-       sed-stmts := <mapconcat(desugar)> elems
-       
-  desugar: NewLine(_) -> []
-  desugar: Statement(stmt, _) -> <desugar-stmt> stmt
+       sed-stmts := <desugar-suite> body

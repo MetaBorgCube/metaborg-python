@@ -1,0 +1,16 @@
+module trash-amb
+
+imports
+  
+  ast-syntax/AST-Wython
+  ast-syntax/AST-Statement
+  ast-syntax/AST-Expression
+  ast-syntax/AST-Common
+  
+  trans/analysis-desugar/Type
+
+strategies
+  trash-amb = topdown(try(trash))
+ 
+rules  
+  trash: amb([h | t]) -> h

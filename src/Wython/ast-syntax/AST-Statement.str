@@ -6,7 +6,7 @@ imports
   
 signature
   sorts
-    Statement
+    Stmt
     Exceptionhandler
     Alias
     Withitem
