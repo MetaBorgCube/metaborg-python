@@ -26,6 +26,9 @@ rules
     desugar-expr(ctx): IntDiv(l, r) -> BinOp(FloorDiv(), <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): Pow(l, r)    -> BinOp(Pow(),      <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     
+    desugar-expr(ctx): And(l, r)    -> BoolOp(And(),     <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
+    desugar-expr(ctx): Or(l, r)     -> BoolOp(Or(),      <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
+    
     desugar-expr(ctx): BitOr(l, r)  -> BinOp(BitOr(),  <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): BitAnd(l, r) -> BinOp(BitAnd(), <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): BitXor(l, r) -> BinOp(BitXor(), <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
@@ -50,7 +53,7 @@ rules
       
     desugar-call(ctx): ID(name) -> Name(ID(name), <ctx>)
     desugar-call(ctx): AttrRef(obj, field) -> Attribute(<desugar-call(ctx)> obj, <desugar-call(ctx)> field, Load())
-    desugar-call(ctx): e -> e where <debug> e
+    desugar-call(ctx): e -> <desugar-expr(ctx)> e
   
     desugar-args(ctx): Some(list) -> <desugar-args(ctx)> list
     desugar-args(ctx): None() -> ([], [])
@@ -72,15 +75,6 @@ rules
     desugar-expr(ctx): List(Some(elems)) -> <desugar-list(ctx)> elems
     desugar-list(ctx): List(elems, _) -> List(<map(desugar-expr(ctx))> elems, Load())
 
-//  desugar-expr(ctx): Await(a) -> Await(<desugar-expr(ctx)> AtomExp(None(), a, b))
-//  
-//  desugar-expr(ctx): OrTest([and]) -> <desugar-expr(ctx)> and
-//  desugar-expr(ctx): OrTest(list) -> BoolOp(Or(), <map(desugar-expr(ctx))> list)
-//  
-//  desugar-expr(ctx): AndTest([comp]) -> <desugar-expr(ctx)> comp
-//  desugar-expr(ctx): AndTest(list) -> BoolOp(And(), <map(desugar-expr(ctx))> list)
-//  
-//  
     desugar-expr(ctx): LambdaDef(args, body) -> Lambda(Arguments(des-args, None(), keys, defaults, kwarg, [] ), <desugar-expr(ctx)> body)
       where
         (des-args, keywords, kwarg) := <desugar-lambda-args(ctx)> args;

@@ -15,8 +15,8 @@ context-free start-symbols
   Exp
   
 context-free priorities
-    {Exp.Tuple Exp.List Exp.Dict Exp.Set} >
-    {ObjExp.AttrRef}                      >
+    {Exp.Tuple Exp.List Exp.Dict Exp.Set
+     ObjExp.AttrRef}                      >
     {ObjExp.Subscript ObjExp.Slice
      ObjExp.Call}                         >
 //    {Exp.Await}                           >
