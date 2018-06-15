@@ -11,3 +11,15 @@ three main areas of the code.
 ## Analysis
 
 ## Codegen
+
+The goal for the code generation in the third milestone was to enable printing
+of both strings and integers, and increasing the possibilities for function
+calls, such that mathematical functions such as factorial could be calculated
+and performed. This goal was split into four sections,
+
+* Functions and function calls
+* Printing Integers
+* Being able to determine the type of an expression and perform the correct
+  string conversion
+* Add strings to strings or integers to strings
+
