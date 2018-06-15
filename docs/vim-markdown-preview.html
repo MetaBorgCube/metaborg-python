@@ -189,6 +189,18 @@ This might be circumvented at a later point by a use of hidden global
 variables.</p>
 <h3>
 <a id="user-content-string-conversions" class="anchor" href="#string-conversions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>String Conversions</h3>
+<p>The analysis was mostly done, but not completely. Due to this fact it was
+decided to assume all integer and function returns to be of integer type. This
+done, rules were added for printing that check for types and convert them
+accordingly.</p>
+<p>Here follow the strategy for printing,</p>
+<div class="highlight highlight-source-js"><pre>  codegen<span class="pl-k">-</span>expr<span class="pl-k">:</span>
+    (<span class="pl-en">Call</span>(<span class="pl-en">Name</span>(<span class="pl-en">ID</span>(<span class="pl-s"><span class="pl-pds">"</span>print<span class="pl-pds">"</span></span>), <span class="pl-en">Load</span>()), arg, kargs), mem) <span class="pl-k">-</span><span class="pl-k">&gt;</span>
+      ([<span class="pl-en">WastCall</span>(<span class="pl-s"><span class="pl-pds">"</span>$print<span class="pl-pds">"</span></span>, str)], mem1)
+    where
+      [type] <span class="pl-k">:=</span> <span class="pl-k">&lt;</span><span class="pl-en">map</span>(get<span class="pl-k">-</span>type)<span class="pl-k">&gt;</span> arg;
+      (w<span class="pl-k">-</span>args, mem1) <span class="pl-k">:=</span> <span class="pl-k">&lt;</span><span class="pl-en">foldl</span>(codegen<span class="pl-k">-</span>arg<span class="pl-k">-</span>fold)<span class="pl-k">&gt;</span> (arg, ([], mem));
+      str <span class="pl-k">:=</span> <span class="pl-k">&lt;</span>expr<span class="pl-k">-</span>to<span class="pl-k">-</span>string<span class="pl-k">&gt;</span> (w<span class="pl-k">-</span>args, type)</pre></div>
 <h3>
 <a id="user-content-concatenation" class="anchor" href="#concatenation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Concatenation</h3>
 

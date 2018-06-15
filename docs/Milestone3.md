@@ -139,4 +139,50 @@ variables.
 
 ### String Conversions
 
+The analysis was mostly done, but not completely. Due to this fact it was
+decided to assume all integer and function returns to be of integer type. This
+done, rules were added for printing that check for types and convert them
+accordingly.
+
+Here follow the strategy for printing,
+
+```javascript
+  codegen-expr:
+    (Call(Name(ID("print"), Load()), arg, kargs), mem) ->
+      ([WastCall("$print", str)], mem1)
+    where
+      [type] := <map(get-type)> arg;
+      (w-args, mem1) := <foldl(codegen-arg-fold)> (arg, ([], mem));
+      str := <expr-to-string> (w-args, type)
+```
+
 ### Concatenation
+
+Having already created the type checks in the portion with string convertions,
+adding the functionality for concatenating strings was reasonably simple, the
+main differences were,
+
+1.  There needed to be a check that at least one of the terms is a string
+2.  The length needed to be added up from the length of the pieces
+
+It ended up looking as follows,
+
+```javascript
+  codegen-expr:
+    (BinOp(Add(), l, r), (a0, b0, c0, mptr0)) ->
+      ([WastCall("$add_strings", <concat> [typed-w-l, typed-w-r]), lengths],
+      (a2, b2, c2, mptr2))
+    where
+    l-type := <get-type> l;
+    r-type := <get-type> r;
+    (w-l, (a1, b1, c1, mptr1) ) := <codegen-expr> (l, (a0, b0, c0, mptr0));
+    (w-r, (a2, b2, c2, mptr2)) := <codegen-expr> (r, (a1, b1, c1, mptr1));
+    (<?StringT()> l-type <+ <?StringT()> r-type);
+    typed-w-l := <if ?StringT() then !w-l else !<expr-to-string> (w-l, l-type) end> l-type;
+    typed-w-r := <if ?StringT() then !w-r else !<expr-to-string> (w-r, r-type) end> r-type;
+    l-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr1, mptr0)) else !<get-length> (w-l, l-type) end> l-type;
+    r-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr2, mptr1)) else !<get-length> (w-r, r-type) end> r-type;
+    lengths := WastI32Add(
+      l-length,
+      r-length)
+```
