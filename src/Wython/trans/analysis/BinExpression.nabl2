@@ -10,69 +10,69 @@ rules
   Expr[[BinOp(Add(), l, r) ^(s): ty]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
   Expr[[BinOp(Sub(), l, r) ^(s): ty]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
   Expr[[BinOp(Mult(), l, r) ^(s): ty]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
   Expr[[BinOp(Div(), l, r) ^(s): ty]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
   Expr[[BinOp(FloorDiv(), l, r) ^(s): ty]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
   Expr[[BinOp(op, l, r) ^(s): UnitT()]] := false | note $[No analysis implemented for [op]].
 
 
 
   // Comparisons
-  Expr[[A-Compare(LtE(), l, r) ^(s): BoolT()]] :=
+  Expr[[Compare(LtE(), l, r) ^(s): BoolT()]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
-  Expr[[A-Compare(Lt(), l, r) ^(s): BoolT()]] :=
+  Expr[[Compare(Lt(), l, r) ^(s): BoolT()]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
-  Expr[[A-Compare(Gt(), l, r) ^(s): BoolT()]] :=
+  Expr[[Compare(Gt(), l, r) ^(s): BoolT()]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
-  Expr[[A-Compare(GtE(), l, r) ^(s): BoolT()]] :=
+  Expr[[Compare(GtE(), l, r) ^(s): BoolT()]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? NumT() | error $[Not a number, found [t1]],
-    t2 <? NumT() | error $[Not a number, found [t2]].
+    t1 <sub? NumT() | error $[Not a number, found [t1]],
+    t2 <sub? NumT() | error $[Not a number, found [t2]].
     
-  Expr[[A-Compare(Eq(), l, r) ^(s): BoolT()]] :=
+  Expr[[Compare(Eq(), l, r) ^(s): BoolT()]] :=
     Expr[[ l ^(s): t1 ]],
     Expr[[ r ^(s): t2 ]],
-    t1 <? UnitT() | error $[Not an object, found [t1]],
-    t2 <? UnitT() | error $[Not an object, found [t2]].
+    t1 <sub? UnitT() | error $[Not an object, found [t1]],
+    t2 <sub? UnitT() | error $[Not an object, found [t2]].
 
-  Expr[[A-Compare(a, l, r) ^(s): UnitT()]] := false | note $[No analysis implemented for [a]].
+  Expr[[Compare(a, l, r) ^(s): UnitT()]] := false | note $[No analysis implemented for [a]].
   
   
   
