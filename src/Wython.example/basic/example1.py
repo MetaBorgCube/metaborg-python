@@ -1,7 +1,9 @@
-a = 12
+def a():
+  print("a")
+  print("b")
 if True:
-	b = 13
-	if True:
-		b = 14
-	c = 14
-c = 12
+  print("True!")
+if False:
+  print("False!")
+print("c")
+a()
