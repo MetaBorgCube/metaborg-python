@@ -19,7 +19,7 @@ A second thing that needed fixing were the else branches of the `if` and
 `while` statements. Making this fix was however not trivial as the root of the
 problem was not clear, all rules to parse them were present. Around that same
 time Eduardo messaged Chiel to ask how far our implementation of the syntax
-was, as he might wanted to use it as part of a benchmark for a paper he is
+was, as he might want to use it as part of a benchmark for a paper he is
 currently writing. He identified a number of issues that could cause our
 problems. The main cause was that we excluded newlines from our layout. This
 was still an artifact of milestone 1 and 2 where we tried to get the
@@ -33,10 +33,10 @@ they were ambiguous. An example of this can be seen in the image below.
 We were not able to fix the issues quickly, therefore we decided for a dirty
 solution that would work fine. We created an extra desugaring step to simply
 filter all the `amb()` constructs and replace them by the first element in
-their list of possibilities. This worked fine, but became anoying quickly when
-writing the NaBL2 analysis. Due to the ambiguities the analysis result would
-still contain a giant warning showing the ambiguous AST, which cluttered the
-output. To fix this it was decided to rewrite the entire syntax. It was
+their list of possibilities. This worked fine, but quickly became annoying
+when writing the NaBL2 analysis. Due to the ambiguities the analysis result
+would still contain a giant warning showing the ambiguous AST, which cluttered
+the output. To fix this it was decided to rewrite the entire syntax. It was
 already planned that we wanted to create a second syntax for Python, one the
 offical way and one using the SDF3 constructs. This would result in an
 interesting case study to see the difference between both implementations. Now
@@ -103,7 +103,7 @@ else:
 This would not be possible with a simple scope graph as it requires
 flow-analysis. The scope-structure we decided on is able to show a number of
 those errors and could be expanded by an extra Stratego pass to show even
-more. Its main idea is to created nested scopes for a code block. On each
+more. Its main idea is to create nested scopes for a code block. On each
 assignment a new scope would be created and for dataflow statements two or
 more. The scopes from the execution paths are then merged after the dataflow
 statements finish. For the code snippet below, this results in the shown scope
@@ -118,7 +118,6 @@ def func(a: int) -> int:
     return a
 
 print(func(12))
-
 ```
 
 ![New syntax](img/M3-scope-graph.png)
