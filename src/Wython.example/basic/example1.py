@@ -1,2 +1,9 @@
-1 + (1 + 1 * 3)
-pass
+def a():
+  print("a")
+  print("b")
+if True:
+  print("True!")
+if False:
+  print("False!")
+print("c")
+a()
