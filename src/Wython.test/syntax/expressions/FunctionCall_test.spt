@@ -9,6 +9,7 @@ start symbol Exp
  */
  
 test FUN invalid name   [[12()]]                parse succeeds // This is a type error, not parse error
+test FUN func in list   [[a[12]()]]             parse succeeds
 test FUN no args        [[func()]]              parse succeeds
 
 test FUN int arg        [[func(12)]]            parse succeeds
