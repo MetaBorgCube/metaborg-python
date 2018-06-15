@@ -23,7 +23,8 @@ install:
   - git clone https://github.com/JRasmusBm/metaborg-webassembly.git
   - cd metaborg-webassembly
   # If there is a branch with the same name, use that one, otherwise skip
-  - git checkout $TRAVIS_BRANCH || echo 'No equally named branch available'
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - git checkout $BRANCH || echo 'No equally named branch available'
 
 script:
   - cd WebAssembly
