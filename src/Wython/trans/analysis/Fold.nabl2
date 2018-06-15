@@ -31,13 +31,16 @@ rules
     Fold[[t ^(while_end, s2)]],
     CombineScopes[[ cond ^(s1, while_body_end_s, while_else_end_s, while_end)]].
   	
-  Fold[[ [Assign(Name(ID(id), _), val) | t] ^(s1, s2)]] :=
+  Fold[[ [Assign(targets, val) | t] ^(s1, s2)]] :=
     new s, s ---> s1,
     Expr[[val ^(s) : ty]],
-    Var{id} <- s,
-    Var{id} : ty!,
-    ExistsT[[id ^(s1) :ty]],
+    Map1T(AssignTarget)[[targets ^(s): ty]],
+    Map1T(ExistsT)[[targets ^(s1) :ty]],
     Fold[[t ^(s, s2)]].
+
+  AssignTarget[[Name(ID(id), _) ^(s): ty]] :=
+    Var{id} <- s,
+    Var{id} : ty!.
 
   Fold[[ [FunctionDef(name, Arguments(args, _, _ , _, _, _), body, decorators, typeAnnotation) | t] ^(s1, s2)]] :=
   	new s, s ---> s1,

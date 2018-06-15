@@ -31,7 +31,7 @@ rules
   	d: expty,
   	ty <sub? expty | error $[Invalid return type. Found [ty], expected [expty]] @val.
   	
-  ExistsT[[id ^(s) : ty ]] :=
+  ExistsT[[Name(ID(id), _) ^(s) : ty ]] :=
   	Var{id} -> s, // This should not be needed
   	Var{id} |-> d | note $[First declariation of variable [id]] @id,
     d : ty_old,
