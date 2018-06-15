@@ -37,6 +37,62 @@ We were able to parse this file correctly, though some desugaring rules are stil
 
 ## Analysis
 
+Due to the time spent on the syntax and desugaring, the time we could spend on the analysis was limited. We started by deciding on a structure of the scope graph.
+We could just do a simple scope graph with one scope for each of the scopes in the language. This would however limit the errors we could report. Take for example the following code snippets and the warnings we would like to show.
 
+```python
+if condition:
+    b = 42
+a = b            # Warning: b might not be declared
+```
+
+```python
+b = 42
+b = True         # Warning: assigning different types
+```
+
+```python
+if condition:
+    b = 42
+b = True         # Warning: assigning different types
+```
+
+```python
+if condition:
+    b = 42
+else:
+    b = True     # Warning: assigning different types
+```
+
+This would not be possible with a simple scope graph as it requires flow-analysis. 
+The scope-structure we decided on is able to show a number of those errors and could be expanded by an extra Stratego pass to show even more.
+Its main idea is to created nested scopes for a code block. On each assignment a new scope would be created and for dataflow statements two or more.
+The scopes from the execution paths are then merged after the dataflow statements finish.
+For the code snippet below, this results in the shown scope graph.
+
+```python
+def func(a: int) -> int:
+    if a < 10:
+        b = 12
+    else:
+        a += 10
+    return a
+    
+print(func(12))
+        
+```
+
+![New syntax](img/M3-scope-graph.png)
+
+In this image you can see a number of things:
+- When declaring a variable, a reference is created to the superscope.
+  This is done to check for previous declarations and type compatability.
+- Else and Then branches of the if use the labels `E` and `T`.
+  This is to make sure that there are not two equally good paths to declarations in earlier scopes.
+  Now we can give one of the paths priority.
+
+A limitation of using NaBL2 for this type of analysis is that we are currently unable to handle the case of a variable declaration in two branches, where both have a different type.
+We can get the set of variables on which this would apply, but we cannot map over them to compare their types.
+In the future this might be done by using an extra pass over the scope graph using Stratego.
 
 ## Codegen
