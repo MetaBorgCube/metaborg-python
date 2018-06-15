@@ -36,7 +36,6 @@ rules
     
   codegen-stmt: (Return(expr), (stmts, mem)) -> (<concat> [stmts, [WastReturn(w-expr)]], mem1)
       where
-      <debug> ("Return, expr: ", expr);
       ([w-expr], mem1) := <codegen-expr> (expr, mem)
   
   codegen-stmt: (ExprStmt(expr), (w-stmts, mem)) -> (<concat> [w-stmts, [w-expr]], mem')

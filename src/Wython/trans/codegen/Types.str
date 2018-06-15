@@ -130,12 +130,8 @@ rules
     WastCall("$intRepr", val), 
     WastCall("$length", val)
   ]
-    where 
-    <debug> ("Evaluating int:",  val)
 
   expr-to-string: (val, StringT()) -> val
-    where 
-    <debug> ("Evaluating string:",  val)
   
   expr-to-string: e -> e
     where
@@ -219,12 +215,7 @@ rules
   get-type:
     Name(ID(name), _) -> type
     where
-    <debug> ("get-type, name: ", name);
-    //ast := <nabl2-get-ast-analysis>;
-    //occurrence := <nabl2-mk-occurrence(|"Var")> name;
-    //<debug> ("get-type, occurrence: ", occurrence);
     type := IntT()
-    //<debug> ("get-type, type: ", type)
     
   get-type: 
     BinOp(_, a, b) -> type
@@ -232,11 +223,7 @@ rules
     type := <get-type> a
 
   get-type: 
-    Call(func,_,_) -> type
-    where
-    <debug> ("get-type, func: ", func);
-    type := <get-type> func;
-    <debug> ("get-type, type: ", type)
+    Call(func,_,_) -> <get-type> func
 
   get-type:
     e -> e

@@ -28,7 +28,6 @@ rules
 	   functions := <filter(is-func)> stmts;
 	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
        (iList, dList, fList, eList, vars, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], [], 0));
-       <debug> ("Memory size", memSize);
        init := WastStart("$main")
 
   is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
@@ -55,7 +54,6 @@ rules
   
   codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, mem)
   	where
-  	  <debug> ("Return:", return);
   	  (_, data, funcs, _, vars, mptr) := wast;
   	  (argdefs, argnames) := <codegen-func> args;
   	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
