@@ -22,7 +22,7 @@ rules // Debugging
     (node, _, _, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"aterm")> path
-    ; result   := node
+    ; result   := <debug> node
     
   editor-desugar:
     (_, _, ast, path, project-path) -> (filename, text) where
@@ -32,7 +32,7 @@ rules // Debugging
   show-wast-ast:
     (_, _, ast, path, project-path) -> (filename, text) where
       filename := <guarantee-extension(|"wast.aterm")> path ;
-      desugared := <desugar-all> ast;
+      desugared := <desugar-all>ast;
       text     := <codegen-all> desugared
     
   compile-to-wast:

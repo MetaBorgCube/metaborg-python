@@ -16,8 +16,8 @@ signature
     Comprehension
  
   constructors
-  //      operator   exprs
-  BoolOp: Boolop  *  [Expr] -> Expr
+  //      operator   left    right
+  BoolOp: Boolop  *  Expr *  Expr -> Expr
   
   //     operator   left   right
   BinOp: Operator * Expr * Expr -> Expr
@@ -60,8 +60,8 @@ signature
   
   // Need sequences for compare to distinguish between
   // x < 4 < 3 and (x < 4) < 3
-  //       left   ops       comparators
-  Compare: Expr * [Cmpop] * [expr] -> Expr
+  //       ops     left   right
+  Compare: Cmpop * Expr * Expr -> Expr
   
   //    func   args     keywords
   Call: Expr * [Expr] * [Keyword] -> Expr

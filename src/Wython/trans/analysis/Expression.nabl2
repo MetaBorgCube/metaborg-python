@@ -6,17 +6,10 @@ imports
       
 rules
 
-  Name[[ Name(ID(a), Store()) ^(s): ty]] := 
-    distinct/name V(s)/Var | error $[Redefinition of variable] @NAMES,
-    Var{a} <- s,
-    
-//    Var{a} |-> d | warning $[Variable [a] might not be defined],
-    Var{a}: ty!.
-    
-  Name[[ Name(ID(a), Load()) ^(s): ty]] := 
+  Expr[[ Name(ID(a), Load()) ^(s): ty]] := 
     Var{a} -> s,
-    Var{a} |-> d | warning $[Variable [a] might not be defined],  // TODO: When this fails do not continue
-    Var{a}: ty.
+    Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
+    d: ty | warning $[Incompatible types, found [ty]] @a.
     
 //  argument[[(ID(i), expr) ^(s) : ty]] :=
   argument[[expr ^(s) : ty]] :=
@@ -24,10 +17,13 @@ rules
     Expr[[expr ^(s): ty]].
 
   Expr[[ Call(func, args, kargs) ^(s) : rtype]] :=
-    Name[[func  ^(s) : objType]],
-    objType == CallableT(argTypes, rtype) | warning $[Object might not be callable],
+    Expr[[func  ^(s) : objType]],
+
     Map1T(argument)[[args  ^(s): argTypes]],
-    Map1T(argument)[[kargs ^(s): kargtys]].
+    Map1T(argument)[[kargs ^(s): kargtys]],
+    objType == CallableT(expArgTy, expRetTy) | warning $[Object might not be callable, found [objType]] @func,
+    rtype <sub? expRetTy | error $[Types not compatible, found [rtype] and [expRetTy]],
+    argTypes <sub? expArgTy | error $[Types not compatible, found [argTypes] and [expArgTy]].
     
   
   Expr[[Name(ID(id), _) ^(s): ty]] :=
@@ -35,9 +31,6 @@ rules
     Var{id} |-> d | warning $[Variable [id] does not seem to be defined],
     d: ty.
 
-  Op[[Lt(): (t1, t2)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]].
-  Op[[LtE(): (t1, t2)]] := t1 <? NumT() | error $[Not a number, found [t1]], t2 <? NumT() | error $[Not a number, found [t2]].
-  
   Expr[[Name(ID(id), _) ^(s) : ty]] :=
   	Var{id} -> s,
   	Var{id} |-> d,

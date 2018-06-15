@@ -24,29 +24,29 @@ test obj.print()  [[
   func(12)
 ]] 1 warnings
 
-test reassign print [[
-  print = 12
-  print(42)
+test reassign print 
+[[print = 12
+print(42)
 ]] >= 1 errors
 
 test print complex arg [[
   print(12 & 13)
 ]] 0 errors 0 warnings
 
-test reassign print to callable [[
-  class A(object):
-    def __call__(self):
+test reassign print to callable 
+[[class A(object):
+  def __call__(self):
       pass
   
-  print = A()
-  print(42)
+print = A()
+print(42) 
 ]] 0 warnings 0 errors
 
-test reassign print to non-callable [[
-  class A(object):
+test reassign print to non-callable 
+[[class A(object):
     def __str__(self):
       pass
   
-  print = A()
-  print(42)
+print = A()
+print(42)
 ]] >= 1 warnings
