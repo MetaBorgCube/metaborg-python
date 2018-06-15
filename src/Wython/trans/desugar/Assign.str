@@ -15,6 +15,21 @@ imports
 
 rules  
   desugar-stmt: ExpStatement(TestFirst(targets, _), AssignList(value)) -> Assign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign> value)
+  desugar-stmt: ExpStatement(TestFirst(targets, _), AuggAssign(op, value)) -> AugAssign(<desugar-assign-target><map(desugar-expr(!Store()))> targets, <desugar-assign-op> op, <desugar-assign> <desugar-expr(!Load())>value)
+  
+  desugar-assign-op: PlusEqual()       -> Add()
+  desugar-assign-op: MinusEqual()      -> Sub()
+  desugar-assign-op: TimesEqual()      -> Mult()
+  desugar-assign-op: AtEqual()         -> MatMult()
+  desugar-assign-op: DivEqual()        -> Div()
+  desugar-assign-op: ModEqual()        -> Mod()
+  desugar-assign-op: BitwiseAndEqual() -> BitAnd()
+  desugar-assign-op: BitwiseOrEqual()  -> BitOr()
+  desugar-assign-op: BitwiseXorEqual() -> BitXor()
+  desugar-assign-op: ShiftLeftEqual()  -> LShift()
+  desugar-assign-op: ShiftRightEqual() -> RShift()
+  desugar-assign-op: PowEqual()         -> Pow()
+  desugar-assign-op: IntegerDivEqual() -> FloorDiv()
   
   desugar-assign-target: [elem] -> elem
   desugar-assign-target: list -> Tuple(<map(desugar-assign-target)> list, Store())
@@ -28,6 +43,9 @@ rules
   desugar-assign-target: [h | t] -> Attribute(<desugar-assign-target> t, h, Store())
 
   desugar-assign-target: e -> <debug> ("Cannot desugar assign target", e)
+  
+  desugar-assign: [elem] -> elem
+  desugar-assign: [h|t] -> Tuple([h|t], Load())
   
   desugar-assign: AssignList(list) -> <desugar-assign> list
   desugar-assign: TestListStarExp(exp) -> <desugar-assign> exp
