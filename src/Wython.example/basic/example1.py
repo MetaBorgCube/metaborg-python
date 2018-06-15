@@ -1,9 +1,9 @@
 def a():
- print("a")
- print("b")
+  print("a")
+  print("b")
 if True:
- print("True!")
+  print("True!")
 if False:
- print("False!")
+  print("False!")
 print("c")
 a()
