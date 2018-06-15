@@ -11,7 +11,6 @@ It was not planned to spend a lot of time on the syntax and its desugaring. We w
 It turned out that this was a false assumption and that we had to spend a lot of time on this again. The first thing that we needed to do was to add support for augmented assigns (+= -=), as this construct was simply forgotten.
 Luckily this was not much work to integrate. 
 
-<<<<<<< HEAD
 A second thing that needed fixing were the else branches of the `if` and `while` statements. Making this fix was however not trivial as the root of the problem was not clear, all rules to parse them were present.
 Around that same time Eduardo messaged Chiel to ask how far our implementation of the syntax was, as he might wanted to use it as part of a benchmark for a paper he is currently writing.
 He identified a number of issues that could cause our problems. The main cause was that we excluded newlines from our layout. This was still an artifact of milestone 1 and 2 where we tried to get the layout-sensitive syntax to work.
