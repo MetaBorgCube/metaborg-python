@@ -1,0 +1,231 @@
+module Types
+
+imports
+  nabl2/api
+  signatures/WebAssembly/-
+  trans/codegen/-
+  ast-syntax/-
+
+rules
+
+// REPR
+
+  int-repr-func: _ -> [
+    WastFunc(
+      Some("$intRepr")
+    , [WastParam(Some("$value"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [ WastLocal(Some("$digit"), WastI32())
+      , WastLocal(Some("$location"), WastI32())
+      , WastLocal(Some("$currLocation"), WastI32())
+      , WastLocal(Some("$len"), WastI32())
+      , WastSetLocal("$len", WastCall("$length", [WastGetLocal("$value")]))
+      , WastSetLocal("$location", WastGrowMemory(WastGetLocal("$len")))
+      , WastSetLocal(
+          "$digit"
+        , WastCall(
+            "$pow"
+          , [WastI32Const("10"), WastI32Sub(WastGetLocal("$len"), WastI32Const("1"))]
+          )
+        )
+      , WastSetLocal("$currLocation", WastGetLocal("$location"))
+      , WastBlock(
+          WastLoop(
+            [ WastI32Store(
+                WastGetLocal("$currLocation")
+              , WastI32Add(
+                  WastI32RemS(WastI32DivS(WastGetLocal("$value"), WastGetLocal("$digit")), WastI32Const("10"))
+                , WastI32Const("48")
+                )
+              )
+            , WastSetLocal("$currLocation", WastI32Add(WastGetLocal("$currLocation"), WastI32Const("1")))
+            , WastSetLocal("$digit", WastI32DivS(WastGetLocal("$digit"), WastI32Const("10")))
+            , WastBrIf("1", WastI32LeS(WastGetLocal("$digit"), WastI32Const("0")))
+            , WastBr("0")
+            ]
+          )
+        )
+      , WastGetLocal("$location")
+      ]
+    )
+  ]
+
+  repr-funcs: _ -> <concat> [
+    <int-repr-func>
+  ]
+  
+  // Length Funcs
+
+  int-length-func: _ -> [
+    WastFunc(
+        Some("$length")
+      , [WastParam(Some("$value"), WastI32())]
+      , Some(WastResult(WastI32()))
+      , [ WastLocal(Some("$len"), WastI32())
+        , WastSetLocal("$len", WastI32Const("0"))
+        , WastBlock(
+            WastLoop(
+              [ WastSetLocal("$len", WastI32Add(WastGetLocal("$len"), WastI32Const("1")))
+              , WastSetLocal("$value", WastI32DivS(WastGetLocal("$value"), WastI32Const("10")))
+              , WastBrIf("1", WastI32Eq(WastGetLocal("$value"), WastI32Const("0")))
+              , WastBr("0")
+              ]
+            )
+          )
+        , WastGetLocal("$len")
+        ]
+    )
+  ]
+  
+  length-funcs: _ -> <concat> [
+    <int-length-func>
+  ]
+  
+  get-length: (val, IntT()) -> WastCall("$length", val)
+  
+  // Math Funcs
+
+  pow-func: _ -> [
+      WastFunc(
+        Some("$pow")
+      , [WastParam(Some("$value"), WastI32()), WastParam(Some("$exp"), WastI32())]
+      , Some(WastResult(WastI32()))
+      , [ WastIf(
+            WastI32LeS(WastGetLocal("$exp"), WastI32Const("0"))
+          , WastThen([WastReturn(WastI32Const("1"))])
+          , Some(
+              WastElse(
+                [ WastIf(
+                    WastI32Eq(WastGetLocal("$exp"), WastI32Const("1"))
+                  , WastThen([WastReturn(WastGetLocal("$value"))])
+                  , Some(
+                      WastElse(
+                        [ WastReturn(
+                            WastI32Mul(
+                              WastGetLocal("$value")
+                            , WastCall(
+                                "$pow"
+                              , [WastGetLocal("$value"), WastI32Sub(WastGetLocal("$exp"), WastI32Const("1"))]
+                              )
+                            )
+                          )
+                        ]
+                      )
+                    )
+                  )
+                ]
+              )
+            )
+          )
+        , WastReturn(WastI32Const("-1"))
+        ]
+      )
+  ]
+  
+  math-funcs: _ -> <concat> [
+    <pow-func>
+  ]
+  
+  expr-to-string: (val, IntT()) -> [
+    WastCall("$intRepr", val), 
+    WastCall("$length", val)
+  ]
+
+  expr-to-string: (val, StringT()) -> val
+  
+  expr-to-string: e -> e
+    where
+    <debug> ("to-string, error: ", e )
+  
+
+// STRINGS
+
+  add-strings: _ -> [
+    WastFunc(
+      Some("$add_strings"),
+      [ 
+         WastParam(Some("$str1"), WastI32()),
+         WastParam(Some("$len1"), WastI32()),
+         WastParam(Some("$str2"), WastI32()),
+         WastParam(Some("$len2"), WastI32())
+      ], 
+      Some(WastResult(WastI32())),
+      [
+         WastLocal(Some("$pos"), WastI32()),
+         WastLocal(Some("$currPos"), WastI32()),
+         WastSetLocal("$pos", 
+          WastGrowMemory(WastI32Add(WastGetLocal("$len1"), WastGetLocal("$len2")))
+         ),
+         WastSetLocal("$currPos", WastGetLocal("$pos")),
+         WastIf(
+            WastI32Ne(WastGetLocal("$len1"), WastI32Const("0")), 
+            WastThen(
+              [ WastBlock(
+                  WastLoop(
+                    [ WastI32Store(WastGetLocal("$currPos"), WastI32Load(WastGetLocal("$str1")))
+                    , WastSetLocal("$str1", WastI32Add(WastGetLocal("$str1"), WastI32Const("1")))
+                    , WastSetLocal("$len1", WastI32Sub(WastGetLocal("$len1"), WastI32Const("1")))
+                    , WastSetLocal("$currPos", WastI32Add(WastGetLocal("$currPos"), WastI32Const("1")))
+                    , WastBrIf("1", WastI32Eq(WastGetLocal("$len1"), WastI32Const("0")))
+                    , WastBr("0")
+                    ]
+                  )
+                )
+              ]
+            )
+          , None()
+          )
+        , WastIf(
+            WastI32Ne(WastGetLocal("$len2"), WastI32Const("0"))
+          , WastThen(
+              [ WastBlock(
+                  WastLoop(
+                    [ WastI32Store(WastGetLocal("$currPos"), WastI32Load(WastGetLocal("$str2")))
+                    , WastSetLocal("$str2", WastI32Add(WastGetLocal("$str2"), WastI32Const("1")))
+                    , WastSetLocal("$len2", WastI32Sub(WastGetLocal("$len2"), WastI32Const("1")))
+                    , WastSetLocal("$currPos", WastI32Add(WastGetLocal("$currPos"), WastI32Const("1")))
+                    , WastBrIf("1", WastI32Eq(WastGetLocal("$len2"), WastI32Const("0")))
+                    , WastBr("0")
+                    ]
+                  )
+                )
+              ]
+            )
+          , None()
+          ),
+          WastReturn(WastGetLocal("$pos"))
+      ]
+      
+      
+    )
+  ]
+
+  string-funcs:
+    _ -> <concat> [<add-strings>
+  ]
+  
+// TYPE
+
+  get-type:
+    Int(n) -> IntT()
+
+  get-type:
+    String(s) -> StringT()
+   
+  get-type:
+    Name(ID(name), _) -> type
+    where
+    type := IntT()
+    
+  get-type: 
+    BinOp(_, a, b) -> type
+    where
+    type := <get-type> a
+
+  get-type: 
+    Call(func,_,_) -> <get-type> func
+
+  get-type:
+    e -> e
+    where
+    <debug> ("get-type, error:", e)

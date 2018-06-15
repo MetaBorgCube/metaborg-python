@@ -17,17 +17,17 @@ rules
   	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
   	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
   ]
-  init-memory: _ -> [
-  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), "1")
+
+  init-memory: n -> [
+  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), <int-to-string> n)
   ]
   
-  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory>, iList], dList, fList, eList, init)], "")
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, <string-funcs>, fList] , eList, init)], "")
     where
 	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;
 	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
        (iList, dList, fList, eList, vars, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], [], 0));
-       <debug> ("Memory size", memSize);
        init := WastStart("$main")
 
   is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
@@ -56,10 +56,16 @@ rules
   	where
   	  (_, data, funcs, _, vars, mptr) := wast;
   	  (argdefs, argnames) := <codegen-func> args;
-  	  (funcbody, mem) := <foldl(codegen-stmt)> (<concat> [body, [return]], ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
   	  (_, _, vardecls, _) := mem;
   	  w-vardecls := <map(codegen-func)> <diff> (vardecls, argnames);
-  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <concat>[w-vardecls, funcbody])
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <result> return, <concat>[w-vardecls, funcbody])
+  	  
+  result: IntT() -> Some(WastResult(WastI32()))
+  result: None() -> None()
+  result: e -> e
+    where
+    <debug> ("Result failed", e)
   
   codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
   codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), (w-name, WastI32())) where w-name := <concat-strings> ["$", name]
