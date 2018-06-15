@@ -31,41 +31,6 @@ rules
     Var{id} |-> d | warning $[Variable [id] does not seem to be defined],
     d: ty.
 
-  Expr[[A-Compare(Lt(), l, r) ^(s) : ty]] :=
-  	Expr[[l ^(s):lty]],
-  	Expr[[r ^(s):rty]],
-    lty <sub? ComparableT() | error $[Not a comparable, found [lty]] @l,
-    rty <sub? ComparableT() | error $[Not a comparable, found [rty]] @r,
-    ty == BoolT().
-    
-  Expr[[A-Compare(LtE(), l, r) ^(s) : ty]] :=
-  	Expr[[l ^(s):lty]],
-  	Expr[[r ^(s):rty]],
-    lty <sub? ComparableT() | error $[Not a comparable, found [lty]] @l,
-    rty <sub? ComparableT() | error $[Not a comparable, found [rty]] @r,
-    ty == BoolT().
-  
-  Expr[[BinOp(Add(), l, r) ^(s) : ty]] :=
-  	Expr[[l ^(s):lty]],
-  	Expr[[r ^(s):rty]],
-    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
-    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
-    ty is sub.lub of (lty, try).
-  
-  Expr[[BinOp(Sub(), l, r) ^(s) : ty]] :=
-  	Expr[[l ^(s):lty]],
-  	Expr[[r ^(s):rty]],
-    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
-    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
-    ty is sub.lub of (lty, try).
-    
-  Expr[[BinOp(Mult(), l, r) ^(s) : ty]] :=
-  	Expr[[l ^(s):lty]],
-  	Expr[[r ^(s):rty]],
-    lty <sub? NumT() | error $[Not a number, found [lty]] @l,
-    rty <sub? NumT() | error $[Not a number, found [rty]] @r,
-    ty is sub.lub of (lty, try).
-
   Expr[[Name(ID(id), _) ^(s) : ty]] :=
   	Var{id} -> s,
   	Var{id} |-> d,
