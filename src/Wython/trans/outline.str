@@ -23,6 +23,7 @@ strategies
   
 rules
   //TODO: make this better
+  list-to-string: [e] -> <write-to-string> [e]
   list-to-string: e -> <write-to-string> e
   
   editor-outline:
@@ -37,12 +38,14 @@ rules
   outline-transform: While(cond, then, []) -> While(cond, then, [])
   outline-transform: While(cond, then, else) -> While(cond, then, Else(else))
   
-  
+  outline-transform: For(targets, iter, then, []) -> For(targets, iter, then, [])
+  outline-transform: For(targets, iter, then, else) -> For(targets, iter, then, Else(else))
   
   to-outline-label: While(cond, then, else) -> $[while ([<to-string> cond])]
   to-outline-label: If(cond, then, else) -> $[if ([<to-string> cond])]
   to-outline-label: Elif(cond, then, else) -> $[elif ([<to-string> cond])]
   to-outline-label: Else(else) -> "else"
+  to-outline-label: For(targets, iter, then, else) -> $[for [<target-to-outline> targets]]
     		
   to-outline-label: Module(stmts) -> $[Module (funcs:[numFuncs], classes: [numClasses])]
   	where
@@ -51,6 +54,8 @@ rules
 
   is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
   is-class: ClassDef(a,b,c,d,e) -> ClassDef(a,b,c,d,e)
+  
+  to-outline-label: ExprStmt(Call(obj, args, kargs)) -> $[call [<target-to-outline>obj]/[<addi>(<length> args, <length> kargs)]]
   
   to-outline-label: FunctionDef(name, args, body, decorators, type) -> $[function [name] ([arg-types] -> [ret-type])]
     where
@@ -90,7 +95,9 @@ rules
   operation-to-outline: Pow() -> ("Assign", "to the power")
   operation-to-outline: FloorDiv() -> ("Dividing (integer division)", "by")
     
+  target-to-outline: Tuple(elems, _) -> <list-to-string> <map(target-to-outline)> elems
   target-to-outline: Name(ID(name), _) -> name
+  target-to-outline: Attribute(field, obj, _) -> $[[<target-to-outline> field].[<target-to-outline> obj]]
   target-to-outline: e -> "unknown object" where <debug> ("Cannot create outline for", e)
   
   parent-to-outline: Name(ID(name), _) -> name
