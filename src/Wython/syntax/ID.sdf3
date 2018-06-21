@@ -12,6 +12,8 @@ context-free start-symbols
 lexical syntax
 
     ID      = [a-zA-Z\_] [a-zA-Z0-9\_]*
+    ID      = SELF
+    SELF    = "self"
   
     ID      = "False"        {reject}
     ID      = "True"         {reject}
