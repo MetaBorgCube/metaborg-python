@@ -28,7 +28,7 @@ class Cat(Animal):
 
 ```
 
-![Outline](images/M4-outline.png)
+![Outline](img/M4-outline.png)
 
 ### Coloring
 Besides the outline we also wanted to include proper coloring. Before implementing this we used the default coloring, which was not properly coloring all constructs.
@@ -36,8 +36,8 @@ Aplying the colors was straightforward, however not everything could be correctl
 
 In the images below you can see the text coloring before and after:
 
-![Old coloring](images/M4-old-color.png)
-![New coloring](images/M4-new-color.png)
+![Old coloring](img/M4-old-color.png)
+![New coloring](img/M4-new-color.png)
 
 ### Eclipse plugin
 Exporting the Eclipse plugin should be easy: just run `mvn clean verify` in the plugin package. In our case this was not the case however, as it produced an empty folder that (obviously) did not contain the plugin. After a lot of trial and error and referencing other project repositories, it was found that the problem lied in the fact that we did not have a toplevel pom-file for the entire project. Adding such a file resulted in a lot of other errors. As no clear difference was found between other projects, this took some time to fix. In the end it turned out that we were also missing a `.mvn`-folder. Now the entire project built correctly and we were able to generate and verify the plugin.
