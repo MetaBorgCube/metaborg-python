@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
->
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.metaborg.lang</groupId>
-  <artifactId>Wython.example</artifactId>
+  <artifactId>org.metaborg.lang.webassembly</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>spoofax-project</packaging>
+  <packaging>pom</packaging>
 
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>parent.language</artifactId>
     <version>2.5.0-SNAPSHOT</version>
+    <relativePath />
   </parent>
-  
-  <dependencies>
-    <dependency>
-      <groupId>org.metaborg.lang</groupId>
-      <artifactId>Wython</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <type>spoofax-language</type>
-    </dependency>
-  </dependencies>
-  
+
+  <modules>
+    <module>Wython</module>
+    <module>Wython.eclipse</module>
+    <module>Wython.eclipse.feature</module>
+    <module>Wython.eclipse.site</module>
+<!--
+    <module>Wython.test</module>
+-->
+  </modules>
+
   <repositories>
     <repository>
       <id>metaborg-release-repo</id>
@@ -46,8 +46,19 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>spoofax-eclipse-repo</id>
+      <url>http://artifacts.metaborg.org/content/unzip/releases-unzipped/org/metaborg/org.metaborg.spoofax.eclipse.updatesite/|rel-version|/org.metaborg.spoofax.eclipse.updatesite-|rel-version|-assembly.zip-unzip/</url>
+      <layout>p2</layout>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>metaborg-release-repo</id>
@@ -70,4 +81,5 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
+
 </project>
