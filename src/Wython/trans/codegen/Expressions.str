@@ -13,6 +13,64 @@ rules
   where
       (loc, len, mem1) := <mem-add-string> (mem, val)
       
+  codegen-expr: (List(values, Load()), mem) -> (WastI32Const(<int-to-string> loc), mem1)
+  where
+  <debug> values; 
+  val := <concat-strings> <debug> <map(node-to-hex)> values;
+  <debug> val;
+  (loc, len, mem1) := <mem-add-string> (mem, <concat-strings> ["\"", val, "\""], <length> values)
+  
+  node-to-hex: Int(n) -> hexstring
+  where
+  // TODO: Hard coding due to fixed length :)
+  byte4 := <modi> (n, 16);
+  n1 := <divi> (n, 16);
+  byte1 := <divi> (n1, 16);
+  n2 := <divi> (n1, 16);
+  byte2 := <divi> (n1, 16);
+  n3 := <divi> (n2, 16);
+  byte3 := <divi> (n1, 16);
+  hexstring := <concat-strings> [ 
+    <byte-to-hex> byte1,
+    <byte-to-hex> byte2,
+    <byte-to-hex> byte3,
+    <byte-to-hex> byte4 ]
+  
+  node-to-hex: e -> e
+  where
+  <debug> ("node-to-hex failed: ", e)
+
+  bits-to-hex: 0 -> "0"
+  bits-to-hex: 1 -> "1"
+  bits-to-hex: 2 -> "2"
+  bits-to-hex: 3 -> "3"
+  bits-to-hex: 4 -> "4"
+  bits-to-hex: 5 -> "5"
+  bits-to-hex: 6 -> "6"
+  bits-to-hex: 7 -> "7"
+  bits-to-hex: 8 -> "8"
+  bits-to-hex: 9 -> "9"
+  bits-to-hex: 10 -> "a"
+  bits-to-hex: 11 -> "b"
+  bits-to-hex: 12 -> "c"
+  bits-to-hex: 13 -> "d"
+  bits-to-hex: 14 -> "e"
+  bits-to-hex: 15 -> "f"
+  bits-to-hex: e -> e
+  where
+  <debug> ("bits-to-hex failed: ", e)
+  byte-to-hex: n -> hexstring
+  where
+  bits1 := <divi> (n, 16);
+  bits2 := <modi> (n, 16);
+  char1 := <bits-to-hex> bits1;
+  char2 := <bits-to-hex> bits2;
+  hexstring := <concat-strings> [ "\\", char1, char2 ]
+  byte-to-hex: e -> e
+  where
+  <debug> ("byte-to-hex failed: ", e)
+
+      
   codegen-expr: (True(), mem) -> ([WastI32Const("1")], mem)
   codegen-expr: (False(), mem) -> ([WastI32Const("0")], mem)
     
@@ -66,6 +124,32 @@ rules
   codegen-expr: (Call(obj, args, kargs), mem) -> ([WastCall(<codegen-call-name> obj, w-args)], mem1)
     where
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
+      
+  codegen-expr: (Subscript(list, index, Load()), mem) -> ([WastI32Load(WastI32Add(w-list, w-index))], mem2)
+  where
+  (w-list, mem1) := <codegen-expr> (list, mem);
+  <debug> "hi";
+  ([w-index], mem2) := <codegen-expr> (index, mem1)
+
+  //codegen-expr: (Subscript(list, index, Store()), mem) -> ([WastStore(WastAdd(list, expr))], mem2)
+  //where
+  //(w-list, mem1) := <codegen-expr> (list, mem);
+  //(w-index, mem2) := <codegen-expr> (index, mem1)
+  
+  codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", [expr]), mem)
+  
+  codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
+  codegen-name: Name(ID(name), Load()) ->  WastGetLocal(<concat-strings> ["$", name])
+  codegen-call-name: Name(ID(name), Load()) ->  <concat-strings> ["$", name]
+
+  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, w-arg], mem1)
+    where
+      (w-arg, mem1) := <codegen-expr> (arg, mem)
+      
+  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, [w-arg]], mem1)
+    where
+      (w-arg, mem1) := <codegen-expr> (arg, mem)
+ 
   
   codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", [expr]), mem)
   

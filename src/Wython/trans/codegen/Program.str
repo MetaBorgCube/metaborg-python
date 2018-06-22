@@ -72,6 +72,11 @@ rules
   codegen-func: (name, type) -> WastLocal(name, type)
   codegen-func: e -> <debug> e
   
+  mem-add-string: ((data, funcs, vars, mptr), val, len) -> (mptr, len, (new-data, funcs, vars, new-mptr))
+    where
+      new-data := <concat> [data, [WastData(WastI32Const(<int-to-string> mptr), Some(val))]];
+      new-mptr := <addi> (mptr, len)
+      
   mem-add-string: ((data, funcs, vars, mptr), val) -> (mptr, len, (new-data, funcs, vars, new-mptr))
     where
       new-data := <concat> [data, [WastData(WastI32Const(<int-to-string> mptr), Some(val))]];

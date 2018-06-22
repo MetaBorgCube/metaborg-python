@@ -211,6 +211,9 @@ rules
 
   get-type:
     String(s) -> StringT()
+      
+  get-type:
+    Subscript(_,_,_) -> IntT()
    
   get-type:
     Name(ID(name), _) -> type
