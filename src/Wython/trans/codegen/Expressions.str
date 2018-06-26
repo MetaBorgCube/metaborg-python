@@ -12,11 +12,9 @@ rules
   where
       (loc, len, mem1) := <mem-add-string> (mem, val)
       
-  codegen-expr: (List(values, Load()), mem) -> (WastI32Const(<int-to-string> loc), mem1)
+  codegen-expr: (List(values, Load()), mem) -> ([WastI32Const(<int-to-string> loc)], mem1)
   where
-  <debug> values; 
-  val := <concat-strings> <debug> <map(node-to-hex)> values;
-  <debug> val;
+  val := <concat-strings> <map(node-to-hex)> values;
   (loc, len, mem1) := <mem-add-string> (mem, <concat-strings> ["\"", val, "\""], <length> values)
   
   node-to-hex: Int(n) -> hexstring
@@ -60,17 +58,11 @@ rules
   <debug> ("bits-to-hex failed: ", e)
   byte-to-hex: n -> hexstring
   where
-  <debug> ("n: ", n);
   bits1 := <divi> (n, 16);
-  <debug> ("bits1: ", bits1);
   bits2 := <modi> (n, 16);
-  <debug> ("bits2: ", bits2);
   char1 := <bits-to-hex> bits1;
-  <debug> ("char1: ", char1);
   char2 := <bits-to-hex> bits2;
-  <debug> ("char2: ", char2);
-  hexstring := <concat-strings> [ "\\", char1, char2 ];
-  <debug> ("hexstring: ", hexstring)
+  hexstring := <concat-strings> [ "\\", char1, char2 ]
   byte-to-hex: e -> e
   where
   <debug> ("byte-to-hex failed: ", e)
@@ -133,15 +125,9 @@ rules
   codegen-expr: (Subscript(list, index, Load()), mem) -> 
     ([WastI32Load(WastI32Add(w-list, WastI32Mul(w-index, WastI32Const("4"))))], mem2)
   where
-  (w-list, mem1) := <codegen-expr> (list, mem);
-  <debug> "hi";
+  ([w-list], mem1) := <codegen-expr> (list, mem);
   ([w-index], mem2) := <codegen-expr> (index, mem1)
 
-  //codegen-expr: (Subscript(list, index, Store()), mem) -> ([WastStore(WastAdd(list, expr))], mem2)
-  //where
-  //(w-list, mem1) := <codegen-expr> (list, mem);
-  //(w-index, mem2) := <codegen-expr> (index, mem1)
-  
   codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", [expr]), mem)
   
   codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
@@ -155,19 +141,3 @@ rules
   codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, [w-arg]], mem1)
     where
       (w-arg, mem1) := <codegen-expr> (arg, mem)
- 
-  
-  codegen-expr: (expr, mem) -> (<debug> ("codegen-expr failed:", [expr]), mem)
-  
-  codegen-name: Name(ID(name), Store()) -> <concat-strings> ["$", name]
-  codegen-name: Name(ID(name), Load()) ->  WastGetLocal(<concat-strings> ["$", name])
-  codegen-call-name: Name(ID(name), Load()) ->  <concat-strings> ["$", name]
-
-  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, w-arg], mem1)
-    where
-      (w-arg, mem1) := <codegen-expr> (arg, mem)
-      
-  codegen-arg-fold: (arg, (list, mem)) -> (<concat>[list, [w-arg]], mem1)
-    where
-      (w-arg, mem1) := <codegen-expr> (arg, mem)
- 

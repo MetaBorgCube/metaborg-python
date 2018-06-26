@@ -7,9 +7,17 @@ imports
 
 
 rules
+
+  codegen-stmt: (Assign([Subscript(name, index, Store())], value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem2)
+    where
+       w-name := <codegen-name> name;
+      ([w-index], mem1) := <codegen-expr> (index, mem);
+      ([w-value], mem2) := <codegen-expr> (value, mem1);
+      w-stmt := [WastI32Store(WastI32Add(WastGetLocal(w-name), WastI32Mul(w-index, WastI32Const("4"))), w-value)]
+      
   codegen-stmt: (Assign([name], value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem2)
     where
-      ([w-value], mem1) := <codegen-expr> (value, mem);
+      ([w-value], mem1) := <debug><codegen-expr> (value, mem);
       w-name := <codegen-name> name;
       mem2 := <mem-add-var> (mem1, (w-name, WastI32()));
       w-stmt := [WastSetLocal(w-name, w-value)]

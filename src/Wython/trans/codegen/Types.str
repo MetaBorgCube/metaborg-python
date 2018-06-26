@@ -9,8 +9,8 @@ imports
 signature 
   sorts
     ListT
-  constructor
-    ListT: -> ListT
+  constructors
+    ListT: ListT
 
 
   
