@@ -5,7 +5,6 @@ imports
   trans/codegen/-
   ast-syntax/-
 
-
 rules
   
   codegen-expr: (Int(val), mem) -> ([WastI32Const(<int-to-string>val)], mem)
@@ -23,18 +22,18 @@ rules
   node-to-hex: Int(n) -> hexstring
   where
   // TODO: Hard coding due to fixed length :)
-  byte4 := <modi> (n, 16);
-  n1 := <divi> (n, 16);
-  byte1 := <divi> (n1, 16);
-  n2 := <divi> (n1, 16);
-  byte2 := <divi> (n1, 16);
-  n3 := <divi> (n2, 16);
-  byte3 := <divi> (n1, 16);
+  byte4 := <modi> (n, 256);
+  n1 := <divi> (n, 256);
+  byte3 := <modi> (n1, 256);
+  n2 := <divi> (n1, 256);
+  byte2 := <modi> (n2, 256);
+  n3 := <divi> (n2, 256);
+  byte1 := <modi> (n3, 256);
   hexstring := <concat-strings> [ 
-    <byte-to-hex> byte1,
-    <byte-to-hex> byte2,
+    <byte-to-hex> byte4,
     <byte-to-hex> byte3,
-    <byte-to-hex> byte4 ]
+    <byte-to-hex> byte2,
+    <byte-to-hex> byte1]
   
   node-to-hex: e -> e
   where
@@ -61,11 +60,17 @@ rules
   <debug> ("bits-to-hex failed: ", e)
   byte-to-hex: n -> hexstring
   where
+  <debug> ("n: ", n);
   bits1 := <divi> (n, 16);
+  <debug> ("bits1: ", bits1);
   bits2 := <modi> (n, 16);
+  <debug> ("bits2: ", bits2);
   char1 := <bits-to-hex> bits1;
+  <debug> ("char1: ", char1);
   char2 := <bits-to-hex> bits2;
-  hexstring := <concat-strings> [ "\\", char1, char2 ]
+  <debug> ("char2: ", char2);
+  hexstring := <concat-strings> [ "\\", char1, char2 ];
+  <debug> ("hexstring: ", hexstring)
   byte-to-hex: e -> e
   where
   <debug> ("byte-to-hex failed: ", e)
@@ -88,14 +93,14 @@ rules
     (w-l, (a1, b1, c1, mptr1) ) := <codegen-expr> (l, (a0, b0, c0, mptr0));
     (w-r, (a2, b2, c2, mptr2)) := <codegen-expr> (r, (a1, b1, c1, mptr1));
     (<?StringT()> l-type <+ <?StringT()> r-type);
-    typed-w-l := <if ?StringT() then !w-l else !<expr-to-string> (w-l, l-type) end> l-type;
-    typed-w-r := <if ?StringT() then !w-r else !<expr-to-string> (w-r, r-type) end> r-type;
-    l-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr1, mptr0)) else !<get-length> (w-l, l-type) end> l-type;
-    r-length := <if ?StringT() then !WastI32Const(<int-to-string> <subt> (mptr2, mptr1)) else !<get-length> (w-r, r-type) end> r-type;
+    typed-w-l := <if ?StringT() + ?ListT() then !w-l else !<expr-to-string> (w-l, l-type) end> l-type;
+    typed-w-r := <if ?StringT() + ?ListT() then !w-r else !<expr-to-string> (w-r, r-type) end> r-type;
+    l-length := <if ?StringT() + ?ListT() then !WastI32Const(<int-to-string> <subt> (mptr1, mptr0)) else !<get-length> (w-l, l-type) end> l-type;
+    r-length := <if ?StringT() + ?ListT() then !WastI32Const(<int-to-string> <subt> (mptr2, mptr1)) else !<get-length> (w-r, r-type) end> r-type;
     lengths := WastI32Add(
       l-length,
       r-length)
-      
+
   codegen-expr: (BinOp(op, l, r), mem) -> ([<codegen-bin-op>(op, w-l, w-r)], mem2)
     where
       ([w-l], mem1) := <codegen-expr> (l, mem);
@@ -125,7 +130,8 @@ rules
     where
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
       
-  codegen-expr: (Subscript(list, index, Load()), mem) -> ([WastI32Load(WastI32Add(w-list, w-index))], mem2)
+  codegen-expr: (Subscript(list, index, Load()), mem) -> 
+    ([WastI32Load(WastI32Add(w-list, WastI32Mul(w-index, WastI32Const("4"))))], mem2)
   where
   (w-list, mem1) := <codegen-expr> (list, mem);
   <debug> "hi";

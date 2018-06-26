@@ -5,6 +5,15 @@ imports
   signatures/WebAssembly/-
   trans/codegen/-
   ast-syntax/-
+ 
+signature 
+  sorts
+    ListT
+  constructor
+    ListT: -> ListT
+
+
+  
 
 rules
 
@@ -214,6 +223,9 @@ rules
       
   get-type:
     Subscript(_,_,_) -> IntT()
+
+  get-type:
+    List(_, _) -> ListT()
    
   get-type:
     Name(ID(name), _) -> type
