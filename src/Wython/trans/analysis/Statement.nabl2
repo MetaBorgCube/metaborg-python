@@ -11,12 +11,7 @@ rules
     
   Stmt[[ExprStmt(exp) ^(s)]] :=
     Expr[[exp ^(s): ty]],
-    ty == NoneT() | note $[Result of calculation is not stored] @exp.
-
-  Args[[Arg(ID(name), type) ^(s) : ty]] :=
-  	Var{name} <- s,
-  	Type[[type: ty]],
-  	Var{name}: ty!.
+    ty <sub? NoneT() | note $[Result of calculation is not stored] @exp.
  
   Type[[None(): UnitT()]].
   Type[[IntT(): IntT()]].
@@ -32,7 +27,6 @@ rules
   	ty <sub? expty | error $[Invalid return type. Found [ty], expected [expty]] @val.
   	
   ExistsT[[Name(ID(id), _) ^(s) : ty ]] :=
-  	Var{id} -> s, // This should not be needed
+  	Var{id} -> s,
   	Var{id} |-> d | note $[First declariation of variable [id]] @id,
-    d : ty_old,
-    ty <sub? ty_old | warning $[You are assigning a value of type [ty] to a variable containing type [ty_old]] @id.
+    d : ty | note $[First declariation of variable [id]] @id.	// Duplicates are not shown
