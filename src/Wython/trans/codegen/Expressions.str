@@ -7,15 +7,60 @@ imports
 
 rules
   
-  codegen-expr: (Int(val), mem) -> ([WastI32Const(<int-to-string>val)], mem)
-  codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string>loc), WastI32Const(<int-to-string>len)], mem1)
+  codegen-expr: (Int(val), mem) -> ([WastI32Const(<int-to-string>loc)], mem1)
   where
-      (loc, len, mem1) := <mem-add-string> (mem, val)
+    (loc, len, mem1) := <mem-add-string> (mem, 
+      <concat-strings> [ "\""
+      , <object> Int(val)
+      , "\""])
+
+
+  codegen-expr: (String(val), mem) -> ([WastI32Const(<int-to-string> loc)], mem1)
+  where
+      (loc, len, mem1) := <mem-add-string> (mem, 
+        <concat-strings> ["\""
+          ,<object> String(val)
+          ,"\""], <addi> (6, <string-length> val))
+        
+  object: Int(n) -> str
+  where
+  str := <concat-strings>[<node-to-hex> Int(<get-type> Int(n))
+      , <node-to-hex> Int(<string-length> <int-to-string> n)
+      , <node-to-hex> Int(n)
+      ]
+    
+  object: String(val) -> <concat-strings>[<node-to-hex> Int(<get-type> String("a"))
+      , <node-to-hex> Int(<string-length> str)
+      , str
+      ]
+  where
+      str := <unquote(id)> val
       
-  codegen-expr: (List(values, Load()), mem) -> ([WastI32Const(<int-to-string> loc)], mem1)
+  hexstring-length: str -> length
   where
-  val := <concat-strings> <map(node-to-hex)> values;
-  (loc, len, mem1) := <mem-add-string> (mem, <concat-strings> ["\"", val, "\""], <length> values)
+  byte-correction := <sum> <map(is-byte)> <explode-string> str;
+  length :=  <addi>(<string-length> str, byte-correction)
+  is-byte: 92 -> -2 // backslash
+  is-byte: e -> 0
+  
+  cell-pointer: (elem, (list, sum)) -> (<concat> [ list, [<object> Int(sum)] ], <addi> (sum, <hexstring-length> elem ))
+  cell-pointer: e -> e
+  where
+  <debug> ("Cell-pointer failed:", e)
+      
+  codegen-expr: (List(values, Load()), (a, b, c, mptr1)) -> ([WastI32Const(<int-to-string> loc)], mem2)
+  where
+  header := <concat-strings> [<node-to-hex> Int(<get-type> List(values, Load()))
+    ,<node-to-hex> Int(<length> values)];
+  cells := <map(object)> values;
+  (pointers, final-size) := <foldl(cell-pointer)> (cells, 
+    ([], <addi> (<addi> (mptr1, <muli>(<length> values, 12)), <hexstring-length> header)));
+  (loc, len, mem1) := <mem-add-string> ((a, b, c, mptr1)
+    ,<concat-strings> ["\"" , header , <concat-strings> pointers, "\""]
+    ,<addi> (<hexstring-length> header, <hexstring-length> <concat-strings> pointers));
+  (_, _, mem2) := <mem-add-string> ((mem1) 
+    ,<concat-strings> ["\"" , <concat-strings> cells, "\""]
+    , <hexstring-length> <concat-strings> cells)
   
   node-to-hex: Int(n) -> hexstring
   where
@@ -78,21 +123,6 @@ rules
       ([w-l], mem1) := <codegen-expr> (l, mem);
       ([w-r], mem2) := <codegen-expr> (r, mem1)
 
-  codegen-expr: (BinOp(Add(), l, r), (a0, b0, c0, mptr0)) -> ([WastCall("$add_strings", <concat> [typed-w-l, typed-w-r]), lengths], (a2, b2, c2, mptr2))
-    where
-    l-type := <get-type> l;
-    r-type := <get-type> r;
-    (w-l, (a1, b1, c1, mptr1) ) := <codegen-expr> (l, (a0, b0, c0, mptr0));
-    (w-r, (a2, b2, c2, mptr2)) := <codegen-expr> (r, (a1, b1, c1, mptr1));
-    (<?StringT()> l-type <+ <?StringT()> r-type);
-    typed-w-l := <if ?StringT() + ?ListT() then !w-l else !<expr-to-string> (w-l, l-type) end> l-type;
-    typed-w-r := <if ?StringT() + ?ListT() then !w-r else !<expr-to-string> (w-r, r-type) end> r-type;
-    l-length := <if ?StringT() + ?ListT() then !WastI32Const(<int-to-string> <subt> (mptr1, mptr0)) else !<get-length> (w-l, l-type) end> l-type;
-    r-length := <if ?StringT() + ?ListT() then !WastI32Const(<int-to-string> <subt> (mptr2, mptr1)) else !<get-length> (w-r, r-type) end> r-type;
-    lengths := WastI32Add(
-      l-length,
-      r-length)
-
   codegen-expr: (BinOp(op, l, r), mem) -> ([<codegen-bin-op>(op, w-l, w-r)], mem2)
     where
       ([w-l], mem1) := <codegen-expr> (l, mem);
@@ -105,25 +135,19 @@ rules
   codegen-comp-op: (LtE(), l, r) -> WastI32LeS(l, r)
   codegen-comp-op: (GtE(), l, r) -> WastI32GeS(l, r)
 
-  codegen-bin-op: (Add(), l, r) -> WastI32Add(l, r)
+  codegen-bin-op: (Add(), l, r) -> WastCall("$addObjects", [l, r])
   codegen-bin-op: (Sub(), l, r) -> WastI32Sub(l, r)
   codegen-bin-op: (Mult(), l, r) -> WastI32Mul(l, r)
   codegen-bin-op: (Div(), l, r) -> WastF32DivS(l, r)
   codegen-bin-op: (FloorDiv(), l, r) -> WastI32DivS(l, r)
   codegen-bin-op: (Mod(), l, r) -> WastI32RemS(l, r)
       
-  codegen-expr: (Call(Name(ID("print"), Load()), arg, kargs), mem) -> ([WastCall("$print", str)], mem1)
-    where
-      [type] := <map(get-type)> arg;
-      (w-args, mem1) := <foldl(codegen-arg-fold)> (arg, ([], mem));
-      str := <expr-to-string> (w-args, type)
-
   codegen-expr: (Call(obj, args, kargs), mem) -> ([WastCall(<codegen-call-name> obj, w-args)], mem1)
     where
       (w-args, mem1) := <foldl(codegen-arg-fold)> (args, ([], mem))
       
   codegen-expr: (Subscript(list, index, Load()), mem) -> 
-    ([WastI32Load(WastI32Add(w-list, WastI32Mul(w-index, WastI32Const("4"))))], mem2)
+    ([WastCall("$loadFromIndex", [w-list, w-index])], mem2)
   where
   ([w-list], mem1) := <codegen-expr> (list, mem);
   ([w-index], mem2) := <codegen-expr> (index, mem1)

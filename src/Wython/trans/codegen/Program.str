@@ -14,7 +14,7 @@ strategies
 rules
 
   lib-funcs: _ -> [
-  	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
+  	WastFunc( Some("$logString"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
   	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
   ]
 
@@ -22,7 +22,10 @@ rules
   	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), <int-to-string> n)
   ]
   
-  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, <string-funcs>, fList] , eList, init)], "")
+  codegen: Module(stmts) -> WastFile([WastModule(
+    <concat>[<lib-funcs>, <init-memory> memSize, iList], dList, 
+    <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, <operator-funcs>, <list-funcs>, fList]
+     , eList, init)], "")
     where
 	   mainBody := <filter(is-not-func)> stmts;
 	   functions := <filter(is-func)> stmts;
@@ -43,11 +46,6 @@ rules
       (d, f, _, mptr) := mem
     
   wast-add-func(wast): (func, mem) -> (i, d, <concat>[f, [func]], e, v, mptr)
-    where
-      (i, _, _, e, v, _) := <wast>;
-      (d, f, _, mptr) := mem
-    
-  wast-add-expr(wast): (expr, mem) -> (i, d, f, <concat>[e, [expr]], v, mptr)
     where
       (i, _, _, e, v, _) := <wast>;
       (d, f, _, mptr) := mem
@@ -80,7 +78,7 @@ rules
   mem-add-string: ((data, funcs, vars, mptr), val) -> (mptr, len, (new-data, funcs, vars, new-mptr))
     where
       new-data := <concat> [data, [WastData(WastI32Const(<int-to-string> mptr), Some(val))]];
-      len := <subti>(<string-length> val, 2);
+      len := <subti>(<string-length> val, 10);
       new-mptr := <addi> (mptr, len)
       
   // Add existing var -> do nothing

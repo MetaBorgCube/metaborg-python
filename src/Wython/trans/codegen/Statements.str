@@ -13,7 +13,7 @@ rules
        w-name := <codegen-name> name;
       ([w-index], mem1) := <codegen-expr> (index, mem);
       ([w-value], mem2) := <codegen-expr> (value, mem1);
-      w-stmt := [WastI32Store(WastI32Add(WastGetLocal(w-name), WastI32Mul(w-index, WastI32Const("4"))), w-value)]
+      w-stmt := [WastSetLocal(w-name, WastCall("$storeAtIndex", [WastGetLocal(w-name), w-index, w-value]))]
       
   codegen-stmt: (Assign([name], value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem2)
     where
