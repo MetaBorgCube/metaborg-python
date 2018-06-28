@@ -9,7 +9,8 @@ rules
   Expr[[ Name(ID(a), Load()) ^(s): ty]] := 
     Var{a} -> s,
     Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
-    d: ty | warning $[Incompatible types, found [ty]] @a.
+    d: ty1 | warning $[Variable [a] might not be defined] @a,
+    ty1 == ty | warning $[Incompatible types, found [ty1] instead of [ty]] @a.
     
 //  argument[[(ID(i), expr) ^(s) : ty]] :=
   argument[[expr ^(s) : ty]] :=
@@ -25,6 +26,9 @@ rules
     rtype <sub? expRetTy | error $[Types not compatible, found [rtype] and [expRetTy]],
     argTypes <sub? expArgTy | error $[Types not compatible, found [argTypes] and [expArgTy]].
     
+  Expr[[ List(elems, _) ^(s) : ty]] :=
+    Map1T(Expr)[[elems  ^(s) : elemTy]],
+    ArrayT(elemTy) == ty | warning $[Incompatible types, found [ArrayT(elemTy)] instead of [ty]] @elems.
   
   Expr[[Name(ID(id), _) ^(s): ty]] :=
     Var{id} -> s,
