@@ -365,9 +365,7 @@ _ -> [
       , WastParam(Some("$value"), WastI32())
       ]
     , Some(WastResult(WastI32()))
-    , [ WastCall("$print", [WastGetLocal("$value")])
-      , WastCall("$print", [WastCall("$intRepr", [WastGetLocal("$value")])])
-      , WastI32Store(
+    , [ WastI32Store(
           WastI32Add(
             WastI32Add(
               WastI32Add(WastGetLocal("$ptr"), WastI32Const("8"))
