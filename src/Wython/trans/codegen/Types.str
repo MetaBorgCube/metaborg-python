@@ -279,7 +279,16 @@ add-objects: _ -> [
         )
       , None()
       )
-    , WastReturn(WastCall("$addIntegers", [WastGetLocal("$obj1"), WastGetLocal("$obj2")]))
+    , WastReturn(
+        WastCall(
+          "$storeInteger"
+        , [ WastI32Add(
+              WastCall("$evalInteger", [WastGetLocal("$obj1")])
+            , WastCall("$evalInteger", [WastGetLocal("$obj2")])
+            )
+          ]
+        )
+      )
     ]
   )
 ] 
@@ -310,16 +319,39 @@ add-integers: _ -> [
     )
 ]
 
+store-integer: _ -> [
+   WastFunc(
+      Some("$storeInteger")
+    , [WastParam(Some("$value"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [ WastLocal(Some("$pos"), WastI32())
+      , WastSetLocal("$pos", WastGrowMemory(WastI32Const("12")))
+      , WastI32Store(WastGetLocal("$pos"), WastI32Const("0"))
+      , WastI32Store(
+          WastI32Add(WastGetLocal("$pos"), WastI32Const("4"))
+        , WastCall("$length", [WastGetLocal("$value")])
+        )
+      , WastI32Store(WastI32Add(WastGetLocal("$pos"), WastI32Const("8")), WastGetLocal("$value"))
+      , WastReturn(WastGetLocal("$pos"))
+      ]
+    )
+]
+
+eval-integer: _ -> [
+   WastFunc(
+      Some("$evalInteger")
+    , [WastParam(Some("$intPtr"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [WastReturn(WastI32Load(WastI32Add(WastGetLocal("$intPtr"), WastI32Const("8"))))]
+    )
+]
+
 operator-funcs:
   _ -> <concat> [
   <add-strings>,
-  <add-integers>,
-  <sub-integers>,
-  <mul-integers>,
-  <div-integers>,
-  <lt-integers>,
-  <gt-integers>,
-  <add-objects>
+  <store-integer>,
+  <add-objects>,
+  <eval-integer>
 ]
 
 // LIST-FUNCS

@@ -24,15 +24,20 @@ rules
       
   codegen-stmt: (While(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
-      ([w-cond], mem1) := <codegen-expr> (cond, mem);
+      (w-cond-ptr, mem1) := <codegen-expr> (cond, mem);
+      w-cond := WastCall("$evalInteger", w-cond-ptr);
       (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
       (w-else, mem3) := <foldl(codegen-stmt)> (else, ([], mem2));
       //TODO: add else case
-      w-stmt := WastIf(w-cond, WastThen([WastBlock(WastLoop(<concat> [w-body, [WastBrIf("0", w-cond)], [WastBr("1")]]))]), None())
+      w-stmt := WastIf(w-cond
+                , WastThen([WastBlock(WastLoop(<concat> [w-body
+                  , [WastBrIf("0", w-cond)]
+                  , [WastBr("1")]]))]), None())
       
   codegen-stmt: (If(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
-      ([w-cond], mem1) := <codegen-expr> (cond, mem);
+      (w-cond-ptr, mem1) := <codegen-expr> (cond, mem);
+      w-cond := WastCall("$evalInteger", w-cond-ptr);
       (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
       (w-else, mem3) := <codegen-stmt-else> (else, mem2);
       w-stmt := WastIf(w-cond, WastThen(w-body), w-else)

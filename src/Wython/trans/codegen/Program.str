@@ -59,11 +59,8 @@ rules
   	  w-vardecls := <map(codegen-func)> <diff> (vardecls, argnames);
   	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <result> return, <concat>[w-vardecls, funcbody])
   	  
-  result: IntT() -> Some(WastResult(WastI32()))
   result: None() -> None()
-  result: e -> e
-    where
-    <debug> ("Result failed", e)
+  result: _ -> Some(WastResult(WastI32()))
   
   codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
   codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), (w-name, WastI32())) where w-name := <concat-strings> ["$", name]
