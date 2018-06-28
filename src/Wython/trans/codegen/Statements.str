@@ -34,6 +34,10 @@ rules
                   , [WastBrIf("0", w-cond)]
                   , [WastBr("1")]]))]), None())
       
+  codegen-stmt: (Break(), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem)
+    where
+      w-stmt := WastBr("1")
+
   codegen-stmt: (If(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
     where
       (w-cond-ptr, mem1) := <codegen-expr> (cond, mem);

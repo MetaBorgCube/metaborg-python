@@ -69,6 +69,115 @@ int-obj-repr-func: _ -> [
   )
 ]
 
+list-repr-func: _ -> [
+   WastFunc(
+      Some("$listRepr")
+    , [WastParam(Some("$l"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [ WastLocal(Some("$i"), WastI32())
+      , WastLocal(Some("$s"), WastI32())
+      , WastSetLocal("$i", WastI32Const("0"))
+      , WastSetLocal("$s", WastI32Const("28"))
+      , WastIf(
+          WastCall(
+            "$evalInteger"
+          , [ WastCall(
+                "$storeInteger"
+              , [ WastI32LtS(
+                    WastCall("$evalInteger", [WastGetLocal("$i")])
+                  , WastCall("$evalInteger", [WastCall("$len", [WastGetLocal("$l")])])
+                  )
+                ]
+              )
+            ]
+          )
+        , WastThen(
+            [ WastBlock(
+                WastLoop(
+                  [ WastIf(
+                      WastCall(
+                        "$evalInteger"
+                      , [ WastCall(
+                            "$storeInteger"
+                          , [ WastI32Eq(
+                                WastCall("$evalInteger", [WastGetLocal("$i")])
+                              , WastCall(
+                                  "$evalInteger"
+                                , [ WastCall(
+                                      "$storeInteger"
+                                    , [ WastI32Sub(
+                                          WastCall("$evalInteger", [WastCall("$len", [WastGetLocal("$l")])])
+                                        , WastCall("$evalInteger", [WastI32Const("37")])
+                                        )
+                                      ]
+                                    )
+                                  ]
+                                )
+                              )
+                            ]
+                          )
+                        ]
+                      )
+                    , WastThen(
+                        [ WastSetLocal(
+                            "$s"
+                          , WastCall(
+                              "$addObjects"
+                            , [WastGetLocal("$s"), WastCall("$loadFromIndex", [WastGetLocal("$l"), WastGetLocal("$i")])]
+                            )
+                          )
+                        ]
+                      )
+                    , Some(
+                        WastElse(
+                          [ WastSetLocal(
+                              "$s"
+                            , WastCall(
+                                "$addObjects"
+                              , [ WastCall(
+                                    "$addObjects"
+                                  , [WastGetLocal("$s"), WastCall("$loadFromIndex", [WastGetLocal("$l"), WastGetLocal("$i")])]
+                                  )
+                                , WastI32Const("65")
+                                ]
+                              )
+                            )
+                          ]
+                        )
+                      )
+                    )
+                  , WastSetLocal(
+                      "$i"
+                    , WastCall("$addObjects", [WastGetLocal("$i"), WastI32Const("75")])
+                    )
+                  , WastBrIf(
+                      "0"
+                    , WastCall(
+                        "$evalInteger"
+                      , [ WastCall(
+                            "$storeInteger"
+                          , [ WastI32LtS(
+                                WastCall("$evalInteger", [WastGetLocal("$i")])
+                              , WastCall("$evalInteger", [WastCall("$len", [WastGetLocal("$l")])])
+                              )
+                            ]
+                          )
+                        ]
+                      )
+                    )
+                  , WastBr("1")
+                  ]
+                )
+              )
+            ]
+          )
+        , None()
+        )
+      , WastReturn(WastCall("$addObjects", [WastGetLocal("$s"), WastI32Const("103")]))
+      ]
+    )
+]
+
 repr-func: _ -> [
    WastFunc(
       Some("$repr")
@@ -79,6 +188,10 @@ repr-func: _ -> [
       , WastIf(
         WastI32Eq(WastGetLocal("$type"), WastI32Const("0"))
       , WastThen([WastReturn(WastCall("$intObjRepr", [WastGetLocal("$ptr")]))])
+      , None())
+      , WastIf(
+        WastI32Eq(WastGetLocal("$type"), WastI32Const("2"))
+      , WastThen([WastReturn(WastCall("$listRepr", [WastGetLocal("$ptr")]))])
       , None())
       , WastReturn(WastGetLocal("$ptr"))
     ])
@@ -104,7 +217,8 @@ repr-funcs: _ -> <concat> [
   <repr-func>, 
   <int-repr-func>,
   <int-obj-repr-func>,
-  <print-string>
+  <print-string>,
+  <list-repr-func>
 ]
 
 // Length Funcs
@@ -337,6 +451,16 @@ store-integer: _ -> [
     )
 ]
 
+len-func: _ -> [
+   WastFunc(
+      Some("$len")
+    , [WastParam(Some("$intPtr"), WastI32())]
+    , Some(WastResult(WastI32()))
+    , [WastReturn(WastCall("$storeInteger"
+      , [WastI32Load(WastI32Add(WastGetLocal("$intPtr"), WastI32Const("4")))]))]
+    )
+]
+
 eval-integer: _ -> [
    WastFunc(
       Some("$evalInteger")
@@ -351,7 +475,8 @@ operator-funcs:
   <add-strings>,
   <store-integer>,
   <add-objects>,
-  <eval-integer>
+  <eval-integer>,
+  <len-func>
 ]
 
 // LIST-FUNCS
