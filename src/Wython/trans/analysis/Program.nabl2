@@ -76,6 +76,10 @@ rules
 //    DictT(_, _) <sub! UnitT(),
 //    ArrayT(a) <sub! GeneratorT(a),
     
+    // Builtin 'len()'
+    Var{"len"} <- initial,
+    Var{"len"}: CallableT([UnitT()], IntT())!,
+    
     // Builtin 'print()'
     Var{"print"} <- initial,
     Var{"print"}: CallableT([UnitT()], NoneT())!,

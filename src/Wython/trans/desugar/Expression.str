@@ -25,6 +25,7 @@ rules
     desugar-expr(ctx): Mul(l, r)    -> BinOp(Mult(),     <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): IntDiv(l, r) -> BinOp(FloorDiv(), <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): Pow(l, r)    -> BinOp(Pow(),      <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
+    desugar-expr(ctx): Mod(l, r)    -> BinOp(Mod(),      <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     
     desugar-expr(ctx): And(l, r)    -> BoolOp(And(),     <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
     desugar-expr(ctx): Or(l, r)     -> BoolOp(Or(),      <desugar-expr(ctx)> l, <desugar-expr(ctx)> r)
