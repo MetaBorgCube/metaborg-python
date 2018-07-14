@@ -4,12 +4,113 @@ imports
   
   signatures/Wython-sig
   libspoofax/editor/outline
-
+  desugar/Program
+  pp
+  
+signature
+  sorts
+    Else
+ 
+  constructors
+    Else: [Stmt]
+    Elif: Expr * [Stmt] * [Stmt] -> Else
+    
+strategies
+  outline-transform-all = bottomup(try(outline-transform))
+//  to-outline = custom-label-outline(to-outline-label, to-outline-node)
+  to-outline = simple-label-outline(to-outline-label)
+  to-string = pp-partial-Wython-string <+ !"unknown"
+  
 rules
+  //TODO: make this better
+  list-to-string: [e] -> <write-to-string> [e]
+  list-to-string: e -> <write-to-string> e
   
   editor-outline:
     (_, _, ast, path, project-path) -> outline
     where
-      outline := <simple-label-outline(to-outline-label)> ast
+	  outline := <to-outline> <outline-transform-all> <desugar-all> ast
+    
+  outline-transform: If(cond, then, If(cond, then2, else)) -> If(cond, then, Elif(cond, then2, else))
+  outline-transform: If(cond, then, []) -> If(cond, then, [])
+  outline-transform: If(cond, then, else) -> If(cond, then, Else(else))
   
-  to-outline-label = fail
+  outline-transform: While(cond, then, []) -> While(cond, then, [])
+  outline-transform: While(cond, then, else) -> While(cond, then, Else(else))
+  
+  outline-transform: For(targets, iter, then, []) -> For(targets, iter, then, [])
+  outline-transform: For(targets, iter, then, else) -> For(targets, iter, then, Else(else))
+  
+  to-outline-label: While(cond, then, else) -> $[while ([<to-string> cond])]
+  to-outline-label: If(cond, then, else) -> $[if ([<to-string> cond])]
+  to-outline-label: Elif(cond, then, else) -> $[elif ([<to-string> cond])]
+  to-outline-label: Else(else) -> "else"
+  to-outline-label: For(targets, iter, then, else) -> $[for [<target-to-outline> targets]]
+    		
+  to-outline-label: Module(stmts) -> $[Module (funcs:[numFuncs], classes: [numClasses])]
+  	where
+   		numFuncs :=   <length><filter(is-func)>  stmts;
+   		numClasses := <length><filter(is-class)> stmts
+
+  is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
+  is-class: ClassDef(a,b,c,d,e) -> ClassDef(a,b,c,d,e)
+  
+  to-outline-label: ExprStmt(Call(obj, args, kargs)) -> $[call [<target-to-outline>obj]/[<addi>(<length> args, <length> kargs)]]
+  
+  to-outline-label: FunctionDef(name, args, body, decorators, type) -> $[function [name] ([arg-types] -> [ret-type])]
+    where
+  	  arg-types := <to-outline-type> args;
+  	  ret-type  := <to-outline-type> type
+  	  
+  to-outline-label: ClassDef(ID(name), parents, _, _, _) -> $[class [name] [outline-parents]]
+    where
+  	  outline-parents := <list-to-string><map(parent-to-outline)> parents
+  	  
+//  to-outline-label: Assign([target], value) -> $[Assign [<to-string> value] to '[outline-label]']
+  to-outline-label: Assign([target], value) -> $[Assign to '[outline-label]']
+    where
+  	  outline-label := <target-to-outline> target
+  	  
+//  to-outline-label: Assign(targets, value) -> $[Assign [<to-string> value] to '[outline-label]']
+  to-outline-label: Assign(targets, value) -> $[Assign to '[outline-label]']
+    where
+  	  outline-label := <list-to-string> <map(target-to-outline)> targets
+ 
+//  to-outline-label: AugAssign(target, op, value) -> $[[operation] '[<target-to-outline> target]' [verb] [<to-string> value]]
+  to-outline-label: AugAssign(target, op, value) -> $[[operation] '[<target-to-outline> target]' [verb] a value]
+    where
+      (operation, verb) := <operation-to-outline> op
+  
+  operation-to-outline: Add() -> ("Increasing", "by")
+  operation-to-outline: Sub() -> ("decreasing", "by")
+  operation-to-outline: Mult() -> ("Multiplying", "by")
+  operation-to-outline: MatMult() -> ("Multiplying matrix", "by")
+  operation-to-outline: Div() -> ("Dividing", "by")
+  operation-to-outline: Mod() -> ("Assign", "modulo")
+  operation-to-outline: BitAnd() -> ("Assign", "bitwise and")
+  operation-to-outline: BitOr() -> ("Assign", "bitwise or")
+  operation-to-outline: BitXor() -> ("Assign", "bitwise xor")
+  operation-to-outline: LShift() -> ("Shifting", "left by")
+  operation-to-outline: RShift() -> ("Shifting", "right by")
+  operation-to-outline: Pow() -> ("Assign", "to the power")
+  operation-to-outline: FloorDiv() -> ("Dividing (integer division)", "by")
+    
+  target-to-outline: Tuple(elems, _) -> <list-to-string> <map(target-to-outline)> elems
+  target-to-outline: Name(ID(name), _) -> name
+  target-to-outline: Attribute(field, obj, _) -> $[[<target-to-outline> field].[<target-to-outline> obj]]
+  target-to-outline: e -> "unknown object" where <debug> ("Cannot create outline for", e)
+  
+  parent-to-outline: Name(ID(name), _) -> name
+  
+  to-outline-type: Arguments(args, _, _, _, _, _) -> <list-to-string> <map(to-outline-type)> args
+  to-outline-type: Arg(name, type) -> <to-outline-type> type
+  to-outline-type: None() -> "Unit"
+  to-outline-type: StringT() -> "String"
+  to-outline-type: IntT() -> "int"
+  to-outline-type: BoolT() -> "bool"
+  to-outline-type: NoneT() -> "void"
+  to-outline-type: Tuple(elems, _) -> <list-to-string> <map(to-outline-type)> elems
+  to-outline-type: ID(type) -> type
+  
+  to-outline-label: FunctionDef(name, args, body, decorators, type) -> $[def [name]]
+  

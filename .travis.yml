@@ -27,7 +27,6 @@ install:
   - git checkout $BRANCH || echo 'No equally named branch available'
 
 script:
-  - cd WebAssembly
   - mvn clean install
-  - cd $CI_SOURCE_PATH/src/Wython
+  - cd $CI_SOURCE_PATH/src
   - mvn clean install

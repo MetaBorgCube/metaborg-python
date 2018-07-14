@@ -7,7 +7,7 @@ imports
 
   pp
   desugar/Program
-  analysis-desugar/desugar
+  analysis-desugar/-
   analysis/-
 
 rules // Analysis

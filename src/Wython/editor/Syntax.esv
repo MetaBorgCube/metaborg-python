@@ -1,17 +1,43 @@
 module Syntax
 
-imports 
+//imports
+//  libspoofax/color/default
+//  completion/colorer/Wython-cc-esv
 
-  libspoofax/color/default
-  completion/colorer/Wython-cc-esv
-
+colorer
+  black     = 0 0 0
+  red       = 63 0 0
+  green     = 0 80 0
+  blue      = 0 90 100
+  dark_blue = 0 50 90
+  
+  red_bold     = 63 0 0 bold
+  purple_bold  = 153 51 153 bold
+  green_italic = 0 80 0 italic
+  
+  operator   : black
+  keyword    : red_bold
+  identifier : black
+  string     : dark_blue
+  number     : blue
+  layout     : green_italic
+  
+  // Atoms
+  STRING : blue
+  SELF : red_bold
+  
+  // Type annotations
+  TypedArgDefExtension : purple_bold
+  FuncType             : purple_bold
+  
 language
 
   table         : target/metaborg/sdf.tbl
   start symbols : Start
 
-  line comment  : "//"
-  block comment : "/*" * "*/"
+  line comment  : "#"
+  block comment : "'''" * "'''"
+  block comment : "\"\"\"' * "\"\"\"
   fences        : [ ] ( ) { }
 
 menus

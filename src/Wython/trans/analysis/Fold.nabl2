@@ -31,17 +31,29 @@ rules
     Fold[[t ^(while_end, s2)]],
     CombineScopes[[ cond ^(s1, while_body_end_s, while_else_end_s, while_end)]].
   	
-  Fold[[ [Assign(targets, val) | t] ^(s1, s2)]] :=
+  Fold[[ [Assign([target], val) | t] ^(s1, s2)]] :=
     new s, s ---> s1,
     Expr[[val ^(s) : ty]],
-    Map1T(AssignTarget)[[targets ^(s): ty]],
-    Map1T(ExistsT)[[targets ^(s1) :ty]],
+    AssignTarget[[target ^(s): ty]],
+    ExistsT[[target ^(s1) :ty1]],
+    ty <sub? ty1 | warning $[You are assigning a value of type [ty] to a variable containing type [ty1]] @target,
     Fold[[t ^(s, s2)]].
 
   AssignTarget[[Name(ID(id), _) ^(s): ty]] :=
     Var{id} <- s,
     Var{id} : ty!.
 
+  Fold[[ [ClassDef(ID(name), parents, _, body, _) | t] ^(s1, s2)]] :=
+  	new s, s ---> s1,
+  	Var{name} <- s,
+  	new class_s, class_s ---> s,
+  	new class_body_s, class_body_s ---> class_s,
+  	Var{name} ===> class_s,
+  	
+  	Var{name}: ObjectT(None())!,
+  	Fold[[body ^(class_body_s, _)]],
+  	Fold[[t ^(s, s2)]].
+  	
   Fold[[ [FunctionDef(name, Arguments(args, _, _ , _, _, _), body, decorators, typeAnnotation) | t] ^(s1, s2)]] :=
   	new s, s ---> s1,
   	Var{name} <- s,
@@ -59,6 +71,11 @@ rules
   	Fold[[body ^(fun_body_s, _)]],
   	Fold[[t ^(s, s2)]].
 
+  Args[[Arg(ID(name), type) ^(s) : ty]] :=
+  	Var{name} <- s,
+  	Type[[type: ty]],
+  	Var{name}: ty!.
+  	
   Fold[[ [h|t] ^(s1, s2)]] :=
   	Stmt[[h ^(s1)]],
   	Fold[[t ^(s1, s2)]].  

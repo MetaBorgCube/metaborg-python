@@ -6,7 +6,7 @@ imports
 
 
 signature
-  namespaces Var Class Function Module
+  namespaces Var
 
 name resolution
   labels
@@ -24,7 +24,7 @@ name resolution
 
 signature
   relations
-     reflexive, transitive sub: Type * Type {
+     reflexive, anti-symmetric, transitive sub: Type * Type {
      	CallableT(-sub, +sub),
     	GeneratorT(+sub),
     	TupleT(+sub),
@@ -47,7 +47,7 @@ sorts Type
      
      CallableT : list(Type) * Type -> Type
      GeneratorT : Type -> Type
-     ObjectT : Type
+     ObjectT : Type -> Type
      TupleT : Type -> Type
      ArrayT : Type -> Type
      DictT : StringT * Type -> Type
@@ -56,18 +56,18 @@ rules
   init ^ (initial) :=
     new initial,
     
-    NumT() <sub! UnitT(),
+    NumT()    <sub! UnitT(),
     StringT() <sub! UnitT(),
-    BoolT() <sub! UnitT(),
-    NoneT() <sub! UnitT(),
+    BoolT()   <sub! UnitT(),
+    NoneT()   <sub! UnitT(),
     
-    IntT() <sub! NumT(),
-    FloatT() <sub! NumT(),
+    IntT()    <sub! NumT(),
+    FloatT()  <sub! NumT(),
      
     ComparableT() <sub! UnitT(),
-    NumT() <sub! ComparableT(),
-    BoolT() <sub! ComparableT(),
-    StringT() <sub! ComparableT(),
+    NumT()        <sub! ComparableT(),
+    BoolT()       <sub! ComparableT(),
+    StringT()     <sub! ComparableT(),
      
 //    CallableT(_, _) <sub! UnitT(),
 //    GeneratorT(_) <sub! UnitT(),
@@ -76,9 +76,9 @@ rules
 //    DictT(_, _) <sub! UnitT(),
 //    ArrayT(a) <sub! GeneratorT(a),
     
-    // Builtin '__name__'
-    Var{"__name__"} <- initial,
-    Var{"__name__"}: StringT()!,
+    // Builtin 'len()'
+    Var{"len"} <- initial,
+    Var{"len"}: CallableT([UnitT()], IntT())!,
     
     // Builtin 'print()'
     Var{"print"} <- initial,
@@ -92,6 +92,11 @@ rules
     Module{"__main__"} <- s,
     new s_module, s_module ---> s,
       Module{"__main__"} ===> s_module,
-      Fold[[stmts ^ (s_module, _)]].
+      
+      // Builtin '__name__'
+      Var{"__name__"} <- s_module,
+      Var{"__name__"}: StringT()!,
+      
+      Fold[[stmts ^ (s_module, a)]].
       
       
