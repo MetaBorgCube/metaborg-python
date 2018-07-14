@@ -1,0 +1,98 @@
+module Program
+
+imports
+  signatures/WebAssembly/-
+  signatures/WebAssembly-sig
+  trans/codegen/-
+  ast-syntax/-
+
+
+strategies
+  codegen-all = codegen
+  is-not-func = not(is-func)
+ 
+rules
+
+  lib-funcs: _ -> [
+  	WastFunc( Some("$print"), WastImport("\"lib\"", "\"logString\""), Some(WastParams([I32(), I32()]))),
+  	WastFunc( Some("$debug"), WastImport("\"debug\"", "\"debugger\""), Some(WastParams([I32(), I32()])))
+  ]
+
+  init-memory: n -> [
+  	WastMem(Some("$d"), WastImport("\"memory\"", "\"memory\""), <int-to-string> n)
+  ]
+  
+  codegen: Module(stmts) -> WastFile([WastModule(<concat>[<lib-funcs>, <init-memory> memSize, iList], dList, <concat> [<math-funcs>, <length-funcs>, <repr-funcs>, <string-funcs>, fList] , eList, init)], "")
+    where
+	   mainBody := <filter(is-not-func)> stmts;
+	   functions := <filter(is-func)> stmts;
+	   all_functions := <concat> [functions, [FunctionDef("main", Arguments([], [], [], [], [], []), mainBody, None(), None())]];
+       (iList, dList, fList, eList, vars, memSize) := <foldl(codegen-func)> (all_functions, ([], [], [], [], [], 0));
+       init := WastStart("$main")
+
+  is-func: FunctionDef(a,b,c,d,e) -> FunctionDef(a,b,c,d,e)
+  
+  wast-add-import(wast): (imp, mem) -> (<concat>[i, [imp]], d, f, e, v, mptr)
+    where 
+      (i, _, _, e, v, _) := <wast>;
+      (d, f, _, mptr) := mem
+    
+  wast-add-data(wast): (data, mem) -> (i, <concat>[d, [data]], f, e, v, mptr)
+    where 
+      (i, _, _, e, v, _) := <wast>;
+      (d, f, _, mptr) := mem
+    
+  wast-add-func(wast): (func, mem) -> (i, d, <concat>[f, [func]], e, v, mptr)
+    where
+      (i, _, _, e, v, _) := <wast>;
+      (d, f, _, mptr) := mem
+    
+  wast-add-expr(wast): (expr, mem) -> (i, d, f, <concat>[e, [expr]], v, mptr)
+    where
+      (i, _, _, e, v, _) := <wast>;
+      (d, f, _, mptr) := mem
+  
+  codegen-func: (FunctionDef(name, args, body, decorators, return), wast) -> <wast-add-func(!wast)> (func, mem)
+  	where
+  	  (_, data, funcs, _, vars, mptr) := wast;
+  	  (argdefs, argnames) := <codegen-func> args;
+  	  (funcbody, mem) := <foldl(codegen-stmt)> (body, ([], (data, funcs, <union> (vars, argnames), mptr)));
+  	  (_, _, vardecls, _) := mem;
+  	  w-vardecls := <map(codegen-func)> <diff> (vardecls, argnames);
+  	  func := WastFunc(Some(<concat-strings> ["$", name]), argdefs , <result> return, <concat>[w-vardecls, funcbody])
+  	  
+  result: IntT() -> Some(WastResult(WastI32()))
+  result: None() -> None()
+  result: e -> e
+    where
+    <debug> ("Result failed", e)
+  
+  codegen-func: Arguments(args, _, _, _, _, _) -> <unzip> <map(codegen-func)> args
+  codegen-func: Arg(ID(name), _) -> (WastParam(Some(w-name), WastI32()), (w-name, WastI32())) where w-name := <concat-strings> ["$", name]
+  codegen-func: (name, type) -> WastLocal(name, type)
+  codegen-func: e -> <debug> e
+  
+  mem-add-string: ((data, funcs, vars, mptr), val) -> (mptr, len, (new-data, funcs, vars, new-mptr))
+    where
+      new-data := <concat> [data, [WastData(WastI32Const(<int-to-string> mptr), Some(val))]];
+      len := <subti>(<string-length> val, 2);
+      new-mptr := <addi> (mptr, len)
+      
+  // Add existing var -> do nothing
+  mem-add-var: ((data, funcs, vars, mptr), var) -> (data, funcs, vars, mptr)
+    where
+      (name, type) := var;
+      varnames := <map(mem-extract-varnames)> vars;
+      new-var := <set-eq> (varnames, <union> (varnames, [name]));	//Fails when adding new var
+      <debug> ("Vardecl already defined for ", name)
+  
+  mem-extract-varnames: (name, type) -> name
+  
+  // Add new var -> do something     
+  mem-add-var: ((data, funcs, vars, mptr), var) -> (data, funcs, <concat>[vars, w-vardecl], mptr)
+    where
+      (name, type) := var;
+      <debug> ("Adding new vardecl for ", name);
+      w-vardecl := [(name, type)]
+  
+

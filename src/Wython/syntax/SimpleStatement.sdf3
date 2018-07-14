@@ -1,0 +1,73 @@
+module SimpleStatement
+
+imports
+  
+  Common
+  ID
+  Expression
+
+sorts
+
+  SimpleStatement
+
+context-free start-symbols
+
+  SimpleStatement
+
+context-free syntax
+  SimpleStatement.Expression = Exp
+  SimpleStatement.Delete = "del" ExpList
+  SimpleStatement.Pass = "pass"
+  SimpleStatement.ImportName = "import" DottedAsNames
+  SimpleStatement.ImportFrom = "from" ImportFromArgs "import" ImportItems
+  SimpleStatement.Global = "global" {ID ","}+
+  SimpleStatement.NonLocal = "nonlocal" {ID ","}+
+  SimpleStatement.Assert = "assert" {Exp ","}+
+  SimpleStatement = FlowStatement
+  
+  FlowStatement.Break = "break"
+  FlowStatement.Continue = "continue"
+  FlowStatement.Return = "return" {Exp ","}*
+  FlowStatement.YieldEmpty = "yield"
+  FlowStatement.RaiseEmpty = "raise"
+  FlowStatement.Yield = "yield" FromExp
+  FlowStatement.Raise = "raise" FromExp
+  
+  FromExp =  Exp
+  FromExp.From =  Exp "from" Exp
+  
+  SimpleStatement.Assign = {AssignTarget ","}+ "=" {Exp ","}+
+  SimpleStatement.AugAssign = AssignTarget AssignOp Exp
+  AssignTarget.Target = Exp
+  
+  AssignOp.PlusEqual = "+="
+  AssignOp.MinusEqual = "-="
+  AssignOp.TimesEqual = "*="
+  AssignOp.AtEqual = "@="
+  AssignOp.DivEqual = "/="
+  AssignOp.ModEqual = "%="
+  AssignOp.BitwiseAndEqual = "&="
+  AssignOp.BitwiseOrEqual = "|="
+  AssignOp.BitwiseXorEqual = "^="
+  AssignOp.ShiftLeftEqual = "<<="
+  AssignOp.ShiftRightEqual = ">>="
+  AssignOp.PowEqual = "**="
+  AssignOp.IntegerDivEqual = "//="
+  
+  
+  DottedAsNames.Names = {DottedAsName ","}+
+  DottedAsName.AsName = DottedName AsName?
+  DottedName.Name = {ID "."}+
+  
+  ImportFromArgs.DottedName = Dots* DottedName
+  ImportFromArgs.JustDots = Dots+
+  
+  Dots.Dot = "."
+  Dots.Dots = "..." {prefer}
+
+  ImportItems.All = "*"
+  ImportItems.Bracketed = "(" ImportAsNames ")" 
+  ImportItems.Normal = {ImportAsNames ","}+
+  
+  ImportAsNames.ImportAsNames = ID ImportAsNamesParam?
+  ImportAsNamesParam.Param = "as" ID

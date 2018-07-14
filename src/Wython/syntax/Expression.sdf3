@@ -1,0 +1,105 @@
+module Expression
+
+imports
+  
+  Common
+  ID
+  Type
+  Parameters
+
+template options
+    tokenize: "(;{[,.!"
+    keyword -/- [a-zA-Z0-9]
+
+context-free start-symbols
+  Exp
+  
+context-free priorities
+    {Exp.Tuple Exp.List Exp.Dict Exp.Set
+     ObjExp.AttrRef}                      >
+    {ObjExp.Subscript ObjExp.Slice
+     ObjExp.Call}                         >
+//    {Exp.Await}                           >
+    {Exp.Pow}                             >
+    {Exp.Pos Exp.Neg Exp.Inv}             >
+    {Exp.Mul Exp.MatMul 
+     Exp.Div Exp.IntDiv Exp.Mod}          >
+    {Exp.Add Exp.Sub}                     >
+    {Exp.BitLShift Exp.BitRShift}         >
+    {Exp.BitAnd}                          >
+    {Exp.BitXor}                          >
+    {Exp.BitOr}                           >
+    {Exp.In Exp.NotIn Exp.Is 
+     Exp.IsNot Exp.In Exp.Lt
+     Exp.Leq Exp.Gt Exp.Geq 
+     Exp.Neq Exp.Neq2 Exp.Eq}             >
+    {Exp.Not}                             >
+    {Exp.And}                             >
+    {Exp.Or}                              >
+    {Exp.InlineIf}                        >
+    {Exp.LambdaDef}
+    
+    
+context-free syntax
+    Exp    = < (<Exp>) >    {bracket}
+
+    Exp.Add       = Exp "+"  Exp        {left}
+    Exp.Sub       = Exp "-"  Exp        {left}
+    Exp.Mul       = Exp "*"  Exp        {left}
+    Exp.MatMul    = Exp "@"  Exp        {left}
+    Exp.Div       = Exp "/"  Exp        {left}
+    Exp.Mod       = Exp "%"  Exp        {left}
+    Exp.IntDiv    = Exp "//" Exp        {left}
+    Exp.Pow       = Exp "**" Exp        {left}
+  
+    Exp.Lt        = Exp "<"  Exp        {left}
+    Exp.Gt        = Exp ">"  Exp        {left}
+    Exp.Eq        = Exp "==" Exp        {left}
+    Exp.Geq       = Exp ">=" Exp        {left}
+    Exp.Leq       = Exp "<=" Exp        {left}
+    Exp.Neq       = Exp "!=" Exp        {left}
+    Exp.Neq2      = Exp "<>" Exp        {left}
+    Exp.In        = Exp "in" Exp        {left}
+    Exp.Is        = Exp "is" Exp        {left}
+    Exp.IsNot     = Exp "is" "not" Exp  {left}
+    Exp.NotIn     = Exp "not" "in" Exp  {left}
+    
+    Exp.And       = Exp "and" Exp       {left}
+    Exp.Or        = Exp "or"  Exp       {left}
+    Exp.Not       = "not" Exp           {right}
+    Exp.Pos       = "+" Exp             {right}
+    Exp.Neg       = "-" Exp             {right}
+    Exp.Inv       = "~" Exp             {right}
+    
+    Exp.BitOr     = Exp "|"  Exp        {left}
+    Exp.BitXor    = Exp "^"  Exp        {left}
+    Exp.BitAnd    = Exp "&"  Exp        {left}
+    Exp.BitLShift = Exp "<<" Exp        {left}
+    Exp.BitRShift = Exp ">>" Exp        {left}
+    
+    Exp.LambdaDef = "lambda" VarArgsList? ":" Exp
+    Exp.InlineIf = "if" Exp "else" Exp
+    
+    Exp.False = "False"
+    Exp.True = "True"
+    Exp.NoneVal = "None"
+    Exp.ThreeDot = "..."
+    Exp.String = STRING
+    Exp.Int = INT
+    Exp.Float = FLOAT
+    
+    Exp = ObjExp
+    ObjExp.ID = ID
+    ObjExp.Subscript = Exp "[" Exp "]"           {left}
+    ObjExp.Slice     = Exp "[" Exp? ":" Exp? "]" {left}
+    ObjExp.Call      = Exp Parameters
+    ObjExp.AttrRef   = Exp "." ObjExp	          {left}
+    
+    Exp.Tuple     = "(" Exp "," {Exp ","}+ ")"
+    Exp.List      = "[" ExpList? "]"
+    Exp.Dict      = "{" {DictElem ","}* "}"   {prefer}
+    Exp.Set       = "{" ExpList? "}"
+    ExpList.List  = {Exp ","}+ Comma?
+    DictElem.DictEntry = Exp ":" Exp          {left}
+        
+    AsName.AsName = "as" ID

@@ -1,0 +1,24 @@
+module Program
+
+imports
+  src-gen/signatures/Program-sig
+  
+  ast-syntax/AST-Wython
+  ast-syntax/AST-Statement
+  
+  trans/desugar/Statement
+  trans/desugar/Expression
+  trans/desugar/Assign
+
+strategies
+  desugar-all = desugar
+//  desugar-all = topdown(debug; desugar)       //
+//  desugar-all = topdown(try(desugar))
+//  desugar-all = bottomup(debug; desugar)      //
+//  desugar-all = bottomup(try(debug; desugar))
+//  desugar-all = alltd(debug; desugar)
+ 
+rules
+	desugar: Module(body) -> Module(sed-stmts)
+      where
+        sed-stmts := <desugar-suite> body

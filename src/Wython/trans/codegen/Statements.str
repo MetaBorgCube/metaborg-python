@@ -1,0 +1,47 @@
+module Statements
+
+imports
+  signatures/WebAssembly/-
+  trans/codegen/-
+  ast-syntax/-
+
+
+rules
+  codegen-stmt: (Assign(name, value), (w-stmts, mem)) -> (<concat> [w-stmts, w-stmt], mem2)
+    where
+      ([w-value], mem1) := <codegen-expr> (value, mem);
+      w-name := <codegen-name> name;
+      mem2 := <mem-add-var> (mem1, (w-name, WastI32()));
+      w-stmt := [WastSetLocal(w-name, w-value)]
+      
+  codegen-stmt: (While(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
+    where
+      ([w-cond], mem1) := <codegen-expr> (cond, mem);
+      (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
+      (w-else, mem3) := <foldl(codegen-stmt)> (else, ([], mem2));
+      //TODO: add else case
+      w-stmt := WastIf(w-cond, WastThen([WastBlock(WastLoop(<concat> [w-body, [WastBrIf("0", w-cond)], [WastBr("1")]]))]), None())
+      
+  codegen-stmt: (If(cond, body, else), (w-stmts, mem)) -> (<concat> [w-stmts, [w-stmt]], mem3)
+    where
+      ([w-cond], mem1) := <codegen-expr> (cond, mem);
+      (w-body, mem2) := <foldl(codegen-stmt)> (body, ([], mem1));
+      (w-else, mem3) := <codegen-stmt-else> (else, mem2);
+      w-stmt := WastIf(w-cond, WastThen(w-body), w-else)
+  
+  codegen-stmt-else: ([], mem) -> (None(), mem)
+  codegen-stmt-else: (stmts, mem) -> (Some(WastElse(else-stmts)), mem')
+    where
+    (else-stmts, mem') := <foldl(codegen-stmt)> (stmts, ([], mem))
+    
+  codegen-stmt: (Return(expr), (stmts, mem)) -> (<concat> [stmts, [WastReturn(w-expr)]], mem1)
+      where
+      ([w-expr], mem1) := <codegen-expr> (expr, mem)
+  
+  codegen-stmt: (ExprStmt(expr), (w-stmts, mem)) -> (<concat> [w-stmts, [w-expr]], mem')
+    where
+      ([w-expr], mem') := <codegen-expr> (expr, mem)
+  
+  codegen-stmt: (None(), res) -> res
+  codegen-stmt: (stmt, (w-stmts, mem)) -> (<concat> [w-stmts, [stmt]], mem) where <debug> ("codegen-stmt failed:", stmt)
+  

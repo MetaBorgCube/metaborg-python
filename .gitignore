@@ -1,0 +1,3 @@
+.metadata/
+**/*.wast
+**/vim-markdown-preview.html

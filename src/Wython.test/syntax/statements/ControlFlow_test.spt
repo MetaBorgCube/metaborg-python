@@ -1,0 +1,351 @@
+module ControlFlow_test
+
+language Wython
+
+start symbol Statement
+
+test simple if
+[[if True:
+	pass
+else:
+  	pass
+]] parse succeeds
+
+test simple elif
+[[if True:
+	pass
+elif True:
+  	pass
+]] parse succeeds
+
+test simple if misaligned
+[[if True:
+	pass
+ else:
+  	pass
+]] parse fails
+
+test simple elif misaligned
+[[if True:
+	pass
+ elif True:
+  	pass
+]] parse fails
+
+test double elif
+[[if True:
+	pass
+elif False:
+	pass
+elif True:
+  	pass
+]] parse succeeds
+
+test double elif else
+[[if True:
+	pass
+elif False:
+	pass
+elif True:
+  	pass
+else:
+	pass
+]] parse succeeds
+
+test nested if
+[[if True:
+	if True:
+		pass
+	else:
+		pass
+else:
+  	if True:
+		pass
+	else:
+		pass
+]] parse succeeds
+
+test if multiple statements
+[[if True:
+	pass
+	a = 12
+]] parse succeeds
+
+test if else multiple statements
+[[if True:
+	pass
+else:
+	pass
+	a = 12
+]] parse succeeds
+
+test if elif multiple statements
+[[if True:
+	pass
+elif True:
+	pass
+	a = 12
+]] parse succeeds
+
+test if complex condition
+[[if 1 + 1 < 12 + 12:
+	pass
+]] parse succeeds
+
+test if complex condition
+[[if True:
+	pass
+else True:
+	pass
+]] parse fails
+
+test if no condition
+[[if:
+	pass
+]] parse fails
+
+
+
+
+
+
+
+test simple while
+[[while True:
+	pass
+else:
+  	pass
+]] parse succeeds
+
+test simple while misaligned
+[[while True:
+	pass
+ else:
+  	pass
+]] parse fails
+
+test nested while
+[[while True:
+	while True:
+		pass
+	else:
+		pass
+else:
+  	while True:
+		pass
+	else:
+		pass
+]] parse succeeds
+
+test while multiple statements
+[[while True:
+	pass
+	a = 12
+]] parse succeeds
+
+test while else multiple statements
+[[while True:
+	pass
+else:
+	pass
+	a = 12
+]] parse succeeds
+
+test while complex condition
+[[while 1 + 1 < 12 + 12:
+	pass
+]] parse succeeds
+
+test while else condition
+[[while True:
+	pass
+else True:
+	pass
+]] parse fails
+
+test while no condition
+[[while:
+	pass
+]] parse fails
+
+
+
+
+
+test simple try
+[[try:
+	pass
+except:
+  	pass
+]] parse succeeds
+
+test simple try misaligned
+[[try True:
+	pass
+ except:
+  	pass
+]] parse fails
+
+test nested try
+[[try:
+	try:
+		pass
+	except:
+		pass
+except:
+  	try:
+		pass
+	except:
+		pass
+]] parse succeeds
+
+test try multiple statements
+[[try:
+	pass
+	a = 12
+except:
+	pass
+]] parse succeeds
+
+test try multiple excepts
+[[try:
+	pass
+	a = 12
+except:
+	pass
+except:
+	pass
+]] parse succeeds
+
+test try multiple excepts and finally
+[[try:
+	pass
+	a = 12
+except:
+	pass
+except:
+	pass
+finally:
+	pass
+]] parse succeeds
+
+test try misaligned except
+[[try:
+	pass
+	a = 12
+ except:
+	pass
+]] parse fails
+
+test try misaligned except2
+[[try:
+	pass
+	a = 12
+except:
+pass
+]] parse fails
+
+test try misaligned finally
+[[try:
+	pass
+	a = 12
+ finally:
+	pass
+]] parse fails
+
+test try misaligned finally2
+[[try:
+	pass
+	a = 12
+finally:
+pass
+]] parse fails
+
+test try without catch
+[[try:
+	pass
+]] parse succeeds
+
+test try except multiple statements
+[[try:
+	pass
+except:
+	pass
+	a = 12
+]] parse succeeds
+
+test try except condition
+[[try:
+	pass
+except Exception:
+	pass
+]] parse succeeds
+
+test try except condition assign
+[[try:
+	pass
+except Exception as er:
+	pass
+]] parse succeeds
+
+
+
+
+
+test simple for
+[[for a in []:
+	pass
+else:
+  	pass
+]] parse succeeds
+
+test simple for misaligned
+[[for a in []:
+	pass
+ else:
+  	pass
+]] parse fails
+
+test nested for
+[[for a in []:
+	for a in []:
+		pass
+	else:
+		pass
+else:
+  	for a in []:
+		pass
+	else:
+		pass
+]] parse succeeds
+
+test for multiple statements
+[[for a in []:
+	pass
+	a = 12
+]] parse succeeds
+
+test for else multiple statements
+[[for a in []:
+	pass
+else:
+	pass
+	a = 12
+]] parse succeeds
+
+test for complex condition
+[[for a, b in enumerate([12]):
+	pass
+]] parse succeeds
+
+test for else condition
+[[for a in []:
+	pass
+else True:
+	pass
+]] parse fails
+
+test for just a list
+[[for []:
+	pass
+]] parse fails

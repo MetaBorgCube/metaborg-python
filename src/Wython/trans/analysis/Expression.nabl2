@@ -1,0 +1,47 @@
+module analysis/Expression
+
+imports
+  desugar/-
+  analysis/-
+      
+rules
+
+  Expr[[ Name(ID(a), Load()) ^(s): ty]] := 
+    Var{a} -> s,
+    Var{a} |-> d | warning $[Variable [a] might not be defined] @a,
+    d: ty | warning $[Incompatible types, found [ty]] @a.
+    
+//  argument[[(ID(i), expr) ^(s) : ty]] :=
+  argument[[expr ^(s) : ty]] :=
+    //TODO: try to check if argument match function definition
+    Expr[[expr ^(s): ty]].
+
+  Expr[[ Call(func, args, kargs) ^(s) : rtype]] :=
+    Expr[[func  ^(s) : objType]],
+
+    Map1T(argument)[[args  ^(s): argTypes]],
+    Map1T(argument)[[kargs ^(s): kargtys]],
+    objType == CallableT(expArgTy, expRetTy) | warning $[Object might not be callable, found [objType]] @func,
+    rtype <sub? expRetTy | error $[Types not compatible, found [rtype] and [expRetTy]],
+    argTypes <sub? expArgTy | error $[Types not compatible, found [argTypes] and [expArgTy]].
+    
+  
+  Expr[[Name(ID(id), _) ^(s): ty]] :=
+    Var{id} -> s,
+    Var{id} |-> d | warning $[Variable [id] does not seem to be defined],
+    d: ty.
+
+  Expr[[Name(ID(id), _) ^(s) : ty]] :=
+  	Var{id} -> s,
+  	Var{id} |-> d,
+  	d: ty.
+
+  // Atoms
+  Expr[[Int(_) ^(s): IntT()]].
+  Expr[[String(_) ^(s): StringT()]].
+  Expr[[True() ^(s): BoolT()]].
+  Expr[[False() ^(s): BoolT()]].
+  Expr[[NoneVal() ^(s): NoneT()]].
+  
+  
+  

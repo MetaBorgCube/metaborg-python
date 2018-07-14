@@ -1,0 +1,15 @@
+module Statement
+
+imports
+  SimpleStatement
+  CompoundStatement
+
+context-free start-symbols
+  Statement
+  Suite
+  
+context-free syntax
+  Statement = CompoundStatement
+  Statement = SimpleStatement
+    
+  Suite.Suite = Statement+ { layout (align 1) }

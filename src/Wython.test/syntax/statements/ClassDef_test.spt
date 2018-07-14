@@ -1,0 +1,55 @@
+module ClassDef_test
+
+language Wython
+
+start symbol Statement
+
+test simple class
+[[class a():
+	pass
+]] parse succeeds
+
+test simple class no indent
+[[class a():
+pass
+]] parse fails
+
+test class complex body
+[[class a():
+	if True:
+		pass
+	else:
+		pass
+]] parse succeeds
+
+test class fields and functions
+[[class a():
+	a = 12
+	b = 13
+	
+	def __init__(self):
+		pass
+		
+	def abc(self):
+		pass
+]] parse succeeds
+
+test class invalid name
+[[class 12a():
+	pass
+]] parse fails
+
+test class extends
+[[class func(a):
+	pass
+]] parse succeeds
+
+test class args
+[[class func(a, b, c=12, *list):
+	pass
+]] parse succeeds
+
+test class not sure what this does
+[[class func(12):
+	pass
+]] parse succeeds

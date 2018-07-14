@@ -1,0 +1,42 @@
+module AST-Common
+
+imports
+  signatures/ID-sig
+  signatures/Type-sig
+  
+  ast-syntax/AST-Expression
+
+signature
+  sorts
+    Arguments
+    Keyword
+    
+    Constant
+    ID
+    Type
+    
+ 
+  constructors
+    //         args    vararg    kwonlyargs  kw_defaults    kwarg   defaults
+    Arguments: [Arg] * Arg   *   [Arg]   *   [Expr]    *    Arg  *  [Expr]-> Arguments
+
+    //   arg    annotation
+    Arg: ID  *  Type -> Arg
+
+    // keyword arguments supplied to call (NULL identifier for **kwargs)
+    //       arg    value
+    Keyword: ID  *  Expr -> Keyword
+    
+    None: None
+    True: True
+    False: False
+    
+    NoneVal: Constant
+    ID: String -> ID
+    Int: String -> Int
+    
+    IntT: Type
+    BoolT: Type
+    StringT: Type
+    NoneT: Type
+    TupleT: [Type] -> Type

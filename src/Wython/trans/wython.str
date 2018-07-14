@@ -1,0 +1,62 @@
+module wython
+
+imports
+  
+  completion/completion
+  pp
+  WebAssembly/pp
+  outline
+  analysis
+  desugar/Program
+
+  codegen/Program
+
+  analysis-desugar/desugar
+
+
+rules // Debugging
+  external java-run-wasm(|)
+  external java-compile-wast(|)
+  
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := <debug> node
+    
+  editor-desugar:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"desugared.aterm")> path ;
+      text     := <desugar-all> ast
+
+  show-wast-ast:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wast.aterm")> path ;
+      desugared := <desugar-all>ast;
+      text     := <codegen-all> desugared
+    
+  compile-to-wast:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wast")> path ;
+      desugared := <desugar-all> ast;
+      code := <codegen-all> desugared;
+      text := <pp-debug-wast> code
+      
+  compile-to-wasm:
+    (a, b, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wasm")> path;
+      (source, contents) := <compile-to-wast> (a, b, ast, path, project-path);
+      text := <java-compile-wast> (<abspath> source, contents)
+      
+  run-wasm:
+    (a, b, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"wasm-out")> path;
+      (source, content) := <compile-to-wasm> (a, b, ast, path, project-path);
+      text := <java-run-wasm> content
+  
+      
+  editor-analysis-desugar:
+    (_, _, ast, path, project-path) -> (filename, text) where
+      filename := <guarantee-extension(|"a-desugared.aterm")> path ;
+      text     := <analysis-desugar-all> <desugar-all> ast
+

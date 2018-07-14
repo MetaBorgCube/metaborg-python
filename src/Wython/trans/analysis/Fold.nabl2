@@ -1,0 +1,86 @@
+module analysis/Fold
+
+imports
+  desugar/-
+  analysis/-
+
+rules
+  Fold[[ [] ^(s1, s2)]] := s1 == s2.
+  
+  Fold[[ [If(cond, then, else) | t] ^(s1, s2) ]] :=
+  	Expr[[cond ^(s1): condty]],
+    condty <sub? BoolT() | error $[non-boolean condition, found [condty]] @cond,
+    new if_then_s, if_then_s -T-> s1,
+    new if_else_s, if_else_s -E-> s1,
+     Fold()[[then ^(if_then_s, if_then_end_s)]],
+     Fold()[[else ^(if_else_s, if_else_end_s)]],
+    new if_end, if_end -T-> if_then_end_s, if_end -E-> if_else_end_s,
+    
+    CombineScopes[[ cond ^(s1, if_then_end_s, if_else_end_s, if_end)]],
+    Fold[[t ^(if_end, s2)]].
+    
+  Fold[[ [While(cond, body, else) | t] ^(s1, s2) ]] :=
+  	Expr[[cond ^(s1): condty]],
+    condty <sub? BoolT() | error $[non-boolean condition, found [condty]] @cond,
+    new while_body_s, while_body_s -T-> s1,
+    new while_else_s, while_else_s -E-> s1,
+     Fold()[[body ^(while_body_s, while_body_end_s)]],
+     Fold()[[else ^(while_else_s, while_else_end_s)]],
+    new while_end, while_end -T-> while_body_end_s, while_end -E-> while_else_end_s,
+    
+    Fold[[t ^(while_end, s2)]],
+    CombineScopes[[ cond ^(s1, while_body_end_s, while_else_end_s, while_end)]].
+  	
+  Fold[[ [Assign(targets, val) | t] ^(s1, s2)]] :=
+    new s, s ---> s1,
+    Expr[[val ^(s) : ty]],
+    Map1T(AssignTarget)[[targets ^(s): ty]],
+    Map1T(ExistsT)[[targets ^(s1) :ty]],
+    Fold[[t ^(s, s2)]].
+
+  AssignTarget[[Name(ID(id), _) ^(s): ty]] :=
+    Var{id} <- s,
+    Var{id} : ty!.
+
+  Fold[[ [FunctionDef(name, Arguments(args, _, _ , _, _, _), body, decorators, typeAnnotation) | t] ^(s1, s2)]] :=
+  	new s, s ---> s1,
+  	Var{name} <- s,
+  	new fun_s, fun_s ---> s,
+  	new fun_body_s, fun_body_s ---> fun_s,
+  	Var{name} ===> fun_s,
+  	Map1T(Args)[[args ^(fun_s): argtys]],
+  	
+  	Type[[typeAnnotation: retty]],
+  	false | warning $[CallableT([argtys], [retty])],
+  	Var{name}: CallableT(argtys, retty)!,
+  	
+  	Var{"_$_return"} <- fun_s,
+  	Var{"_$_return"}: retty!,
+  	Fold[[body ^(fun_body_s, _)]],
+  	Fold[[t ^(s, s2)]].
+
+  Fold[[ [h|t] ^(s1, s2)]] :=
+  	Stmt[[h ^(s1)]],
+  	Fold[[t ^(s1, s2)]].  
+        
+  // Merge scopes 'b1' and 'b2' into 'end'
+  // Checks for declaration in a single branch and declaration in both
+  CombineScopes[[ a ^(base, b1, b2, end)]] :=
+  	// Defined in b1: (V(b1)/Var minus/name V(base)/Var)
+  	// Defined in b2: (V(b2)/Var minus/name V(base)/Var)
+  	// The folowing code is an implementation of set difference
+  	(
+	  	((V(b1)/Var minus/name V(base)/Var) minus/name (V(b2)/Var minus/name V(base)/Var)) 
+	  	union
+		((V(b2)/Var minus/name V(base)/Var) minus/name (V(b1)/Var minus/name V(base)/Var))
+	) seteq 0 | warning $[Variable declaration in a single branch] @NAMES.
+	
+	// TODO: For these check types and create declarations
+//	(
+//	  	(V(b1)/Var minus/name V(b2)/Var) 
+//	  	isect
+//	  	(V(b2)/Var minus/name V(b1)/Var) 
+//	) seteq 0 | warning $[Variable declaration in a single branch] @NAMES.
+	
+      
+      

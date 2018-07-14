@@ -1,0 +1,24 @@
+module analysis-desugar/desugar
+
+imports
+  
+  ast-syntax/AST-Wython
+  ast-syntax/AST-Statement
+  ast-syntax/AST-Expression
+  ast-syntax/AST-Common
+  
+  trans/analysis-desugar/Type
+  
+signature
+  constructors
+    
+strategies
+//  analysis-desugar-all = a-desugar
+//  analysis-desugar-all = topdown(debug; a-desugar)       //
+  analysis-desugar-all = topdown(try(a-desugar))
+//  analysis-desugar-all = bottomup(debug; a-desugar)      //
+//  analysis-desugar-all = bottomup(try(debug; a-desugar))
+//  analysis-desugar-all = alltd(debug; a-desugar)
+ 
+rules
+  a-desugar: e -> e
